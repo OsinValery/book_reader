@@ -1,0 +1,56 @@
+
+#: import Window kivy.core.window.Window
+
+
+<PageTurnerSheet>:
+    height: Window.height * 0.4
+    orientation: "vertical"
+    spacing: 20
+
+    on_current:
+        root.seek(root.current)
+
+    GridLayout:
+        size_hint_x: 1
+        cols: 3
+        spacing: 15
+        padding: (20, 20, 20, 10)
+
+        Label: 
+            color: (0,0,0,1)
+            text: "Страница: "
+            text_size: None , None
+            size: self.texture_size
+            size_hint_x: None
+        
+        MDTextField: 
+            text: str(root.current)
+            multiline: False
+            input_filter: "int"
+
+            on_text:
+                text = self.text
+                if text == '': text = '1'
+                if text == '-': self.text = ''
+                if text == '-': text = '1'
+                page = int(text)
+                if page < 1: page = 1
+                old = page
+                if page > root.maximum: page = root.maximum
+                if old > root.maximum: self.text = str(root.maximum)
+                root.current = page
+        
+        Label:
+            color: (0,0,0,1)
+            text: " / " + str(root.maximum)
+            text_size: None , None
+            size: self.texture_size
+            size_hint_x: None
+
+    MDSlider:
+        min: 1
+        max: root.maximum
+        value: root.current
+
+        on_value:
+            root.current = int(self.value)

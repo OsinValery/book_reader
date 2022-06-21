@@ -1,0 +1,43 @@
+
+
+#: import Window kivy.core.window.Window
+
+#: set page_number_height 20
+
+
+<Page>:
+    on_parent:
+        if self.size == [100, 100]: self.size = [Window.size[0], Window.size[1] - 64]
+
+    canvas.before:
+        Color:
+            rgba: (0,0,1,1)
+        Line:
+            points: (0, page_number_height, self.width, page_number_height)
+            width: 0.5
+        Color:
+            rgba: (1,1,1,1)
+
+    ScrollView:
+        size: (self.parent.size[0] - 2 * icon_size, self.parent.size[1] - page_number_height)
+        pos: (icon_size, page_number_height)
+        do_scroll_x: False
+        do_scroll_y: True
+        scroll_timeout: 300
+
+        BoxLayout:
+            size_hint_y: None
+            height: self.minimum_height
+            orientation: 'vertical'
+            spacing: 10
+            id: page_content
+
+            on_parent:
+                self.add_widget(Space())
+                widgets = root.prepare(root.text)
+                for widget in widgets: self.add_widget(widget)
+                self.add_widget(Space())
+    Label:
+        center: (Window.size[0]/2,page_number_height/2)
+        text: str(root.page)
+        color: (0,0,0,1)

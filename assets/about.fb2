@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+   <FictionBook xmlns="http://www.gribuser.ru/xml/fictionbook/2.0" xmlns:l="http://www.w3.org/1999/xlink">
+     <description>
+        <title-info>
+           <author>
+                <first-name>Developer</first-name>
+           </author>
+             <book-title>Описание приложения</book-title>
+             <annotation>
+                <p>В данной книге представлено описание функций приложения. Я советую всё-таки не полениться и изучить её, т.к. она не заёмёт у вас много времени, но зато даст Вам много полезных знаний.</p>
+             </annotation>
+                <lang>ru</lang>
+        </title-info>
+                <document-info>
+                        <author>
+                                <first-name>Developers</first-name>
+                        </author>
+                        <id>20181105110000</id>
+                        <version>1.0</version>
+                </document-info>
+                <publish-info>
+                        <book-name>How use application</book-name>
+                </publish-info>   
+        </description>
+        <body>
+                <section>
+                  <title>
+                        <p><strong>Предисловие</strong></p>
+                  </title>
+                  <p>Здравствуй, уважаемый читатель!...</p>
+                  <p>Данная книга познакомит тебя со всеми функциями данного приложения. Обычно пользователи бездумно пропускают данный раздел, а потом мучаются, думая, тыкаясь и злясь, как же включить ночной режим приложения!? Во избежание таких вот конфузов и была написана данная книга, чтобы позволить Вам читать книги без всяких там технических затруднений.</p>
+                  <p>Приятного чтения!</p>
+                </section>
+                <section>
+                  <title><p><strong>Читать книги</strong></p></title>
+                  <p> О да, а вы думали, что не будет данной функции?</p>
+                  <p> Данное приложение позволит Вам прочитать любую электронную книгу в формате fb2. </p>
+                </section>
+        </body>
+   </FictionBook>

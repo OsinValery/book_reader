@@ -1,0 +1,93 @@
+
+#: import Window kivy.core.window.Window
+#: set icon_size 20
+
+<SelectableLabel>:
+    text: ''
+    markup: True
+    color: (0,0,0,1)
+    selection_color: (66/255, 170/255, 1, 0.2)
+
+    on_ref_press: 
+        root.on_refference(*args)
+
+
+<Paragraph>:
+    text: ''
+    markup: True
+    color: (0,0,0,1)
+    halign: 'left'
+    valign: 'center'
+
+    text_size: Window.width - 2 * icon_size , None
+    size: self.texture_size
+    size_hint_y: None
+
+<Space>:
+    size_hint_y: None
+    size: Window.width ,0.05 * Window.height
+
+<Unknown>:
+    text: ''
+    text_size: Window.width - 2 * icon_size , None
+    size: self.texture_size
+    color: (0,0,0,1)
+    size_hint_y: None
+
+<Mistake>:
+    text: ''
+    text_size: Window.width - 2 * icon_size , None
+    size: self.texture_size
+    color: (1,0,0,1)
+    size_hint_y: None    
+
+<ImageData>:
+    size_hint_y: None
+    size: self.texture_size
+
+<Title>:
+    text: ''
+    font_size: 30
+    markup: True
+    color: (0,0,0,1)
+    halign: 'center'
+    valign: 'center'
+    bold: True
+
+    text_size: Window.width - 2 * icon_size , None
+    size: self.texture_size
+    size_hint_y: None
+
+<NotesDelimeter>:
+    size_hint_y: None
+    size: Window.width ,0.02 * Window.height 
+
+    canvas:
+        Color:
+            rgba: (0,0.5,1,1)
+        Line:
+            points: self.pos[0], self.pos[1], self.pos[0] + self.size[0], self.pos[1]
+            width: 0.75
+
+<Note>:
+    text: ''
+    color: (10/255, 183 / 255 , 122 / 255 , 1)    
+    size_hint_y: None
+    halign: 'left'
+    valign: 'center'
+
+    text_size: Window.width - 2 * icon_size , None
+    size: self.texture_size
+
+<SubTitle>:
+    text: ''
+    color: (0,0,0,1)
+    halign: 'center'
+    valign: 'center'
+
+    text_size: Window.width - 2 * icon_size , None
+    size: self.texture_size[0], self.texture_size[1] + 20
+    size_hint_y: None
+
+
+
