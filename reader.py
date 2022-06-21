@@ -13,6 +13,8 @@ from kivymd.uix.toolbar.toolbar import MDTopAppBar
 from kivymd.uix.menu.menu import MDDropdownMenu
 from kivymd.uix.bottomsheet.bottomsheet import MDCustomBottomSheet
 from kivymd.uix.snackbar import Snackbar
+from kivymd.uix.dialog import MDDialog
+from kivymd.uix.button import MDRaisedButton, MDFlatButton
 
 from libretranslatepy import LibreTranslateAPI
 
@@ -30,7 +32,19 @@ class PageScreen(MDNavigationLayout):
             self.translation_result = self.translater.translate(self.word, 'ru', 'en')
             self.ids.translater.set_state("open")
         except:
-            print('error!!')
+            def cancel(data=...):
+                dialog.dismiss()
+            def retry(data=...):
+                cancel()
+                self.present(word)
+            dialog = MDDialog(
+                text = 'Network exception. Please, check internet connection and try again.',
+                buttons = [
+                    MDFlatButton(text='cancel', on_press=cancel),
+                    MDRaisedButton(text='Again', on_press=retry)
+                ]
+            )
+            dialog.open()
 
 
 class Page(Widget):
