@@ -23,7 +23,7 @@ class ReaderApp(MDApp):
     def build(self):
         Window.clearcolor = (1,1,1,1)
 
-        file = os.path.join(self.directory, 'assets', 'Шклярский Альфред. Томек в стране кенгуру - TheLib.Ru.fb2')
+        file = os.path.join(self.directory, 'assets', 'avidreaders.ru__prestuplenie-i-nakazanie-dr-izd.fb2')
         app_values.app_info.book.read(file)
 
         self.load_all_kv_files(os.path.join(self.directory, 'kvfiles'))
