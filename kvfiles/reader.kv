@@ -87,9 +87,20 @@
 
     ScreenManager:
         size: self.parent.size
+        id: page_screen
 
         Screen:
-            size: self.parent.size
+            name: 'debug'
+
+            Button:
+                text: 'read'
+                on_press:
+                    app.read_book()
+                    page_screen.current = 'book'        
+
+        Screen:
+            size: page_screen.size
+            name: 'book'
 
             BoxLayout:
                 orientation: 'vertical'
@@ -103,6 +114,7 @@
 
                 PagePresenter:
                     id: page_presenter
+        
 
     # left drawer
     MDNavigationDrawer:

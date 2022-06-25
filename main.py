@@ -18,20 +18,23 @@ from kivy.core.window import Window
 
 from reader import PageScreen
 import app_values
+import bookframe
 
 
 class ReaderApp(MDApp):
     def build(self):
         Window.clearcolor = (1,1,1,1)
+        app_values.app_info.book.content.append([bookframe.BookFrame('this is test book','text', {})])
+        self.load_all_kv_files(os.path.join(self.directory, 'kvfiles'))
+        return PageScreen(size = Window.size)
+    
+    def read_book(self):
         filename = 'avidreaders.ru__prestuplenie-i-nakazanie-dr-izd.fb2'
         file = os.path.join(self.directory, 'assets', filename)
         new_file = os.path.join(self.user_data_dir, filename)
         if not os.path.exists(new_file):
             shutil.copyfile(file, new_file)
         app_values.app_info.book.read(new_file)
-
-        self.load_all_kv_files(os.path.join(self.directory, 'kvfiles'))
-        return PageScreen(size = Window.size)
 
 
 if __name__ == '__main__':
