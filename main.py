@@ -2,6 +2,7 @@
 # 2 lines for pyinstaller
 import sys
 import os
+import shutil
 os.environ['KIVY_NO_FILELOG'] = '1'
 os.environ["KIVY_NO_CONSOLELOG"] = "1"
 from kivy.config import Config
@@ -22,9 +23,12 @@ import app_values
 class ReaderApp(MDApp):
     def build(self):
         Window.clearcolor = (1,1,1,1)
-
-        file = os.path.join(self.directory, 'assets', 'avidreaders.ru__prestuplenie-i-nakazanie-dr-izd.fb2')
-        app_values.app_info.book.read(file)
+        filename = 'avidreaders.ru__prestuplenie-i-nakazanie-dr-izd.fb2'
+        file = os.path.join(self.directory, 'assets', filename)
+        new_file = os.path.join(self.user_data_dir, filename)
+        if not os.path.exists(new_file):
+            shutil.copyfile(file, new_file)
+        app_values.app_info.book.read(new_file)
 
         self.load_all_kv_files(os.path.join(self.directory, 'kvfiles'))
         return PageScreen(size = Window.size)
