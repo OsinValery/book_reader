@@ -43,7 +43,7 @@ class BookFrame():
             if src != '' and src[0] == '#':
                 # notes
                 self.notes[src] = link_text
-                link_text = '[color=#00a400][size=20] ' + link_text + ' [/size][/color] '
+                link_text = ' [color=#00a400][size=20] ' + link_text + ' [/size][/color] '
             head, tail = text[0:start-1], text[end+5:]
             text = head + content + link_text + tail
 

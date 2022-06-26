@@ -61,8 +61,8 @@ class Book():
             content = file.read()
         body_pos = content.find('<body>')
         pos_close = content.find('</body>')
-        body = content[body_pos + 6: pos_close]
-        book_body = fb2_book.fb2_parser('<body>'+body+'</body>', 0)[0]
+        body = content[body_pos: pos_close+7]
+        book_body = fb2_book.fb2_parser(body, 0)[0]
         elements = book_body.work()
         # divide into pages
         page = []

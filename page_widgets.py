@@ -150,7 +150,7 @@ class SelectableLabel(Label):
                     shapes.append(rect)
                     words.append(element)
         
-        self.page_widget.selectation = True
+        self.page_widget.selection = True
         self.selections = words
 
         for el in self.selection_figures:

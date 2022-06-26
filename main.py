@@ -26,7 +26,7 @@ class ReaderApp(MDApp):
         app_values.app_info.book.content.append([])
         self.load_all_kv_files(os.path.join(self.directory, 'kvfiles'))
         return PageScreen(size = Window.size)
-    
+
     def read_book(self):
         filename = 'avidreaders.ru__prestuplenie-i-nakazanie-dr-izd.fb2'
         file = os.path.join(self.directory, 'assets', filename)

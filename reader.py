@@ -7,7 +7,7 @@ from kivy.properties import NumericProperty, ListProperty, \
 from kivy.metrics import dp
 from kivy.core.clipboard import Clipboard
 from kivy.clock import Clock
-from kivy.core.window import Window
+from kivy.factory import Factory
 
 from kivymd.uix.navigationdrawer.navigationdrawer import MDNavigationLayout
 from kivymd.uix.toolbar.toolbar import MDTopAppBar
@@ -20,7 +20,6 @@ from kivymd.uix.button import MDRaisedButton, MDFlatButton
 from libretranslatepy import LibreTranslateAPI
 
 import app_values
-import page_widgets
 
 class PageScreen(MDNavigationLayout):
     word = StringProperty('click on the words in the text')
@@ -49,7 +48,6 @@ class PageScreen(MDNavigationLayout):
 
 
 class Page(Widget):
-    text = ListProperty()
     page = NumericProperty(5)
     selection = BooleanProperty(False)
 
@@ -69,10 +67,13 @@ class Page(Widget):
         return None
 
     def on_touch_down(self, touch):
+        if self.root_screen.ids.page_presenter.ids.page_back.collide_point(*touch.pos):
+            return False
+        if self.root_screen.ids.page_presenter.ids.page_forward.collide_point(*touch.pos):
+            return False
         if self.copping:
             if not self.bubble.collide_point(*touch.pos):
                 self.copping = False
-                self.deselect()
                 self.remove_widget(self.bubble)
                 return True
         self.deselect()
@@ -83,18 +84,13 @@ class Page(Widget):
             if not self.bubble.collide_point(*touch.pos):
                 self.copping = False
                 self.remove_widget(self.bubble)
-                if self.selectation:
+                if self.selection:
                     self.deselect()
                 return True
         return super().on_touch_move(touch)
 
     def on_touch_up(self, touch):
-        if self.root_screen.ids.page_presenter.ids.page_back.collide_point(*touch.pos):
-            return False
-        if self.root_screen.ids.page_presenter.ids.page_forward.collide_point(*touch.pos):
-            return False
-
-        if self.selectation:
+        if self.selection:
             text = ''
             for child in self.ids.page_content.children:
                 # boxlayout keeps his child widgets in reversed order
@@ -106,15 +102,11 @@ class Page(Widget):
                 self.deselect()
 
             def copy(arg=None):
-                self.copping = False
-                self.remove_widget(bubble)
-                self.deselect()
+                cancel()
                 Clock.schedule_once(lambda dt: self.copy_text(text))
 
             def translate(arg=...):
-                self.copping = False
-                self.remove_widget(bubble)
-                self.deselect()
+                cancel()
                 Clock.schedule_once(lambda dt: self.root_screen.present(text))
                 
             if not self.copping:
@@ -122,9 +114,7 @@ class Page(Widget):
                 bubble.add_widget(BubbleButton(text='Копировать', on_press=copy))
                 bubble.add_widget(BubbleButton(text='Отмена', on_press=cancel))
                 bubble.add_widget(BubbleButton(text='Перевод', on_press=translate))
-                bubble.pos[0] -= bubble.width/2
-                if bubble.pos[0] < 5:
-                    bubble.pos[0] = 5
+                bubble.pos[0] = max(bubble.pos[0] - bubble.width/2, 5)
                 self.bubble = bubble
                 self.add_widget(bubble)
                 self.copping = True
@@ -142,8 +132,10 @@ class Page(Widget):
         snack.size_hint_x = (self.width - snack.snackbar_x * 2) / self.width
         snack.open()
 
-    def prepare(self, elements):
-        content = [el.make_content() for el in elements]
+    def prepare(self):
+        book = app_values.app_info.book
+        elements = book.get_page(self.page-1)
+        content = [Factory.Space()] + [el.make_content() for el in elements]
         have = False
         comments = {}
         for el in elements:
@@ -151,18 +143,18 @@ class Page(Widget):
                 have = True
                 comments.update(el.notes)
         if have:
-            content.append(page_widgets.NotesDelimeter())
-            book = app_values.app_info.book
+            content.append(Factory.NotesDelimeter())
             for note in comments:
                 code : str = comments[note] 
                 code = code.replace(']','').replace('[','').replace('&bl;', '').replace('&br;','')
                 ind = note[1:]
                 note_text = book.notes[ind] if ind in book.notes else 'This note don\'t found!'
-                content.append(page_widgets.Note(text=code + ' - ' + note_text))
+                content.append(Factory.Note(text= f'{code} - {note_text}'))
+        content.append(Factory.Space())
         return content
 
     def deselect(self):
-        self.selectation = False
+        self.selection = False
         for child in self.ids.page_content.children:
             child.deselect()
 
@@ -175,13 +167,11 @@ class PagePresenter(Widget):
         return app_values.app_info.book
 
     def init_page(self):
-        self.page_container = self
-        # self.add_widget(self.page_container)
-        self.page_container.add_widget(Page(
+        self.page = Page(
             size = self.parent.size, 
-            text = self.book.get_page(self.cur_page-1),
             page = self.cur_page
-        ))
+        )
+        self.add_widget(self.page)
 
     def back(self):
         self.seek(self.cur_page-1)
@@ -190,17 +180,28 @@ class PagePresenter(Widget):
         self.seek(self.cur_page+1)
 
     def seek(self, number):
-        for wid in self.page_container.children:
-            if type(wid) == Page:
-                self.page_container.remove_widget(wid)
-                break
         self.cur_page = number
-        new = Page(
+        self.page.page = number
+        content = self.page.ids.page_content
+        content.clear_widgets()
+        self.page.ids.page_scroll.scroll_y = 1        
+        if self.page.copping:
+            self.page.copping = False
+            self.page.remove_widget(self.page.bubble)
+        self.page.selection = False
+        for el in self.page.prepare():
+            content.add_widget(el)
+
+        self.ids.page_forward.disabled = self.cur_page == self.book.length 
+        # was
+        return
+        self.remove_widget(self.page)
+        self.cur_page = number
+        self.page = Page(
             size = self.size,
-            text = self.book.get_page(self.cur_page-1),
             page = self.cur_page 
         )
-        self.page_container.add_widget(new)
+        self.add_widget(self.page)
         self.ids.page_forward.disabled = self.cur_page == self.book.length        
 
 
