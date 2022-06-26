@@ -6,29 +6,26 @@ os.environ["KIVY_NO_CONSOLELOG"] = "1"
 from kivy.config import Config
 Config.set('kivy', 'log_enable', '0')
 # for pyinstaller
-from kivy.resources import resource_add_path
 from kivy.logger import Logger, LOG_LEVELS
 Logger.setLevel(LOG_LEVELS["error"])
 
 
 from kivymd.app import MDApp
 from kivy.core.window import Window
-from kivymd.uix.navigationdrawer.navigationdrawer import MDNavigationLayout
-from kivymd.uix.toolbar.toolbar import MDTopAppBar
+from kivymd.uix.label.label import MDLabel
 
 
 
-class PageScreen(MDNavigationLayout):
-    pass
+class PageScreen(MDLabel):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.text = 'test successed'
+        self.color = (0,0,0,1)
 
-class MyAppBar(MDTopAppBar):
-    def open_menu(self, arg=...):
-        pass
 
 class ReaderApp(MDApp):
     def build(self):
         Window.clearcolor = (1,1,1,1)
-        self.load_all_kv_files(os.path.join(self.directory, 'kvfiles'))
         return PageScreen(size = Window.size)
 
 
