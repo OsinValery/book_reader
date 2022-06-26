@@ -5,3 +5,4 @@ from book import Book
 class AppInfo():
     def __init__(self) -> None:
         self.book = Book()
+        self.max_elements_per_page = 10

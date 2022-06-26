@@ -8,13 +8,13 @@
 
 #: import Space page_widgets.Space
 
-#: set icon_size 20
+#: set icon_size 40
 
 
 <PageTurnerButton@Button>:
     background_normal: ''
     background_color: (0,0,0,0)
-    size: (icon_size, 50)
+    size: (icon_size, 60)
     text: ''
     icon: ""
 
@@ -90,13 +90,14 @@
         id: page_screen
 
         Screen:
-            name: 'debug'
+            name: 'start'
 
             Button:
                 text: 'read'
                 on_press:
                     app.read_book()
                     page_screen.current = 'book'        
+                    page_presenter.seek(1)
 
         Screen:
             size: page_screen.size

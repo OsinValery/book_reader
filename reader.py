@@ -7,6 +7,7 @@ from kivy.properties import NumericProperty, ListProperty, \
 from kivy.metrics import dp
 from kivy.core.clipboard import Clipboard
 from kivy.clock import Clock
+from kivy.core.window import Window
 
 from kivymd.uix.navigationdrawer.navigationdrawer import MDNavigationLayout
 from kivymd.uix.toolbar.toolbar import MDTopAppBar

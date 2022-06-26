@@ -9,10 +9,13 @@ class Book():
         self.notes = {}
         self.format = 'fb2'
     
-    def read(self, filepath):
+    def read(self, filepath, max_elements_per_page=20):
+        self.content = []
+        self.notes = {}
         self.file_path = filepath
         self.format = os.path.split(self.file_path)[-1]
         self.format: str = self.format[-3:]
+        self.max_elements_per_page = max_elements_per_page
         if self.format == 'fb2':
             self.read_fb2()
         else:
@@ -74,13 +77,12 @@ class Book():
                     el.attributs['broken'] = 1
             page.append(el)
             i += 1
-            if i == 20:
+            if i == self.max_elements_per_page:
                 self.content.append(page)
                 i = 0
                 page = []
         if page != []:
             self.content.append(page)
-
     
     @property
     def length(self):
