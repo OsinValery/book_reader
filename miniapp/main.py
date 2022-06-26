@@ -1,14 +1,3 @@
-# 2 lines for pyinstaller
-import sys
-import os
-os.environ['KIVY_NO_FILELOG'] = '1'
-os.environ["KIVY_NO_CONSOLELOG"] = "1"
-from kivy.config import Config
-Config.set('kivy', 'log_enable', '0')
-# for pyinstaller
-from kivy.logger import Logger, LOG_LEVELS
-Logger.setLevel(LOG_LEVELS["error"])
-
 
 from kivymd.app import MDApp
 from kivy.core.window import Window
@@ -29,7 +18,5 @@ class ReaderApp(MDApp):
         return PageScreen(size = Window.size)
 
 
-if __name__ == '__main__':
-
-    app = ReaderApp()
-    app.run()
+app = ReaderApp()
+app.run()
