@@ -1,3 +1,4 @@
+from re import sub
 import bookframe
 
 class FB2_tag:
@@ -46,13 +47,13 @@ class FB2_tag:
 
 def fb2_parser(text, pos=0):
     root = FB2_tag()
-    while text[pos] != '<':
+    while pos < len(text) and text[pos] != '<':
         pos += 1
     close = pos + text[pos:].find('>')
     tag = text[pos+1:close]
     root.tag = tag
     pos = close + 1
-    if tag == 'p':
+    if tag[0] == 'p':
         close_tag = text[close:].find('</p>')
         tag_text = text[close+1:close_tag+close]
         pos += close_tag + 3
@@ -89,15 +90,20 @@ def fb2_parser(text, pos=0):
                 closed = True
                 pos = pos + 8
 
-    elif tag == 'body':
+    elif tag[:4] == 'body':
         pos = close + 1
-        while pos < len(text):
+        closed = False
+        while not closed:
+            while text[pos] != '<':
+                pos += 1  
             if text[pos:pos+7] != '</body>':
                 sub_tag, new_pos = fb2_parser(text, pos)
                 root.append(sub_tag)
                 pos = new_pos
+                if pos >= len(text):
+                    closed = True
             else:
-                pos += 8
+                return root, pos + 7
     elif tag[:7] == 'section':
         pos = close + 1
         closed = False

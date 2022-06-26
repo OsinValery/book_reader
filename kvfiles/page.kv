@@ -7,7 +7,7 @@
 
 <Page>:
     on_parent:
-        if self.size == [100, 100]: self.size = [Window.size[0], Window.size[1] - 64]
+        if self.size == [100, 100]: self.size = [Window.width, Window.height * (1-64/600)]
 
     canvas.before:
         Color:

@@ -6,8 +6,6 @@
 #: import ScrollEffect kivy.effects.scroll.ScrollEffect
 #:import get_color_from_hex kivy.utils.get_color_from_hex
 
-#: import Space page_widgets.Space
-
 #: set icon_size 40
 
 
@@ -72,6 +70,7 @@
         pos: (self.parent.size[0] - self.size[0], self.parent.size[1]/2)
         icon: os.path.join(app.directory, 'assets', 'right.png')
         on_press: root.forward()
+        disabled: root.cur_page == root.book.length
 
     PageTurnerButton:
         id: page_back
@@ -89,16 +88,7 @@
         size: self.parent.size
         id: page_screen
 
-        Screen:
-            name: 'start'
-
-            Button:
-                text: 'read'
-                on_press:
-                    app.read_book()
-                    page_screen.current = 'book'        
-                    page_presenter.seek(1)
-
+        # main page with book
         Screen:
             size: page_screen.size
             name: 'book'
@@ -111,11 +101,46 @@
                     id: pagePresenterAppBar
                     title: 'reader'
                     right_action_items: [['dots-vertical', lambda x: self.open_menu(x)]]
+                    left_action_items: [['menu', lambda x: app_menu.set_state('open')]]
                     page_turner: page_presenter
 
                 PagePresenter:
                     id: page_presenter
         
+        # page with list of books
+        Screen:
+            id: library
+            size: page_screen.size
+            name: 'library'
+
+            BoxLayout:
+                orientation: "vertical"
+                size: self.parent.size
+
+                MDTopAppBar:
+                    title: "Library"
+                    id: library_app_bar
+                    left_action_items: [['arrow-left', lambda x: root.close_library()]]
+                
+                ScrollView:
+                    do_scroll_x: False
+                    do_scroll_y: True
+                    id: library_scroll
+                    width: self.parent.width
+                    height: self.parent.height - library_app_bar.height
+
+                    LibraryPresenter:
+                        id: library_list
+                        on_parent:
+                            self.update_library()
+
+            MDFloatingActionButton:
+                icon: "plus"
+                md_bg_color: app.theme_cls.primary_color
+                pos: [Window.width * 0.98 - self.width, 0.02 * Window.height]
+
+                on_press:
+                    print('add book')
 
     # left drawer
     MDNavigationDrawer:
@@ -161,4 +186,32 @@
             MDNavigationDrawerDivider:
             MDNavigationDrawerLabel:
                 text: 'translated with Argos'
+
+    # right drawer with menu 
+    MDNavigationDrawer:
+        id: app_menu
+        md_bg_color: get_color_from_hex("#f7f4e7")
+        close_on_click: True
+        anchor: 'left'
+        padding: [0,0,0,16]
+
+        MDNavigationDrawerMenu:
+            do_scroll_y: False
+
+            MDNavigationDrawerHeader:
+                title: "Reader"
+            
+            MDNavigationDrawerItem:
+                text: "Выбрать книгу"
+
+                on_press:
+                    app_menu.set_state('close')
+                    library_list.update_library()
+                    page_screen.current = 'library'
+        
+            MDNavigationDrawerItem:
+                text: "Settings"
+
+                on_press:
+                    app.open_settings()
 

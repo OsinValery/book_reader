@@ -1,30 +1,30 @@
 
+import os
 from kivy.uix.widget import Widget
 from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.bubble import Bubble, BubbleButton
-from kivy.properties import NumericProperty, ListProperty, \
-    StringProperty, BooleanProperty, ObjectProperty
+from kivy.properties import NumericProperty, StringProperty, ObjectProperty
 from kivy.metrics import dp
-from kivy.core.clipboard import Clipboard
-from kivy.clock import Clock
-from kivy.factory import Factory
 
 from kivymd.uix.navigationdrawer.navigationdrawer import MDNavigationLayout
 from kivymd.uix.toolbar.toolbar import MDTopAppBar
 from kivymd.uix.menu.menu import MDDropdownMenu
 from kivymd.uix.bottomsheet.bottomsheet import MDCustomBottomSheet
-from kivymd.uix.snackbar import Snackbar
 from kivymd.uix.dialog import MDDialog
 from kivymd.uix.button import MDRaisedButton, MDFlatButton
+from kivymd.uix.list import MDList, OneLineAvatarIconListItem, IconLeftWidget
 
 from libretranslatepy import LibreTranslateAPI
 
 import app_values
+from page import Page
 
 class PageScreen(MDNavigationLayout):
     word = StringProperty('click on the words in the text')
     translation_result = StringProperty('Here you may see translated text' )
     translater = ObjectProperty(LibreTranslateAPI("https://translate.argosopentech.com/"))
+
+    def close_library(self):
+        self.ids.page_screen.current = 'book'
 
     def present(self, word):
         self.word = word
@@ -45,118 +45,6 @@ class PageScreen(MDNavigationLayout):
                 ]
             )
             dialog.open()
-
-
-class Page(Widget):
-    page = NumericProperty(5)
-    selection = BooleanProperty(False)
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.copping = False
-        self.bubble = None
-
-    @property
-    def root_screen(self):
-        """returns screen named 'reader' or None"""
-        widget = self
-        while widget.parent != None:
-            if 'name' in dir(widget.parent) and widget.parent.name == 'reader':
-                return widget.parent
-            widget = widget.parent
-        return None
-
-    def on_touch_down(self, touch):
-        if self.root_screen.ids.page_presenter.ids.page_back.collide_point(*touch.pos):
-            return False
-        if self.root_screen.ids.page_presenter.ids.page_forward.collide_point(*touch.pos):
-            return False
-        if self.copping:
-            if not self.bubble.collide_point(*touch.pos):
-                self.copping = False
-                self.remove_widget(self.bubble)
-                return True
-        self.deselect()
-        return super().on_touch_down(touch)
-    
-    def on_touch_move(self, touch):
-        if self.copping:
-            if not self.bubble.collide_point(*touch.pos):
-                self.copping = False
-                self.remove_widget(self.bubble)
-                if self.selection:
-                    self.deselect()
-                return True
-        return super().on_touch_move(touch)
-
-    def on_touch_up(self, touch):
-        if self.selection:
-            text = ''
-            for child in self.ids.page_content.children:
-                # boxlayout keeps his child widgets in reversed order
-                text = child.get_selected_text() + text
-
-            def cancel(arg=None):
-                self.copping = False
-                self.remove_widget(bubble)
-                self.deselect()
-
-            def copy(arg=None):
-                cancel()
-                Clock.schedule_once(lambda dt: self.copy_text(text))
-
-            def translate(arg=...):
-                cancel()
-                Clock.schedule_once(lambda dt: self.root_screen.present(text))
-                
-            if not self.copping:
-                bubble = Bubble(pos=touch.pos, background_color=(0,0,0,1), orientation='vertical')
-                bubble.add_widget(BubbleButton(text='Копировать', on_press=copy))
-                bubble.add_widget(BubbleButton(text='Отмена', on_press=cancel))
-                bubble.add_widget(BubbleButton(text='Перевод', on_press=translate))
-                bubble.pos[0] = max(bubble.pos[0] - bubble.width/2, 5)
-                self.bubble = bubble
-                self.add_widget(bubble)
-                self.copping = True
-        return super().on_touch_up(touch)
-    
-    def copy_text(self, text):
-        Clipboard.copy(text)
-        snack = Snackbar(
-            text = 'Текст скопирован буфер обмена',
-            snackbar_x="10dp",
-            snackbar_y="10dp",
-            snackbar_animation_dir='Right',
-            bg_color=(0, 0, 1, 0.4),
-        )
-        snack.size_hint_x = (self.width - snack.snackbar_x * 2) / self.width
-        snack.open()
-
-    def prepare(self):
-        book = app_values.app_info.book
-        elements = book.get_page(self.page-1)
-        content = [Factory.Space()] + [el.make_content() for el in elements]
-        have = False
-        comments = {}
-        for el in elements:
-            if el.have_note:
-                have = True
-                comments.update(el.notes)
-        if have:
-            content.append(Factory.NotesDelimeter())
-            for note in comments:
-                code : str = comments[note] 
-                code = code.replace(']','').replace('[','').replace('&bl;', '').replace('&br;','')
-                ind = note[1:]
-                note_text = book.notes[ind] if ind in book.notes else 'This note don\'t found!'
-                content.append(Factory.Note(text= f'{code} - {note_text}'))
-        content.append(Factory.Space())
-        return content
-
-    def deselect(self):
-        self.selection = False
-        for child in self.ids.page_content.children:
-            child.deselect()
 
 
 class PagePresenter(Widget):
@@ -180,11 +68,10 @@ class PagePresenter(Widget):
         self.seek(self.cur_page+1)
 
     def seek(self, number):
-        self.cur_page = number
-        self.page.page = number
+        self.cur_page = self.page.page = number
         content = self.page.ids.page_content
         content.clear_widgets()
-        self.page.ids.page_scroll.scroll_y = 1        
+        self.page.ids.page_scroll.scroll_y = 1
         if self.page.copping:
             self.page.copping = False
             self.page.remove_widget(self.page.bubble)
@@ -192,17 +79,9 @@ class PagePresenter(Widget):
         for el in self.page.prepare():
             content.add_widget(el)
 
-        self.ids.page_forward.disabled = self.cur_page == self.book.length 
-        # was
-        return
-        self.remove_widget(self.page)
-        self.cur_page = number
-        self.page = Page(
-            size = self.size,
-            page = self.cur_page 
-        )
-        self.add_widget(self.page)
-        self.ids.page_forward.disabled = self.cur_page == self.book.length        
+    def change_book(self):
+        self.seek(1)
+        self.ids.page_forward.disabled = self.book.length == 1
 
 
 class MyAppBar(MDTopAppBar):
@@ -264,3 +143,37 @@ class PageTurnerSheet(BoxLayout):
     def seek(self, page):
         self.on_select(page)
 
+
+class LibraryPresenter(MDList):
+    def update_library(self):
+        self.clear_widgets()
+        for book in app_values.app_info.library:
+            line = OneLineAvatarIconListItem(
+                on_press = self.choose_book,
+                text = book
+            )
+            # x.parent.parent is link on "line"
+            line.add_widget(IconLeftWidget(
+                icon='book', 
+                on_press=lambda x: self.choose_book(x.parent.parent))
+            )
+            self.add_widget(line)
+
+    def choose_book(self, arg):
+        app_values.app_info.book.read(
+            os.path.join(app_values.app_info.book_dir, arg.text), 
+            app_values.app_info.max_elements_per_page
+        )
+        root = self.root_screen
+        root.ids.page_presenter.change_book()
+        root.ids.page_screen.current = 'book'
+
+    @property
+    def root_screen(self):
+        """returns screen named 'reader' or None"""
+        widget = self
+        while widget.parent != None:
+            if 'name' in dir(widget.parent) and widget.parent.name == 'reader':
+                return widget.parent
+            widget = widget.parent
+        return None
