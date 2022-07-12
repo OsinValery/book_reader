@@ -7,6 +7,10 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.properties import NumericProperty, StringProperty, ObjectProperty
 from kivy.metrics import dp
 import kivy.app
+from kivy.utils import platform
+
+if platform == 'android':
+    from android.permissions import request_permission,check_permission, Permission
 
 from kivymd.uix.navigationdrawer.navigationdrawer import MDNavigationLayout
 from kivymd.uix.toolbar.toolbar import MDTopAppBar
@@ -181,6 +185,23 @@ class LibraryPresenter(MDList):
             if self.manager_open:
                 self._file_manager.back()
         return True
+
+    def prepare_choosing_file(self, arg = ...):
+        if platform != 'android':
+            self.start_choose_file()
+        else:
+            if check_permission(Permission.READ_EXTERNAL_STORAGE):
+                self.start_choose_file()
+            else:
+                # request permission
+                def work_prepare(arg = ...):
+                    if check_permission(Permission.READ_EXTERNAL_STORAGE):
+                        self.start_choose_file()
+                    else:
+                        pass
+                        # show alert with mistake message
+                request_permission(Permission.READ_EXTERNAL_STORAGE, work_prepare)
+
 
     def start_choose_file(self, arg=...):
         if self.manager_open:
