@@ -1,9 +1,12 @@
 
 import os
+import shutil
+
 from kivy.uix.widget import Widget
 from kivy.uix.boxlayout import BoxLayout
 from kivy.properties import NumericProperty, StringProperty, ObjectProperty
 from kivy.metrics import dp
+import kivy.app
 
 from kivymd.uix.navigationdrawer.navigationdrawer import MDNavigationLayout
 from kivymd.uix.toolbar.toolbar import MDTopAppBar
@@ -12,6 +15,7 @@ from kivymd.uix.bottomsheet.bottomsheet import MDCustomBottomSheet
 from kivymd.uix.dialog import MDDialog
 from kivymd.uix.button import MDRaisedButton, MDFlatButton
 from kivymd.uix.list import MDList, OneLineAvatarIconListItem, IconLeftWidget
+from kivymd.uix.filemanager.filemanager import MDFileManager
 
 from libretranslatepy import LibreTranslateAPI
 
@@ -145,6 +149,45 @@ class PageTurnerSheet(BoxLayout):
 
 
 class LibraryPresenter(MDList):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._file_manager = MDFileManager(
+            exit_manager = self.cancel,
+            select_path = self.load_book,
+            preview=False,
+            ext = app_values.app_info.supported_formats
+        )
+        self.manager_open = False
+
+    def cancel(self, arg = ...):
+        self.manager_open = False
+        self._file_manager.close()
+
+    def load_book(self, path):
+        self.manager_open = False
+        self._file_manager.close()
+        folder_with_books: str = kivy.app.App.get_running_app().books_dir
+        # TODO check if file with such name already exists
+        filename = path.split('/')[-1]
+        app_values.app_info.library.append(filename)
+        shutil.copyfile(path, os.path.join(folder_with_books, filename))
+        self.update_library()
+        
+
+    def events(self, instance, keyboard, keycode, text, modifiers):
+        '''Called when buttons are pressed on the mobile device.'''
+
+        if keyboard in (1001, 27):
+            if self.manager_open:
+                self._file_manager.back()
+        return True
+
+    def start_choose_file(self, arg=...):
+        if self.manager_open:
+            return
+        self.manager_open = True
+        self._file_manager.show('/')
+
     def update_library(self):
         self.clear_widgets()
         for book in app_values.app_info.library:
