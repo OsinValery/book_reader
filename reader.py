@@ -195,7 +195,8 @@ class LibraryPresenter(MDList):
                 self.start_choose_file()
             else:
                 # request permission
-                def work_prepare(arg = ...):
+                def work_prepare(*args, **kwargs):
+                    print(args, kwargs)
                     if check_permission(Permission.READ_EXTERNAL_STORAGE):
                         self.start_choose_file()
                     else:

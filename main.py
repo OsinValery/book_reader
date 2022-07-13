@@ -4,7 +4,7 @@ import sys
 import os
 import shutil
 os.environ['KIVY_NO_FILELOG'] = '1'
-os.environ["KIVY_NO_CONSOLELOG"] = "1"
+# os.environ["KIVY_NO_CONSOLELOG"] = "1"
 from kivy.config import Config
 Config.set('kivy', 'log_enable', '0')
 # for pyinstaller
