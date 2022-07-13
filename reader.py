@@ -20,6 +20,7 @@ from kivymd.uix.dialog import MDDialog
 from kivymd.uix.button import MDRaisedButton, MDFlatButton
 from kivymd.uix.list import MDList, OneLineAvatarIconListItem, IconLeftWidget
 from kivymd.uix.filemanager.filemanager import MDFileManager
+from kivymd.uix.dialog import MDDialog
 
 from libretranslatepy import LibreTranslateAPI
 
@@ -198,8 +199,7 @@ class LibraryPresenter(MDList):
                     if check_permission(Permission.READ_EXTERNAL_STORAGE):
                         self.start_choose_file()
                     else:
-                        pass
-                        # show alert with mistake message
+                        show_alert_no_permission()
                 request_permission(Permission.READ_EXTERNAL_STORAGE, work_prepare)
 
 
@@ -241,3 +241,24 @@ class LibraryPresenter(MDList):
                 return widget.parent
             widget = widget.parent
         return None
+
+def show_alert_no_permission():
+    def close(data=...):
+        popup.dismiss()
+    
+    popup = MDDialog(
+        text = 'No permission to read files on your device',
+        title = 'Error!',
+        text_color=kivy.app.App.get_running_app.theme_cls.primary_color,
+        radius = [8] * 4,
+        buttons = [
+            MDFlatButton( 
+                text = 'Ok',
+                on_press = close,
+            )
+        ]
+    )
+
+    popup.open()
+
+
