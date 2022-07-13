@@ -7,6 +7,7 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.properties import NumericProperty, StringProperty, ObjectProperty
 from kivy.metrics import dp
 import kivy.app
+from kivy.clock import Clock
 from kivy.utils import platform
 
 if platform == 'android':
@@ -197,10 +198,12 @@ class LibraryPresenter(MDList):
                 # request permission
                 def work_prepare(*args, **kwargs):
                     print(args, kwargs)
-                    if check_permission(Permission.READ_EXTERNAL_STORAGE):
-                        self.start_choose_file()
+                    permissions, results = args
+
+                    if results[0]:
+                        Clock.schedule_once(self.start_choose_file)
                     else:
-                        show_alert_no_permission()
+                        Clock.schedule_once(show_alert_no_permission)
                 request_permission(Permission.READ_EXTERNAL_STORAGE, work_prepare)
 
 
