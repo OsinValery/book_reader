@@ -10,7 +10,7 @@ Config.set('kivy', 'log_enable', '0')
 # for pyinstaller
 from kivy.resources import resource_add_path
 from kivy.logger import Logger, LOG_LEVELS
-Logger.setLevel(LOG_LEVELS["error"])
+# Logger.setLevel(LOG_LEVELS["error"])
 
 
 from kivymd.app import MDApp
@@ -18,10 +18,14 @@ from kivy.core.window import Window
 
 from reader import PageScreen
 import app_values
+from localizator import get_lang
 
 class ReaderApp(MDApp):
     def build(self):
         Window.clearcolor = (1,1,1,1)
+        if not app_values.app_info.read_settings():
+            app_values.app_info.interface_language = get_lang()
+            app_values.app_info.write_settings()
         self.load_all_kv_files(os.path.join(self.directory, 'kvfiles'))
         
         asset_dir = os.path.join(self.directory, 'assets')

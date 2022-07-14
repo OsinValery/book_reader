@@ -21,16 +21,16 @@ from kivymd.uix.dialog import MDDialog
 from kivymd.uix.button import MDRaisedButton, MDFlatButton
 from kivymd.uix.list import MDList, OneLineAvatarIconListItem, IconLeftWidget
 from kivymd.uix.filemanager.filemanager import MDFileManager
-from kivymd.uix.dialog import MDDialog
 
 from libretranslatepy import LibreTranslateAPI
+from localizator import Get_text
 
 import app_values
 from page import Page
 
 class PageScreen(MDNavigationLayout):
-    word = StringProperty('click on the words in the text')
-    translation_result = StringProperty('Here you may see translated text' )
+    word = StringProperty(Get_text('info_click_text') )
+    translation_result = StringProperty(Get_text('info_translated_text'))
     translater = ObjectProperty(LibreTranslateAPI("https://translate.argosopentech.com/"))
 
     def close_library(self):
@@ -48,13 +48,27 @@ class PageScreen(MDNavigationLayout):
                 cancel()
                 self.present(word)
             dialog = MDDialog(
-                text = 'Network exception. Please, check internet connection and try again.',
+                text = Get_text('error_network_connection'),
                 buttons = [
-                    MDFlatButton(text='cancel', on_press=cancel),
-                    MDRaisedButton(text='Again', on_press=retry)
+                    MDFlatButton(text=Get_text('info_cancel'), on_press=cancel),
+                    MDRaisedButton(text=Get_text('info_again'), on_press=retry)
                 ]
             )
             dialog.open()
+
+    def close_settings(self):
+        self.ids.page_screen.current = 'book'
+
+    def change_language(self, arg = ...):
+        self.ids.pagePresenterAppBar.title = Get_text('info_reader')
+        self.ids.menu_header.title = Get_text('info_reader')        
+        self.ids.library_app_bar.title = Get_text('info_library')
+        self.ids.settings_app_bar.title = Get_text('info_settings')
+        self.ids.menu_settings.text = Get_text('info_settings')
+        self.ids.language_label.text = Get_text('info_language')
+        self.ids.translater_header.title = Get_text('info_translater')
+        self.ids.menu_select_book.text = Get_text('info_select_book')
+        self.ids.pagePresenterAppBar.change_language()
 
 
 class PagePresenter(Widget):
@@ -94,22 +108,42 @@ class PagePresenter(Widget):
         self.ids.page_forward.disabled = self.book.length == 1
 
 
+
 class MyAppBar(MDTopAppBar):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         menu_items = [{ 
             "viewclass": "OneLineListItem", 
-            "text": "Начало книги", 
+            "text": Get_text('info_book_start'), 
             "height": dp(40), 
             "on_release": self.to_book_start
             },{ 
             "viewclass": "OneLineListItem", 
-            "text": "Конец книги", 
+            "text": Get_text('info_book_end'), 
             "height": dp(40), 
             "on_release": self.to_book_end
             },{ 
             "viewclass": "OneLineListItem", 
-            "text": "Пролистать", 
+            "text": Get_text('info_turn'), 
+            "height": dp(40), 
+            "on_release": self.seek
+            }]
+        self.menu = MDDropdownMenu(items=menu_items, width_mult=3)
+    
+    def change_language(self):
+        menu_items = [{ 
+            "viewclass": "OneLineListItem", 
+            "text": Get_text('info_book_start'), 
+            "height": dp(40), 
+            "on_release": self.to_book_start
+            },{ 
+            "viewclass": "OneLineListItem", 
+            "text": Get_text('info_book_end'), 
+            "height": dp(40), 
+            "on_release": self.to_book_end
+            },{ 
+            "viewclass": "OneLineListItem", 
+            "text": Get_text('info_turn'), 
             "height": dp(40), 
             "on_release": self.seek
             }]
@@ -170,15 +204,25 @@ class LibraryPresenter(MDList):
         self._file_manager.close()
 
     def load_book(self, path):
+        # adds book into the library from internal storage
         self.manager_open = False
         self._file_manager.close()
         folder_with_books: str = kivy.app.App.get_running_app().books_dir
-        # TODO check if file with such name already exists
         filename = path.split('/')[-1]
-        app_values.app_info.library.append(filename)
-        shutil.copyfile(path, os.path.join(folder_with_books, filename))
-        self.update_library()
-        
+        if filename in app_values.app_info.library:
+            def add():
+                new_path = os.path.join(folder_with_books, filename)
+                if os.path.exists(new_path):
+                    os.remove(new_path)
+                shutil.copyfile(path, new_path)
+                self.update_library()
+            def start(arg=...):
+                show_alert_book_exists(filename, add)
+            Clock.schedule_once(start, 0.1)
+        else:
+            app_values.app_info.library.append(filename)
+            shutil.copyfile(path, os.path.join(folder_with_books, filename))
+            self.update_library()
 
     def events(self, instance, keyboard, keycode, text, modifiers):
         '''Called when buttons are pressed on the mobile device.'''
@@ -205,7 +249,6 @@ class LibraryPresenter(MDList):
                     else:
                         Clock.schedule_once(show_alert_no_permission)
                 request_permission(Permission.READ_EXTERNAL_STORAGE, work_prepare)
-
 
     def start_choose_file(self, arg=...):
         if self.manager_open:
@@ -251,18 +294,29 @@ def show_alert_no_permission():
         popup.dismiss()
     
     popup = MDDialog(
-        text = 'No permission to read files on your device',
-        title = 'Error!',
-        text_color=kivy.app.App.get_running_app.theme_cls.primary_color,
+        text = Get_text('error_no_permission'),
+        title = Get_text('error_error'),
         radius = [8] * 4,
         buttons = [
-            MDFlatButton( 
-                text = 'Ok',
-                on_press = close,
-            )
+            MDFlatButton(text = Get_text('info_ok'), on_press = close)
         ]
     )
-
     popup.open()
 
+def show_alert_book_exists(name, callback):
+    def cancel(arg=...):
+        popups.dismiss()
+    def akt(arg=...):
+        popups.dismiss()
+        callback()
 
+    popups = MDDialog(
+        text = Get_text('error_already_exists').format(name),
+        title = Get_text('error_error'),
+        radius = [8] * 4,
+        buttons = [
+            MDFlatButton(text = Get_text('info_ok'), on_press = akt),
+            MDFlatButton(text = Get_text('info_no'), on_press = cancel),
+        ]
+    )
+    popups.open()

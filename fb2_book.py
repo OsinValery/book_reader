@@ -1,4 +1,3 @@
-from re import sub
 import bookframe
 
 class FB2_tag:

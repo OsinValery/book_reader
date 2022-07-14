@@ -1,6 +1,6 @@
 
 #: import Window kivy.core.window.Window
-
+#: import Get_text localizator.Get_text 
 
 <PageTurnerSheet>:
     height: Window.height * 0.25
@@ -10,6 +10,9 @@
 
     on_current:
         root.seek(root.current)
+    
+    on_parent:
+        page.text = Get_text('info_page') + ': '
 
     GridLayout:
         size_hint_x: 1
@@ -18,8 +21,10 @@
         padding: (20, 20, 20, 10)
 
         Label: 
+            id: page
             color: (0,0,0,1)
-            text: "Страница: "
+            # text will be setted in on_parent
+            text: ''
             text_size: None , None
             size: self.texture_size
             size_hint_x: None

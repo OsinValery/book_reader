@@ -4,7 +4,11 @@
 #: import Window kivy.core.window.Window
 #: import ObjectProperty kivy.properties.ObjectProperty
 #: import ScrollEffect kivy.effects.scroll.ScrollEffect
-#:import get_color_from_hex kivy.utils.get_color_from_hex
+#: import get_color_from_hex kivy.utils.get_color_from_hex
+#: import Get_text localizator.Get_text
+#: import MDDropdownMenu kivymd.uix.menu.MDDropdownMenu
+
+#: import app_values app_values
 
 #: set icon_size 40
 
@@ -99,7 +103,7 @@
 
                 MyAppBar:
                     id: pagePresenterAppBar
-                    title: 'reader'
+                    title: Get_text('info_reader')
                     right_action_items: [['dots-vertical', lambda x: self.open_menu(x)]]
                     left_action_items: [['menu', lambda x: app_menu.set_state('open')]]
                     page_turner: page_presenter
@@ -118,7 +122,7 @@
                 size: self.parent.size
 
                 MDTopAppBar:
-                    title: "Library"
+                    title: Get_text('info_library')
                     id: library_app_bar
                     left_action_items: [['arrow-left', lambda x: root.close_library()]]
                 
@@ -143,6 +147,61 @@
                     print('add book')
                     library_list.prepare_choosing_file()
 
+        # screen with settings
+        Screen:
+            id: settings
+            name: "settings"
+            size: page_screen.size
+
+            BoxLayout:
+                orientation: "vertical"
+                size: self.parent.size
+
+                MDTopAppBar:
+                    title: Get_text('info_settings')
+                    id: settings_app_bar
+                    left_action_items: [['arrow-left', lambda x: root.close_settings()]]
+                
+                ScrollView:
+                    do_scroll_x: False
+                    do_scroll_y: False
+                    size: [Window.width, Window.height - settings_app_bar.height]
+
+                    MDList:
+                        padding: [50, 50]
+                        spacing: 10
+
+                        Widget:
+                            size_hint_y: None
+                            height: 15
+
+                        BoxLayout:
+                            orientation: "horizontal"
+
+                            MDLabel:
+                                id: language_label
+                                text: Get_text('info_language')
+                                
+                            MDDropDownItem:
+                                id: language_drop_down_image
+                                text: Get_text('lang_'+app_values.app_info.interface_language)
+                                size_hint_x: None
+                                
+                                on_press:
+                                    def work(lang): menu.dismiss();language_drop_down_image.text = Get_text('lang_'+lang);app_values.app_info.set_language(lang);reader.change_language();
+                                    def produse(lang): return {'text': Get_text('lang_'+lang), 'on_release': lambda x=None: work(lang),"viewclass": "MDFlatButton", "height": 76}
+                                    
+                                    menu_items = [ produse(lang) \
+                                    for lang in app_values.app_info.supported_interface_languages
+                                    ]
+
+                                    menu = MDDropdownMenu( \
+                                    caller = language_drop_down_image, \
+                                    items=menu_items, \
+                                    width_mult=3, \
+                                    )
+                                    menu.open()
+
     # left drawer
     MDNavigationDrawer:
         id: translater
@@ -156,7 +215,8 @@
             do_scroll_y: False    
 
             MDNavigationDrawerHeader:
-                title: "Translater"
+                id: translater_header
+                title: Get_text('info_translater')
                 title_color: get_color_from_hex("#4a4939")
                 text: ""
                 # spacing: "4dp"
@@ -200,10 +260,12 @@
             do_scroll_y: False
 
             MDNavigationDrawerHeader:
-                title: "Reader"
+                id: menu_header
+                title: Get_text('info_reader')
             
             MDNavigationDrawerItem:
-                text: "Выбрать книгу"
+                id: menu_select_book
+                text: Get_text('info_select_book')
 
                 on_press:
                     app_menu.set_state('close')
@@ -211,10 +273,12 @@
                     page_screen.current = 'library'
         
             MDNavigationDrawerItem:
-                text: "Settings"
+                id: menu_settings
+                text: Get_text('info_settings')
 
                 on_press:
-                    app.open_settings()
+                    app_menu.set_state('close')
+                    page_screen.current = 'settings'
 
 
 

@@ -9,6 +9,7 @@ from kivy.core.clipboard import Clipboard
 from kivymd.uix.snackbar import Snackbar
 
 import app_values
+from localizator import Get_text
 
 class Page(Widget):
     page = NumericProperty(5)
@@ -74,9 +75,9 @@ class Page(Widget):
                 
             if not self.copping:
                 bubble = Bubble(pos=touch.pos, background_color=(0,0,0,1), orientation='vertical')
-                bubble.add_widget(BubbleButton(text='Копировать', on_press=copy))
-                bubble.add_widget(BubbleButton(text='Отмена', on_press=cancel))
-                bubble.add_widget(BubbleButton(text='Перевод', on_press=translate))
+                bubble.add_widget(BubbleButton(text=Get_text('info_copy'), on_press=copy))
+                bubble.add_widget(BubbleButton(text=Get_text('info_cancel'), on_press=cancel))
+                bubble.add_widget(BubbleButton(text=Get_text('info_translate'), on_press=translate))
                 bubble.pos[0] = max(bubble.pos[0] - bubble.width/2, 5)
                 self.bubble = bubble
                 self.add_widget(bubble)
@@ -86,7 +87,7 @@ class Page(Widget):
     def copy_text(self, text):
         Clipboard.copy(text)
         snack = Snackbar(
-            text = 'Текст скопирован буфер обмена',
+            text = Get_text('info_text_copied'),
             snackbar_x="10dp",
             snackbar_y="10dp",
             snackbar_animation_dir='Right',
@@ -111,7 +112,7 @@ class Page(Widget):
                 code : str = comments[note] 
                 code = code.replace(']','').replace('[','').replace('&bl;', '').replace('&br;','')
                 ind = note[1:]
-                note_text = book.notes[ind] if ind in book.notes else 'This note don\'t found!'
+                note_text = book.notes[ind] if ind in book.notes else Get_text('info_unknown_note')
                 content.append(Factory.Note(text= f'{code} - {note_text}'))
         content.append(Factory.Space())
         return content
