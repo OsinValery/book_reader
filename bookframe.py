@@ -111,15 +111,22 @@ class BookFrame():
             n = 8
             # 2 different unicode simbols
             if text[0] in ['-', '—']:
-                n = 3    
+                n = 3
             text = self.escape_text(text)
             text, refs = self.referize_text(text)
-            return page_widgets.Epigraph_text(text=' ' * n +text,referization=refs)
+            return page_widgets.SelectablePair(
+                pad = 0.5,
+                child = page_widgets.Epigraph_text(text=' ' * n +text,referization=refs)
+            )
+
         elif self.type == 'epigraph_author':
             text = self.content.strip()
             text = self.escape_text(text)
             text, refs = self.referize_text(text)
-            return page_widgets.EpigraphAuthor(text=text, referization=refs)
+            return page_widgets.SelectablePair(
+                pad = 0.6,
+                child = page_widgets.EpigraphAuthor(text=text, referization=refs)
+            )
         elif self.type == 'stanza_empty':
             return page_widgets.Stanza_empty()
         elif self.type == 'text-author':

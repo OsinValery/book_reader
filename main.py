@@ -50,7 +50,6 @@ class ReaderApp(MDApp):
             app_values.app_info.library.append(file)
         
         self.read_book()
-        print(Window.size)
         return PageScreen(size = Window.size)
 
     def read_book(self):

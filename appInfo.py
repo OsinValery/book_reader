@@ -23,7 +23,6 @@ class AppInfo():
             with open(filename) as file:
                 data = file.readlines()
                 self.interface_language = data[0]
-                print(data)
         except Exception as e:
             print(e)
             return False

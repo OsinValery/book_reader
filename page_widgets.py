@@ -1,10 +1,11 @@
 
 from kivy.uix.label import Label
 from kivy.uix.widget import Widget
-from kivy.uix.image import Image
-from kivy.properties import ListProperty, BooleanProperty, StringProperty
+from kivy.uix.boxlayout import BoxLayout
+from kivy.properties import ListProperty, BooleanProperty, StringProperty, ObjectProperty, NumericProperty
 from kivy.graphics import Color, Rectangle
 from kivy.factory import Factory
+from kivy.core.window import Window
 
 #
 # study kvfiles/page_widgets.kv
@@ -23,6 +24,9 @@ class PageContent:
     def get_selected_text(self):
         return ''
 
+
+class Space(Widget, PageContent):
+    pass
 
 # base class for all active elements of page
 class SelectableLabel(Label):
@@ -66,12 +70,17 @@ class SelectableLabel(Label):
             else:
                 print('can\'t present content in SelectableLabel.on_refference')
             self.choosenWord = ''
+        self.first_pos = list(self.center)
         return super().on_touch_up(touch)
     
     def on_touch_down(self, touch):
         self.deselect()
         self.selection = True
-        self.first_pos = touch.pos
+        self.first_pos = list(touch.pos)
+        if self.parent:
+            if type(self.parent == SelectablePair):
+                if self == self.parent.children[0] and len(self.parent.children) > 1:
+                    self.first_pos[0] -= (self.parent.width * self.parent.pad + self.parent.spacing)
         return super().on_touch_down(touch)
 
     def on_touch_move(self, touch):
@@ -83,12 +92,22 @@ class SelectableLabel(Label):
                 self.first_pos = [self.pos[0], self.height + self.pos[1]]
             else:
                 self.first_pos = [self.pos[0] + self.width, self.pos[1]]        
+            if self.parent:
+                if type(self.parent == SelectablePair):
+                    if self == self.parent.children[0] and len(self.parent.children) > 1:
+                        self.first_pos[0] += (self.parent.width * self.parent.pad + self.parent.spacing)
         self.select(touch.pos)
         return super().on_touch_move(touch)
 
     def select(self, pos):
         shapes = []
         words = []
+        pos = [pos[0], pos[1]]
+        if self.parent:
+            if type(self.parent == SelectablePair):
+                if self == self.parent.children[0] and len(self.parent.children) > 1:
+                    pos[0] -= (self.parent.width * self.parent.pad + self.parent.spacing)
+
         direction = 'down'
         if pos[1] > self.first_pos[1] + 10:
             direction = 'up'
@@ -176,12 +195,25 @@ class SelectableLabel(Label):
         self.selection = False
         self.selection_figures = []
 
+class SelectablePair(BoxLayout):
+    child = ObjectProperty(Widget())
+    pad = NumericProperty(0.4)
+
+    def deselect(self):
+        for child in self.children:
+            child.deselect()
+    
+    def select(self):
+        pass
+
+    def get_selected_text(self):
+        text = ''
+        for child in self.children:
+            text += child.get_selected_text()
+        return text
 
 
 class Paragraph(SelectableLabel):
-    pass
-
-class Space(Widget, PageContent):
     pass
 
 class Unknown(SelectableLabel):
@@ -190,8 +222,14 @@ class Unknown(SelectableLabel):
 class Mistake(SelectableLabel):
     pass
 
-class ImageData(Image, PageContent):
-    pass
+class ImageData(Widget, PageContent):
+    texture = ObjectProperty()
+
+    def get_size(self, icon_size):
+        width = 0.7 * (Window.width - icon_size * 2)
+        scale = width / self.texture.size[0]
+        return [width, scale * self.texture.size[1]]
+    
 
 class Title(SelectableLabel):
     pass
