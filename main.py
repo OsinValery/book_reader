@@ -5,8 +5,12 @@ import os
 import shutil
 os.environ['KIVY_NO_FILELOG'] = '1'
 # os.environ["KIVY_NO_CONSOLELOG"] = "1"
+from kivy.utils import platform
 from kivy.config import Config
 Config.set('kivy', 'log_enable', '0')
+if platform not in ['android', 'ios']:
+    Config.set('graphics', 'width', '400')
+    Config.set('graphics', 'height', '700')
 # for pyinstaller
 from kivy.resources import resource_add_path
 from kivy.logger import Logger, LOG_LEVELS
@@ -15,6 +19,7 @@ from kivy.logger import Logger, LOG_LEVELS
 
 from kivymd.app import MDApp
 from kivy.core.window import Window
+
 
 from reader import PageScreen
 import app_values
@@ -45,6 +50,7 @@ class ReaderApp(MDApp):
             app_values.app_info.library.append(file)
         
         self.read_book()
+        print(Window.size)
         return PageScreen(size = Window.size)
 
     def read_book(self):

@@ -205,5 +205,22 @@ class Note(SelectableLabel):
 class SubTitle(SelectableLabel):
     pass
 
+class Poem_title(SelectableLabel):
+    pass
+
+class Poem_line(SelectableLabel):
+    pass
+
+class Stanza_empty(Widget, PageContent):
+    pass
+
+class Author(SelectableLabel):
+    pass
+
+class Epigraph_text(SelectableLabel):
+    pass
+
+class EpigraphAuthor(SelectableLabel):
+    pass
 
 

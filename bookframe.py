@@ -11,6 +11,11 @@ class BookFrame():
         self.attributs = args
         self.have_note = False
         self.notes = {}
+    
+    
+    def goTo(self, new_type):
+        """changes data of this frame when it is inserted into another tag"""
+        self.type = new_type
 
     def escape_text(self, text: str)-> str:
         # service symbols
@@ -69,17 +74,23 @@ class BookFrame():
     
     def make_content(self):
         "returns widget view to present it to user"
-        if self.type == 'empty':
-            return page_widgets.Space()
-        elif self.type == 'p':
+        if self.type == 'p':
             text = self.content.strip()
             n = 8
+            # 2 different unicode simbols
             if text[0] in ['-', '—']:
                 n = 3        
             text = self.escape_text(text)
             text, refs = self.referize_text(text)
             text = ' ' * n + text
             return page_widgets.Paragraph(text= text, referization=refs)
+        elif self.type == 'v':
+            text = self.content.strip()
+            text = self.escape_text(text)
+            text, refs = self.referize_text(text)
+            return page_widgets.Poem_line(text = text, referization=refs)
+        elif self.type == 'empty':
+            return page_widgets.Space()        
         elif self.type == 'title':
             text = self.content.strip()
             text = self.escape_text(text)
@@ -90,6 +101,32 @@ class BookFrame():
             text = self.escape_text(text)
             text, refs = self.referize_text(text)
             return page_widgets.SubTitle(text=text,referization=refs)
+        elif self.type == 'poem_title':
+            text = self.content.strip()
+            text = self.escape_text(text)
+            text, refs = self.referize_text(text)
+            return page_widgets.Poem_title(text=text,referization=refs)
+        elif self.type == 'epigraph_p':
+            text = self.content.strip()
+            n = 8
+            # 2 different unicode simbols
+            if text[0] in ['-', '—']:
+                n = 3    
+            text = self.escape_text(text)
+            text, refs = self.referize_text(text)
+            return page_widgets.Epigraph_text(text=' ' * n +text,referization=refs)
+        elif self.type == 'epigraph_author':
+            text = self.content.strip()
+            text = self.escape_text(text)
+            text, refs = self.referize_text(text)
+            return page_widgets.EpigraphAuthor(text=text, referization=refs)
+        elif self.type == 'stanza_empty':
+            return page_widgets.Stanza_empty()
+        elif self.type == 'text-author':
+            text = self.content.strip()
+            text = self.escape_text(text)
+            text, refs = self.referize_text(text)
+            return page_widgets.Author(text=text, referization=refs)
         elif self.type == 'image':
             if 'broken' in self.attributs:
                 return page_widgets.Mistake(text=f'picture don\'t found: {self.content}')            

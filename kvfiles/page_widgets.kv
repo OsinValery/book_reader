@@ -6,6 +6,10 @@
     text: ''
     markup: True
     color: (0,0,0,1)
+    text_size: Window.width - 2 * icon_size , None
+    size: self.texture_size
+    size_hint_y: None
+
     selection_color: (66/255, 170/255, 1, 0.2)
 
     on_ref_press: 
@@ -19,27 +23,17 @@
     halign: 'left'
     valign: 'center'
 
-    text_size: Window.width - 2 * icon_size , None
-    size: self.texture_size
-    size_hint_y: None
-
 <Space>:
     size_hint_y: None
     size: Window.width ,0.05 * Window.height
 
 <Unknown>:
     text: ''
-    text_size: Window.width - 2 * icon_size , None
-    size: self.texture_size
-    color: (0,0,0,1)
-    size_hint_y: None
+    color: (0,0,1,1)
 
 <Mistake>:
     text: ''
-    text_size: Window.width - 2 * icon_size , None
-    size: self.texture_size
     color: (1,0,0,1)
-    size_hint_y: None    
 
 <ImageData>:
     size_hint_y: None
@@ -49,14 +43,9 @@
     text: ''
     font_size: 30
     markup: True
-    color: (0,0,0,1)
     halign: 'center'
     valign: 'center'
     bold: True
-
-    text_size: Window.width - 2 * icon_size , None
-    size: self.texture_size
-    size_hint_y: None
 
 <NotesDelimeter>:
     size_hint_y: None
@@ -72,22 +61,46 @@
 <Note>:
     text: ''
     color: (10/255, 183 / 255 , 122 / 255 , 1)    
-    size_hint_y: None
     halign: 'left'
     valign: 'center'
 
-    text_size: Window.width - 2 * icon_size , None
-    size: self.texture_size
-
 <SubTitle>:
     text: ''
-    color: (0,0,0,1)
     halign: 'center'
     valign: 'center'
 
-    text_size: Window.width - 2 * icon_size , None
-    size: self.texture_size[0], self.texture_size[1] + 20
+<Poem_title>:
+    text: ''
+    bold: True
+    halign: 'center'
+    valign: 'center'
+    size: self.texture_size
+    text_size: (Window.width - 2 * icon_size) * 0.4, None
+    pos_hint_x: 0.6
+    
+<Poem_line>:
+    text: ''
+    padding_x: 0.2 * Window.size[0]
+
+
+<Stanza_empty>:
     size_hint_y: None
+    size: Window.width ,0.02 * Window.height
+
+<Author>:
+    padding_x: 0.1 * Window.width
+    italic: True
+
+<Epigraph_text>:
+    text: ''
+    text_size: (Window.width - 2 * icon_size) * 0.4, None
+    padding_x: 0.6
+
+
+<EpigraphAuthor>:
+    text: ''
+    halign: "right"
+
 
 
 
