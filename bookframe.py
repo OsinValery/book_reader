@@ -118,6 +118,58 @@ class BookFrame():
                 pad = 0.5,
                 child = page_widgets.Epigraph_text(text=' ' * n +text,referization=refs)
             )
+        elif self.type == 'cite_p':
+            text = self.content.strip()
+            n = 8
+            # 2 different unicode simbols
+            if text[0] in ['-', '—']:
+                n = 3        
+            text = self.escape_text(text)
+            text, refs = self.referize_text(text)
+            text = ' ' * n + text
+            return page_widgets.Cite_P(text=text, referization=refs)
+        
+        elif self.type == 'cite_v':
+            text = self.content.strip()
+            text = self.escape_text(text)
+            text, refs = self.referize_text(text)
+            return page_widgets.Cite_V(text=text, referization=refs)
+        
+        elif self.type == 'cite_title':
+            text = self.content.strip()
+            text = self.escape_text(text)
+            text, refs = self.referize_text(text)
+            return page_widgets.Cite_Title(text=text, referization=refs)
+        
+        elif self.type == 'cite_poem_title':
+            text = self.content.strip()
+            text = self.escape_text(text)
+            text, refs = self.referize_text(text)
+            return page_widgets.Cite_Poem_Title(text=text, referization=refs)       
+
+        elif self.type == 'cite_epigraph_p':
+            text = self.content.strip()
+            text = self.escape_text(text)
+            text, refs = self.referize_text(text)
+            return page_widgets.Cite_Epigraph_P(text=text, referization=refs)
+
+        elif self.type == 'cite_epigraph_author':
+            text = self.content.strip()
+            text = self.escape_text(text)
+            text, refs = self.referize_text(text)
+            return page_widgets.Cite_Epigraph_Author(text=text, referization=refs)
+
+        elif self.type == 'cite_epigraph_poem_line':
+            text = self.content.strip()
+            text = self.escape_text(text)
+            text, refs = self.referize_text(text)
+            return page_widgets.Cite_Epigraph_V(text=text, referization=refs)
+
+        elif self.type == 'cite_epigraph_poem_title':
+            text = self.content.strip()
+            text = self.escape_text(text)
+            text, refs = self.referize_text(text)
+            return page_widgets.Cite_epigraph_poem_title(text=text, referization=refs)
 
         elif self.type == 'epigraph_author':
             text = self.content.strip()
@@ -127,13 +179,40 @@ class BookFrame():
                 pad = 0.6,
                 child = page_widgets.EpigraphAuthor(text=text, referization=refs)
             )
+
+        elif self.type == 'epigraph_poem_line':
+            text = self.content.strip()
+            text = self.escape_text(text)
+            text, refs = self.referize_text(text)
+            return page_widgets.SelectablePair(
+                pad = 0.5,
+                child = page_widgets.EpifraphPoemLine(text=text,referization=refs)
+            )
+
         elif self.type == 'stanza_empty':
             return page_widgets.Stanza_empty()
+
         elif self.type == 'text-author':
             text = self.content.strip()
             text = self.escape_text(text)
             text, refs = self.referize_text(text)
             return page_widgets.Author(text=text, referization=refs)
+        
+        elif self.type == 'epigraph_poem_title':
+            text = self.content.strip()
+            text = self.escape_text(text)
+            text, refs = self.referize_text(text)
+            return page_widgets.SelectablePair(
+                pad = 0.5,
+                child = page_widgets.Poem_title(text=text,referization=refs)
+            )
+        
+        elif self.type == 'cite_poem_title':
+            text = self.content.strip()
+            text = self.escape_text(text)
+            text, refs = self.referize_text(text)
+            return page_widgets.Cite_Poem_Title(text=text,referization=refs)
+
         elif self.type == 'image':
             if 'broken' in self.attributs:
                 return page_widgets.Mistake(text=f'picture don\'t found: {self.content}')            

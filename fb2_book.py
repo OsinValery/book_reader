@@ -64,9 +64,73 @@ class FB2_tag:
                     result.append(temp_tag)
                 elif child.tag == 'text-author':
                     result.append(bookframe.BookFrame(child.text, 'epigraph_author', {}))
+                elif child.tag == 'poem':
+                    elements: List[bookframe.BookFrame] = child.work()
+                    for el in elements:
+                        if el.type == 'v':
+                            el.goTo('epigraph_poem_line')
+                            result.append(el)
+                        elif el.type == 'empty':
+                            result.append(el)
+                        elif el.type == 'date':
+                            print('work date for epigraph -> poem -> date')
+                        
+                        elif el.type == 'text-author':
+                            result.append(el)
+                        
+                        elif 'epigraph' in el.type:
+                            result.append(el)
+
+                        elif el.type == 'poem_title':
+                            el.goTo('epigraph_poem_title')
+                            result.append(el)
+
+                        elif el.type == 'stanza_empty':
+                            result.append(el) 
+                elif child.tag == 'cite':
+                    content = child.work()
+                    for el in content:
+                        if 'cite' in el.type:
+                            result.append(el)
+                        
+                        elif 'date' in el.type:
+                            result.append(el)
+
+                        else:
+                            el.goTo('cite_' + el.type)
+                            result.append(el)
                 else:
+                    print('unknown content for')
                     print('epigraph:')
                     print(child.tag)
+            return result
+
+        elif self.tag == 'cite':
+            for child in self.content:
+                if child.tag == 'p':
+                    el = child.work()[0]
+                    el.goTo('cite_p')
+                    result.append(el)
+                elif child.tag == 'text-author':
+                    el = child.work()[0]
+                    el.goTo('cite_author')
+                    result.append(el)
+                elif child.tag == 'empty-line/':
+                    result.append(bookframe.BookFrame(None, 'empty', {}))
+                elif child.tag == 'subtitle':
+                    result += child.work()
+                elif child.tag == 'poem':
+                    content = child.work()
+                    for el in content:
+                        if 'cite' in el.type:
+                            result.append(el)
+                        elif 'empty' in el.type:
+                            result.append(el)
+                        elif 'date' in el.type:
+                            result.append(el)
+                        else:
+                            el.goTo('cite_' + el.type)
+                            result.append(el)
             return result
 
         for child in self.content:

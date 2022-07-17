@@ -14,7 +14,6 @@
     on_ref_press: 
         root.on_refference(*args)
 
-
 <Paragraph>:
     text: ''
     markup: True
@@ -89,7 +88,6 @@
     text: ''
     padding_x: 0.1 * Window.size[0]
 
-
 <Stanza_empty>:
     size_hint_y: None
     size: Window.width ,0.02 * Window.height
@@ -100,12 +98,18 @@
 
 <Epigraph_text>:
     text: ''
-    halign: 'left'
+    halign: 'right'
     size_hint_x: None
 
 <EpigraphAuthor>:
     text: ''
     halign: "right"
+    size_hint_x: None
+    size_hint_x: None
+
+<EpifraphPoemLine>:
+    text: ''
+    halign: "left"
     size_hint_x: None
     size_hint_x: None
 
@@ -126,6 +130,31 @@
         size_hint_y: None
         height: root.child.height
         
+<Cite_P>:
+    text: ''
+    italic: True
 
+<Cite_V>:
+    text: ''
+    italic: True
+
+<Cite_title>:
+    text: ""
+    italic: True
+
+<Cite_Poem_Title>:
+    italic: True
+
+<Cite_Epigraph_p>:
+    italic: True
+
+<Cite_Epigraph_V>:
+    italic: True
+
+<Cite_Epigraph_Author>
+    italic: True
+
+<Cite_epigraph_poem_title>:
+    italic: True
 
 

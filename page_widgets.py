@@ -261,4 +261,32 @@ class Epigraph_text(SelectableLabel):
 class EpigraphAuthor(SelectableLabel):
     pass
 
+class EpifraphPoemLine(SelectableLabel):
+    pass
+
+class Cite_P(Paragraph):
+    pass
+
+class Cite_V(Poem_line):
+    pass
+
+class Cite_Title(Title):
+    pass
+
+class Cite_Poem_Title(Poem_title):
+    pass
+
+class Cite_Epigraph_P(Epigraph_text):
+    pass
+
+class Cite_Epigraph_V(EpifraphPoemLine):
+    pass
+
+class Cite_Epigraph_Author(EpigraphAuthor):
+    pass
+
+class Cite_epigraph_poem_title(Title):
+    pass
+
+
 

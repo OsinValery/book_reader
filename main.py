@@ -32,7 +32,7 @@ class ReaderApp(MDApp):
             app_values.app_info.interface_language = get_lang()
             app_values.app_info.write_settings()
         self.load_all_kv_files(os.path.join(self.directory, 'kvfiles'))
-        
+
         asset_dir = os.path.join(self.directory, 'assets')
         booksdir = self.books_dir
         app_values.app_info.book_dir = booksdir
@@ -48,7 +48,7 @@ class ReaderApp(MDApp):
                     )
         for file in os.listdir(booksdir):
             app_values.app_info.library.append(file)
-        
+
         self.read_book()
         return PageScreen(size = Window.size)
 
@@ -56,7 +56,7 @@ class ReaderApp(MDApp):
         filename = 'about.fb2'
         file = os.path.join(self.user_data_dir,'books', filename)
         app_values.app_info.book.read(file,app_values.app_info.max_elements_per_page)
-    
+
     @property
     def books_dir(self):
         return os.path.join(self.user_data_dir, 'books')
