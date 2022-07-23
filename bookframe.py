@@ -105,8 +105,7 @@ class BookFrame():
                 note=is_note,
             )
         elif self.type == 'v':
-            text = self.content.strip()
-            text = self.escape_text(text)
+            text = self.escape_text(self.content)
             text, refs = self.referize_text(text)
             return page_widgets.Poem_line(
                 text = text, 
@@ -120,8 +119,7 @@ class BookFrame():
             return page_widgets.Space()
         
         elif self.type == 'title':
-            text = self.content.strip()
-            text = self.escape_text(text)
+            text = self.escape_text(self.content)
             text, refs = self.referize_text(text)
             widget = page_widgets.Title(
                 text=text,
@@ -155,8 +153,7 @@ class BookFrame():
             return page_widgets.Annotation_empty()
 
         elif self.type == 'text-author':
-            text = self.content.strip()
-            text = self.escape_text(text)
+            text = self.escape_text(self.content)
             text, refs = self.referize_text(text)
             widget = page_widgets.Author(
                 text=text, 
@@ -168,8 +165,7 @@ class BookFrame():
             )
 
         elif self.type == 'text':
-            text = self.content.strip()
-            text = self.escape_text(text)
+            text = self.escape_text(self.content.strip())
             text, refs = self.referize_text(text)
             widget = page_widgets.Text(
                 text=text, 

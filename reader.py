@@ -21,6 +21,7 @@ from kivymd.uix.dialog import MDDialog
 from kivymd.uix.button import MDRaisedButton, MDFlatButton
 from kivymd.uix.list import MDList, OneLineAvatarIconListItem, IconLeftWidget
 from kivymd.uix.filemanager.filemanager import MDFileManager
+from kivymd.uix.slider.slider import MDSlider
 
 from libretranslatepy import LibreTranslateAPI
 from localizator import Get_text
@@ -106,7 +107,6 @@ class PagePresenter(Widget):
     def change_book(self):
         self.seek(1)
         self.ids.page_forward.disabled = self.book.length == 1
-
 
 
 class MyAppBar(MDTopAppBar):
