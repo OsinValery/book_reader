@@ -59,14 +59,9 @@ class FB2_tag:
                     result.append(temp_tag)
                 elif child.tag == 'text-author':
                     result.append(bookframe.BookFrame(child.text, 'text-author', {'epigraph': True}))
-                elif child.tag == 'poem':
+                elif child.tag in ('poem','cite'):
                     elements = child.work()
                     for el in elements:
-                        el.add_attribute('epigraph', True)
-                        result.append(el)
-                elif child.tag == 'cite':
-                    content = child.work()
-                    for el in content:
                         el.add_attribute('epigraph', True)
                         result.append(el)
                 else:
@@ -185,7 +180,7 @@ def fb2_parser(text:str, pos=0):
                     closed = True
             else:
                 closed = True
-                pos += 7 - 1
+                pos += 6
     
     elif tag == 'epigraph':
         pos = close + 1
@@ -201,7 +196,7 @@ def fb2_parser(text:str, pos=0):
                     closed = True
             else:
                 closed = True
-                pos += 11 - 1
+                pos += 10
     
     elif tag == 'cite':
         pos = close + 1
@@ -217,7 +212,7 @@ def fb2_parser(text:str, pos=0):
                     closed = True
             else:
                 closed = True
-                pos += 7 - 1
+                pos += 6
 
     elif tag[:7] == 'section':
         pos = close + 1
@@ -251,7 +246,7 @@ def fb2_parser(text:str, pos=0):
                     closed = True
             else:
                 closed = True
-                pos = pos + 10 - 1
+                pos = pos + 9
 
     elif tag[:4] == 'body':
         pos = close + 1
@@ -282,7 +277,7 @@ def fb2_parser(text:str, pos=0):
                     closed = True
             else:
                 closed = True
-                pos += 13 - 1
+                pos += 12
 
     else:
         print('---uncnown---')
