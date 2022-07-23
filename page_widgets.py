@@ -297,7 +297,7 @@ class SubTitle(SelectableLabel):
             if self.cite:
                 self.font_size = 30
 
-class Stanza_empty(Widget, PageContent):
+class Stanza_empty(Space):
     pass
 
 class Author(SelectableLabel):
@@ -344,4 +344,11 @@ class Poem_line(SelectableLabel):
                 self.font_name = self.get_font('NotoSans-MediumItalic.ttf')
             else:
                 self.font_name = self.get_font('NotoSans-Medium.ttf')
+
+class Annotation_empty(Space):
+    pass
+
+class Title_Empty(Space):
+    pass
+
 

@@ -16,12 +16,14 @@ class FB2_tag:
         result = []
 
         if self.tag == 'title':
+            result.append(bookframe.BookFrame(None,'title_empty', {}))
             for child in self.content:
                 if child.tag == 'empty-line/':
                     result.append(bookframe.BookFrame(None, 'empty', {}))
                 else:
                     # p
                     result.append(bookframe.BookFrame(child.text, 'title', {}))
+            result.append(bookframe.BookFrame(None,'title_empty', {}))
             return result
 
         elif self.tag == 'poem':
@@ -84,7 +86,10 @@ class FB2_tag:
         for child in self.content:
             result += child.work()
 
-        if self.tag in ['body', 'section', 'stanza']:
+        if self.tag == 'annotation':
+            result.append(bookframe.BookFrame(None,'annotation_empty', {}))
+
+        if self.tag in ['body', 'section', 'stanza', 'annotation']:
             return result
 
         element = None
@@ -262,6 +267,22 @@ def fb2_parser(text:str, pos=0):
                     closed = True
             else:
                 return root, pos + 7
+
+    elif tag[:10] == 'annotation':
+        pos = close + 1
+        closed = False
+        while not closed:
+            while text[pos] != '<':
+                pos += 1
+            if text[pos:pos+11] != '</annotation>':
+                sub_tag, new_pos = fb2_parser(text, pos)
+                root.append(sub_tag)
+                pos = new_pos
+                if pos >= len(text):
+                    closed = True
+            else:
+                closed = True
+                pos += 13 - 1
 
     else:
         print('---uncnown---')

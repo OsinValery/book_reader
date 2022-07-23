@@ -116,6 +116,7 @@ class BookFrame():
             )
         elif self.type == 'empty':
             return page_widgets.Space()
+        
         elif self.type == 'title':
             text = self.content.strip()
             text = self.escape_text(text)
@@ -128,6 +129,10 @@ class BookFrame():
                 poem=is_poem,
                 note=is_note,
             )
+        
+        elif self.type == 'title_empty':
+            return page_widgets.Title_Empty()
+
         elif self.type == 'subtitle':
             text = self.content.strip()
             text = self.escape_text(text)
@@ -143,6 +148,9 @@ class BookFrame():
 
         elif self.type == 'stanza_empty':
             return page_widgets.Stanza_empty()
+        
+        elif self.type == 'annotation_empty':
+            return page_widgets.Annotation_empty()
 
         elif self.type == 'text-author':
             text = self.content.strip()
