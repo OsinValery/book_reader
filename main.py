@@ -11,9 +11,10 @@ Config.set('kivy', 'log_enable', '0')
 if platform not in ['android', 'ios']:
     Config.set('graphics', 'width', '400')
     Config.set('graphics', 'height', '700')
+from kivy.lang.builder import Builder
 # for pyinstaller
 from kivy.resources import resource_add_path
-from kivy.logger import Logger, LOG_LEVELS
+# from kivy.logger import Logger, LOG_LEVELS
 # Logger.setLevel(LOG_LEVELS["error"])
 
 
@@ -26,6 +27,23 @@ import app_values
 from localizator import get_lang
 
 class ReaderApp(MDApp):
+    def load_all_kv_files(self, path_to_directory: str) -> None:
+        for path_to_dir, _ , files in os.walk(path_to_directory):
+            if (
+                "venv" in path_to_dir
+                or ".buildozer" in path_to_dir
+                or os.path.join("kivymd") in path_to_dir
+            ):
+                continue
+            for name_file in files:
+                if (
+                    os.path.splitext(name_file)[1] == ".kv"
+                    and name_file != "style.kv"  # if use PyInstaller
+                    and "__MACOS" not in path_to_dir  # if use Mac OS
+                ):
+                    path_to_kv_file = os.path.join(path_to_dir, name_file)
+                    Builder.load_file(path_to_kv_file)
+
     def build(self):
         Window.clearcolor = (1,1,1,1)
         if not app_values.app_info.read_settings():
@@ -50,6 +68,7 @@ class ReaderApp(MDApp):
             app_values.app_info.library.append(file)
 
         self.read_book()
+
         return PageScreen(size = Window.size)
 
     def read_book(self):

@@ -1,4 +1,6 @@
+import os
 
+from kivy.app import App
 from kivy.uix.label import Label
 from kivy.uix.widget import Widget
 from kivy.uix.boxlayout import BoxLayout
@@ -6,6 +8,7 @@ from kivy.properties import ListProperty, BooleanProperty, StringProperty, Objec
 from kivy.graphics import Color, Rectangle
 from kivy.factory import Factory
 from kivy.core.window import Window
+
 
 #
 # study kvfiles/page_widgets.kv
@@ -38,6 +41,12 @@ class SelectableLabel(Label):
     referization = ListProperty([])
     choosenWord = StringProperty('')
 
+    # for graphics
+    cite = BooleanProperty(False)
+    poem = BooleanProperty(False)
+    note = BooleanProperty(False)
+    epigraph = BooleanProperty(False)
+
     @property
     def root_screen(self):
         """returns screen named 'reader' or None"""
@@ -60,6 +69,10 @@ class SelectableLabel(Label):
 
     def on_refference(self, inst, data=...):
         self.choosenWord = data
+
+    def get_font(self, name):
+        folder = App.get_running_app().directory
+        return os.path.join(folder, 'assets', 'fonts', name)
 
     def on_touch_up(self, touch):
         if self.choosenWord != '':
@@ -195,6 +208,7 @@ class SelectableLabel(Label):
         self.selection = False
         self.selection_figures = []
 
+
 class SelectablePair(BoxLayout):
     child = ObjectProperty(Widget())
     pad = NumericProperty(0.4)
@@ -214,7 +228,23 @@ class SelectablePair(BoxLayout):
 
 
 class Paragraph(SelectableLabel):
-    pass
+
+    def resolve_state(self):
+        if self.cite: 
+            self.font_size = 30
+        self.halign = 'left'
+
+        if not self.epigraph:
+            if self.cite:
+                self.font_name = self.get_font('NotoSans-ExtraLightItalic.ttf')
+        else:
+            self.halign = 'right'
+            self.size_hint_x = None
+            if self.cite:
+                self.font_name = self.get_font('NotoSans-ThinItalic.ttf')
+            else:
+                self.font_name = self.get_font('NotoSans-Thin.ttf')
+
 
 class Unknown(SelectableLabel):
     pass
@@ -229,10 +259,23 @@ class ImageData(Widget, PageContent):
         width = 0.7 * (Window.width - icon_size * 2)
         scale = width / self.texture.size[0]
         return [width, scale * self.texture.size[1]]
-    
+
 
 class Title(SelectableLabel):
-    pass
+    
+    def resolve_state(self):
+        if self.cite: 
+            self.font_size = 38
+        
+        if self.cite and self.poem:
+            self.font_name = self.get_font('NotoSans-ExtraBoldItalic.ttf')
+        elif self.cite:
+            self.font_name = self.get_font('NotoSans-SemiBoldItalic.ttf')
+        elif self.poem:
+            self.font_name = self.get_font('NotoSans-ExtraBold.ttf')
+        else:
+            pass
+
 
 class NotesDelimeter(Widget,PageContent):
     pass
@@ -241,52 +284,64 @@ class Note(SelectableLabel):
     pass
 
 class SubTitle(SelectableLabel):
-    pass
-
-class Poem_title(SelectableLabel):
-    pass
-
-class Poem_line(SelectableLabel):
-    pass
+    def resolve_state(self):
+        if self.cite:
+            self.font_name = self.get_font('NotoSans-ThinItalic.ttf')
+        else:
+            self.font_name = self.get_font('NotoSans-Italic.ttf')
+  
+        if self.epigraph:
+            self.font_size = 28
+            self.size_hint_x = None
+        else:
+            if self.cite:
+                self.font_size = 30
 
 class Stanza_empty(Widget, PageContent):
     pass
 
 class Author(SelectableLabel):
-    pass
-
-class Epigraph_text(SelectableLabel):
-    pass
-
-class EpigraphAuthor(SelectableLabel):
-    pass
-
-class EpifraphPoemLine(SelectableLabel):
-    pass
-
-class Cite_P(Paragraph):
-    pass
-
-class Cite_V(Poem_line):
-    pass
-
-class Cite_Title(Title):
-    pass
-
-class Cite_Poem_Title(Poem_title):
-    pass
-
-class Cite_Epigraph_P(Epigraph_text):
-    pass
-
-class Cite_Epigraph_V(EpifraphPoemLine):
-    pass
-
-class Cite_Epigraph_Author(EpigraphAuthor):
-    pass
-
-class Cite_epigraph_poem_title(Title):
-    pass
+    def resolve_state(self):
+        if self.epigraph:
+            self.font_size = 28
+            self.size_hint_x = None
+            if self.cite:
+                self.font_name = self.get_font('NotoSans-ThinItalic.ttf')
+            else:
+                self.font_name = self.get_font('NotoSans-Light.ttf')
+        else:
+            self.font_name = self.get_font('NotoSans-Italic.ttf')
+            if self.cite:
+                self.font_size = 30
 
 
+# this class != Paragraph
+class Text(SelectableLabel):
+    def resolve_state(self):
+        if self.cite: 
+            self.font_size = 30
+
+        if not self.epigraph:
+            if self.cite:
+                self.font_name = self.get_font('NotoSans-ExtraLightItalic.ttf')
+            else:
+                self.font_name = self.get_font('NotoSans-Medium.ttf')
+        else:
+            self.size_hint_x = None
+            if self.cite:
+                self.font_name = self.get_font('NotoSans-ThinItalic.ttf')
+            else:
+                self.font_name = self.get_font('NotoSans-Thin.ttf')
+
+class Poem_line(SelectableLabel):
+    def resolve_state(self):
+        if self.epigraph:
+            self.size_hint_x = None
+            self.font_name = self.get_font('NotoSans-Thin.ttf')
+        else:
+            if self.cite:
+                self.italic = True
+                self.font_name = self.get_font('NotoSans-MediumItalic.ttf')
+            else:
+                self.font_name = self.get_font('NotoSans-Medium.ttf')
 

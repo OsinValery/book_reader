@@ -11,11 +11,9 @@ class BookFrame():
         self.attributs = args
         self.have_note = False
         self.notes = {}
-    
-    
-    def goTo(self, new_type):
-        """changes data of this frame when it is inserted into another tag"""
-        self.type = new_type
+
+    def add_attribute(self, name, value):
+        self.attributs[name] = value
 
     def escape_text(self, text: str)-> str:
         # service symbols
@@ -74,6 +72,19 @@ class BookFrame():
     
     def make_content(self):
         "returns widget view to present it to user"
+        is_cite = (('cite' in self.attributs) and self.attributs['cite'])
+        is_poem = (('poem' in self.attributs) and self.attributs['poem'])
+        is_note = (('note' in self.attributs) and self.attributs['note'])
+        is_epigraph = (('epigraph' in self.attributs) and self.attributs['epigraph'])
+
+        widget = page_widgets.Unknown(
+            text='Initial widget. It means, that it wasn\'t choosen. Tag = ' + self.type , 
+            cite=is_cite,
+            epigraph=is_epigraph,
+            poem=is_poem,
+            note=is_note,
+        )
+
         if self.type == 'p':
             text = self.content.strip()
             n = 8
@@ -83,110 +94,51 @@ class BookFrame():
             text = self.escape_text(text)
             text, refs = self.referize_text(text)
             text = ' ' * n + text
-            return page_widgets.Paragraph(text= text, referization=refs)
+            widget = page_widgets.Paragraph(
+                text= text, 
+                referization=refs, 
+                cite=is_cite,
+                epigraph=is_epigraph,
+                poem=is_poem,
+                note=is_note,
+            )
         elif self.type == 'v':
             text = self.content.strip()
             text = self.escape_text(text)
             text, refs = self.referize_text(text)
-            return page_widgets.Poem_line(text = text, referization=refs)
+            return page_widgets.Poem_line(
+                text = text, 
+                referization=refs,
+                cite=is_cite,
+                epigraph=is_epigraph,
+                poem=is_poem,
+                note=is_note,
+            )
         elif self.type == 'empty':
-            return page_widgets.Space()        
+            return page_widgets.Space()
         elif self.type == 'title':
             text = self.content.strip()
             text = self.escape_text(text)
             text, refs = self.referize_text(text)
-            return page_widgets.Title(text=text,referization=refs)
+            widget = page_widgets.Title(
+                text=text,
+                referization=refs, 
+                cite=is_cite,
+                epigraph=is_epigraph,
+                poem=is_poem,
+                note=is_note,
+            )
         elif self.type == 'subtitle':
             text = self.content.strip()
             text = self.escape_text(text)
             text, refs = self.referize_text(text)
-            return page_widgets.SubTitle(text=text,referization=refs)
-        elif self.type == 'poem_title':
-            text = self.content.strip()
-            text = self.escape_text(text)
-            text, refs = self.referize_text(text)
-            return page_widgets.Poem_title(text=text,referization=refs)
-        elif self.type == 'epigraph_p':
-            text = self.content.strip()
-            n = 8
-            # 2 different unicode simbols
-            if text[0] in ['-', '—']:
-                n = 3
-            text = self.escape_text(text)
-            text, refs = self.referize_text(text)
-            return page_widgets.SelectablePair(
-                pad = 0.5,
-                child = page_widgets.Epigraph_text(text=' ' * n +text,referization=refs)
-            )
-        elif self.type == 'cite_p':
-            text = self.content.strip()
-            n = 8
-            # 2 different unicode simbols
-            if text[0] in ['-', '—']:
-                n = 3        
-            text = self.escape_text(text)
-            text, refs = self.referize_text(text)
-            text = ' ' * n + text
-            return page_widgets.Cite_P(text=text, referization=refs)
-        
-        elif self.type == 'cite_v':
-            text = self.content.strip()
-            text = self.escape_text(text)
-            text, refs = self.referize_text(text)
-            return page_widgets.Cite_V(text=text, referization=refs)
-        
-        elif self.type == 'cite_title':
-            text = self.content.strip()
-            text = self.escape_text(text)
-            text, refs = self.referize_text(text)
-            return page_widgets.Cite_Title(text=text, referization=refs)
-        
-        elif self.type == 'cite_poem_title':
-            text = self.content.strip()
-            text = self.escape_text(text)
-            text, refs = self.referize_text(text)
-            return page_widgets.Cite_Poem_Title(text=text, referization=refs)       
-
-        elif self.type == 'cite_epigraph_p':
-            text = self.content.strip()
-            text = self.escape_text(text)
-            text, refs = self.referize_text(text)
-            return page_widgets.Cite_Epigraph_P(text=text, referization=refs)
-
-        elif self.type == 'cite_epigraph_author':
-            text = self.content.strip()
-            text = self.escape_text(text)
-            text, refs = self.referize_text(text)
-            return page_widgets.Cite_Epigraph_Author(text=text, referization=refs)
-
-        elif self.type == 'cite_epigraph_poem_line':
-            text = self.content.strip()
-            text = self.escape_text(text)
-            text, refs = self.referize_text(text)
-            return page_widgets.Cite_Epigraph_V(text=text, referization=refs)
-
-        elif self.type == 'cite_epigraph_poem_title':
-            text = self.content.strip()
-            text = self.escape_text(text)
-            text, refs = self.referize_text(text)
-            return page_widgets.Cite_epigraph_poem_title(text=text, referization=refs)
-
-        elif self.type == 'epigraph_author':
-            text = self.content.strip()
-            text = self.escape_text(text)
-            text, refs = self.referize_text(text)
-            return page_widgets.SelectablePair(
-                pad = 0.6,
-                child = page_widgets.EpigraphAuthor(text=text, referization=refs)
-            )
-
-        elif self.type == 'epigraph_poem_line':
-            text = self.content.strip()
-            text = self.escape_text(text)
-            text, refs = self.referize_text(text)
-            return page_widgets.SelectablePair(
-                pad = 0.5,
-                child = page_widgets.EpifraphPoemLine(text=text,referization=refs)
+            widget = page_widgets.SubTitle(
+                text=text,
+                referization=refs,
+                cite=is_cite,
+                epigraph=is_epigraph,
+                poem=is_poem,
+                note=is_note,
             )
 
         elif self.type == 'stanza_empty':
@@ -196,22 +148,27 @@ class BookFrame():
             text = self.content.strip()
             text = self.escape_text(text)
             text, refs = self.referize_text(text)
-            return page_widgets.Author(text=text, referization=refs)
-        
-        elif self.type == 'epigraph_poem_title':
-            text = self.content.strip()
-            text = self.escape_text(text)
-            text, refs = self.referize_text(text)
-            return page_widgets.SelectablePair(
-                pad = 0.5,
-                child = page_widgets.Poem_title(text=text,referization=refs)
+            widget = page_widgets.Author(
+                text=text, 
+                referization=refs,
+                cite=is_cite,
+                epigraph=is_epigraph,
+                poem=is_poem,
+                note=is_note,
             )
-        
-        elif self.type == 'cite_poem_title':
+
+        elif self.type == 'text':
             text = self.content.strip()
             text = self.escape_text(text)
             text, refs = self.referize_text(text)
-            return page_widgets.Cite_Poem_Title(text=text,referization=refs)
+            widget = page_widgets.Text(
+                text=text, 
+                referization=refs,
+                cite=is_cite,
+                epigraph=is_epigraph,
+                poem=is_poem,
+                note=is_note,
+            )
 
         elif self.type == 'image':
             if 'broken' in self.attributs:
@@ -229,4 +186,9 @@ class BookFrame():
         else:
             text = self.type + '\n' + self.content + '\n' + str(self.attributs)
             text = 'Uncnown element;\nThat\'s content:\n' + text
-            return page_widgets.Unknown(text = text)
+            widget = page_widgets.Unknown(text = text)
+    
+        if is_epigraph:
+            return page_widgets.SelectablePair(pad = 0.5,child = widget)
+        else:
+            return widget

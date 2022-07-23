@@ -5,6 +5,8 @@
     text: ''
     markup: True
     color: (0,0,0,1)
+    font_size: 32
+
     text_size: Window.width - 2 * icon_size , None
     size: self.texture_size
     size_hint_y: None
@@ -17,9 +19,12 @@
 <Paragraph>:
     text: ''
     markup: True
-    color: (0,0,0,1)
-    halign: 'left'
     valign: 'center'
+    italic: root.cite
+    font_name: root.get_font('NotoSans-Regular.ttf')
+
+    on_parent:
+        root.resolve_state()
 
 <Space>:
     size_hint_y: None
@@ -47,11 +52,16 @@
 
 <Title>:
     text: ''
-    font_size: 30
+    font_size: 40
     markup: True
     halign: 'center'
     valign: 'center'
     bold: True
+    italic: root.cite
+    font_name: root.get_font('NotoSans-Bold.ttf')
+
+    on_parent:
+        root.resolve_state()
 
 <NotesDelimeter>:
     size_hint_y: None
@@ -75,43 +85,32 @@
     halign: 'center'
     valign: 'center'
 
-<Poem_title>:
-    text: ''
-    bold: True
-    halign: 'center'
-    valign: 'center'
-    size: self.texture_size
-    text_size: (Window.width - 2 * icon_size) * 0.4, None
-    pos_hint_x: 0.6
+    on_parent:
+        if root.cite: self.font_size = 30
     
 <Poem_line>:
     text: ''
-    padding_x: 0.1 * Window.size[0]
+    padding_x: 0.1 * Window.width
+
+    on_parent:
+        self.resolve_state()
 
 <Stanza_empty>:
     size_hint_y: None
     size: Window.width ,0.02 * Window.height
 
 <Author>:
-    padding_x: 0.1 * Window.width
+    halign: 'right'
     italic: True
 
-<Epigraph_text>:
-    text: ''
-    halign: 'right'
-    size_hint_x: None
+    on_parent:
+        root.resolve_state()
 
-<EpigraphAuthor>:
-    text: ''
-    halign: "right"
-    size_hint_x: None
-    size_hint_x: None
-
-<EpifraphPoemLine>:
-    text: ''
+<Text>:
     halign: "left"
-    size_hint_x: None
-    size_hint_x: None
+
+    on_parent:
+        root.resolve_state()
 
 <SelectablePair>:
     cols: 2
@@ -130,31 +129,3 @@
         size_hint_y: None
         height: root.child.height
         
-<Cite_P>:
-    text: ''
-    italic: True
-
-<Cite_V>:
-    text: ''
-    italic: True
-
-<Cite_title>:
-    text: ""
-    italic: True
-
-<Cite_Poem_Title>:
-    italic: True
-
-<Cite_Epigraph_p>:
-    italic: True
-
-<Cite_Epigraph_V>:
-    italic: True
-
-<Cite_Epigraph_Author>
-    italic: True
-
-<Cite_epigraph_poem_title>:
-    italic: True
-
-
