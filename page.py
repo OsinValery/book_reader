@@ -7,6 +7,8 @@ from kivy.properties import NumericProperty, BooleanProperty
 from kivy.core.clipboard import Clipboard
 
 from kivymd.uix.snackbar import Snackbar
+from kivymd.uix.bottomsheet.bottomsheet import MDListBottomSheet
+
 
 import app_values
 from localizator import Get_text
@@ -17,8 +19,7 @@ class Page(Widget):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.copping = False
-        self.bubble = None
+        self.selectionAction = MDListBottomSheet()
 
     @property
     def root_screen(self):
@@ -35,22 +36,10 @@ class Page(Widget):
             return False
         if self.root_screen.ids.page_presenter.ids.page_forward.collide_point(*touch.pos):
             return False
-        if self.copping:
-            if not self.bubble.collide_point(*touch.pos):
-                self.copping = False
-                self.remove_widget(self.bubble)
-                return True
         self.deselect()
         return super().on_touch_down(touch)
     
     def on_touch_move(self, touch):
-        if self.copping:
-            if not self.bubble.collide_point(*touch.pos):
-                self.copping = False
-                self.remove_widget(self.bubble)
-                if self.selection:
-                    self.deselect()
-                return True
         return super().on_touch_move(touch)
 
     def on_touch_up(self, touch):
@@ -61,9 +50,8 @@ class Page(Widget):
                 text = child.get_selected_text() + text
 
             def cancel(arg=None):
-                self.copping = False
-                self.remove_widget(bubble)
                 self.deselect()
+                self.selectionAction.dismiss()
 
             def copy(arg=None):
                 cancel()
@@ -72,16 +60,20 @@ class Page(Widget):
             def translate(arg=...):
                 cancel()
                 Clock.schedule_once(lambda dt: self.root_screen.present(text))
-                
-            if not self.copping:
-                bubble = Bubble(pos=touch.pos, background_color=(0,0,0,1), orientation='vertical')
-                bubble.add_widget(BubbleButton(text=Get_text('info_copy'), on_press=copy))
-                bubble.add_widget(BubbleButton(text=Get_text('info_cancel'), on_press=cancel))
-                bubble.add_widget(BubbleButton(text=Get_text('info_translate'), on_press=translate))
-                bubble.pos[0] = max(bubble.pos[0] - bubble.width/2, 5)
-                self.bubble = bubble
-                self.add_widget(bubble)
-                self.copping = True
+            
+            def near(*args):
+                self.deselect()
+                return True
+
+            if text != '':
+                self.selectionAction = MDListBottomSheet()
+                self.selectionAction.add_item(text=Get_text('info_copy'), icon = 'content-copy', callback=copy)
+                self.selectionAction.add_item(text=Get_text('info_cancel'), icon = 'cancel', callback=cancel)
+                self.selectionAction.add_item(text=Get_text('info_translate'), icon = 'book', callback=translate)  
+                self.selectionAction.value_transparent = (0,0,0,0.5)
+                self.selectionAction.on_dismiss = near
+                self.selectionAction.open()      
+            
         return super().on_touch_up(touch)
     
     def copy_text(self, text):

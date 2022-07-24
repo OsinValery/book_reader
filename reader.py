@@ -96,9 +96,6 @@ class PagePresenter(Widget):
         content = self.page.ids.page_content
         content.clear_widgets()
         self.page.ids.page_scroll.scroll_y = 1
-        if self.page.copping:
-            self.page.copping = False
-            self.page.remove_widget(self.page.bubble)
         self.page.selection = False
         for el in self.page.prepare():
             content.add_widget(el)
