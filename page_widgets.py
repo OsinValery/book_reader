@@ -116,10 +116,14 @@ class SelectableLabel(Label):
         shapes = []
         words = []
         pos = [pos[0], pos[1]]
+        pos[0] -= 40
+
         if self.parent:
             if type(self.parent == SelectablePair):
                 if self == self.parent.children[0] and len(self.parent.children) > 1:
                     pos[0] -= (self.parent.width * self.parent.pad + self.parent.spacing)
+                    pos[0] += 40
+        
 
         direction = 'down'
         if pos[1] > self.first_pos[1] + 10:
@@ -127,49 +131,34 @@ class SelectableLabel(Label):
         elif (pos[0] < self.first_pos[0]) and (pos[1] > self.first_pos[1] - 10):
             direction = 'up'
 
-        if direction == 'up':
-            for element in self.refs:
-                points = self.refs[element][0]
+
+        for element in self.refs:
+            new_selections = []
+            element_selected = False
+
+            for points in self.refs[element]:
                 x1, y1, x2, y2 = points
                 y1 = self.pos[1] + self.height - y1
                 y2 = self.pos[1] + self.height - y2
-
+                rect = Rectangle(pos = [self.pos[0]+x1, y2],size=[x2-x1,abs(y2-y1)])
+                new_selections.append(rect)  
+                if element_selected:
+                    continue
+                
                 if x1 < pos[0] and x2 >= pos[0] and y1 > pos[1] and y2 < pos[1]:
-                    rect = Rectangle(pos = [self.pos[0]+x1, y2],size=[x2-x1,abs(y2-y1)])
-                    shapes.append(rect)
-                    words.append(element)
+                    element_selected = True
                 elif x1 < self.first_pos[0] and x2 >= self.first_pos[0] and \
-                        y1 > self.first_pos[1] and y2 < self.first_pos[1]:
-                    rect = Rectangle(pos = [self.pos[0]+x1,y2],size = [x2-x1,abs(y2-y1)])
-                    shapes.append(rect)
-                    words.append(element)
-                else:
+                            y1 > self.first_pos[1] and y2 < self.first_pos[1]:
+                        element_selected = True
+
+                elif direction == 'up':
                     if y1 < self.first_pos[1]:
                         continue
                     if y2 < self.first_pos[1] and x2 > self.first_pos[0]:
                         continue
                     if y2 > pos[1] or (y1 > pos[1] and x1 < pos[0]):
                         continue
-
-                    rect = Rectangle(pos = [self.pos[0]+x1,y2],size = [x2-x1,abs(y2-y1)])
-                    shapes.append(rect)
-                    words.append(element)
-        else:
-            for element in self.refs:
-                points = self.refs[element][0]
-                x1, y1, x2, y2 = points
-                y1 = self.pos[1] + self.height - y1
-                y2 = self.pos[1] + self.height - y2
-
-                if x1 < pos[0] and x2 >= pos[0] and y1 > pos[1] and y2 < pos[1]:
-                    rect = Rectangle(pos = [self.pos[0]+x1,y2],size = [x2-x1,abs(y2-y1)])
-                    shapes.append(rect)
-                    words.append(element)
-                elif x1 < self.first_pos[0] and x2 >= self.first_pos[0] and \
-                        y1 > self.first_pos[1] and y2 < self.first_pos[1]:
-                    rect = Rectangle(pos = [self.pos[0]+x1,y2],size = [x2-x1,abs(y2-y1)])
-                    shapes.append(rect)
-                    words.append(element)
+                    element_selected = True
                 else:
                     if y2 > self.first_pos[1]:
                         continue
@@ -177,10 +166,12 @@ class SelectableLabel(Label):
                         continue
                     if y1 < pos[1] or (x1 > pos[0] and pos[1] > y2):
                         continue
+                    element_selected = True
 
-                    rect = Rectangle(pos = [self.pos[0]+x1,y2],size = [x2-x1,abs(y2-y1)])
+            if element_selected:
+                words.append(element)
+                for rect in new_selections:
                     shapes.append(rect)
-                    words.append(element)
         
         self.page_widget.selection = True
         self.selections = words
