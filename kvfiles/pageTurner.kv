@@ -18,13 +18,12 @@
         size_hint_x: 1
         cols: 3
         spacing: 15
-        padding: (20, 20, 20, 10)
+        padding: [20, 20, 20, 10]
 
         Label: 
             id: page
             color: (0,0,0,1)
             # text will be setted in on_parent
-            text: ''
             text_size: None , None
             size: self.texture_size
             size_hint_x: None
@@ -37,13 +36,10 @@
             on_text:
                 text = self.text
                 if text == '': text = '1'
-                if text == '-': self.text = ''
-                if text == '-': text = '1'
+                if text == '-': self.text = '';text = '1'
                 page = int(text)
                 if page < 1: page = 1
-                old = page
-                if page > root.maximum: page = root.maximum
-                if old > root.maximum: self.text = str(root.maximum)
+                if page > root.maximum: page = root.maximum;self.text = str(root.maximum)
                 root.current = page
         
         Label:
@@ -59,6 +55,7 @@
         max: root.maximum
         value: root.current
         step: 1
+        icon: 'book'
 
         on_value:
             root.current = int(self.value)

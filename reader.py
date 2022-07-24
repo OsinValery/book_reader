@@ -21,7 +21,6 @@ from kivymd.uix.dialog import MDDialog
 from kivymd.uix.button import MDRaisedButton, MDFlatButton
 from kivymd.uix.list import MDList, OneLineAvatarIconListItem, IconLeftWidget
 from kivymd.uix.filemanager.filemanager import MDFileManager
-from kivymd.uix.slider.slider import MDSlider
 
 from libretranslatepy import LibreTranslateAPI
 from localizator import Get_text
@@ -32,7 +31,7 @@ from page import Page
 class PageScreen(MDNavigationLayout):
     word = StringProperty(Get_text('info_click_text') )
     translation_result = StringProperty(Get_text('info_translated_text'))
-    translater = ObjectProperty(LibreTranslateAPI("https://translate.argosopentech.com/"))
+    translater = ObjectProperty(LibreTranslateAPI())
 
     def close_library(self):
         self.ids.page_screen.current = 'book'

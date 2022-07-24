@@ -4,11 +4,11 @@ import sys
 import os
 import shutil
 os.environ['KIVY_NO_FILELOG'] = '1'
-# os.environ["KIVY_NO_CONSOLELOG"] = "1"
+os.environ["KIVY_NO_CONSOLELOG"] = "1"
 from kivy.utils import platform
-from kivy.config import Config
-Config.set('kivy', 'log_enable', '0')
+
 if platform not in ['android', 'ios']:
+    from kivy.config import Config
     Config.set('graphics', 'width', '400')
     Config.set('graphics', 'height', '700')
 from kivy.lang.builder import Builder
