@@ -1,7 +1,6 @@
 
 import os
 import shutil
-from turtle import onclick
 
 from kivy.uix.widget import Widget
 from kivy.uix.boxlayout import BoxLayout
@@ -34,7 +33,12 @@ from page import Page
 class PageScreen(MDNavigationLayout):
     word = StringProperty(Get_text('info_click_text') )
     translation_result = StringProperty(Get_text('info_translated_text'))
+
     translater = ObjectProperty(LibreTranslateAPI())
+    supported_languages = ['en','ar','zh','fr','de','hi','id','ga','it','ja','ko','pl','pt','ru','es','tr','vi',]
+    from_lang = StringProperty('ru')
+    to_lang = StringProperty('en')
+
 
     def close_library(self):
         self.ids.page_screen.current = 'book'
@@ -42,7 +46,7 @@ class PageScreen(MDNavigationLayout):
     def present(self, word):
         self.word = word
         try:
-            self.translation_result = self.translater.translate(self.word, 'ru', 'en')
+            self.translation_result = self.translater.translate(self.word, self.from_lang, self.to_lang)
             self.ids.translater.set_state("open")
         except:
             def cancel(data=...):
@@ -71,6 +75,8 @@ class PageScreen(MDNavigationLayout):
         self.ids.language_label.text = Get_text('info_language')
         self.ids.translater_header.title = Get_text('info_translater')
         self.ids.menu_select_book.text = Get_text('info_select_book')
+        self.ids.translate_to.text = Get_text('info_translate_to')
+        self.ids.translate_from.text = Get_text('info_translate_from')
         self.ids.pagePresenterAppBar.change_language()
 
 

@@ -202,7 +202,7 @@
                                     )
                                     menu.open()
 
-    # left drawer
+    # right drawer
     MDNavigationDrawer:
         id: translater
         md_bg_color: get_color_from_hex("#f7f4e7")
@@ -229,16 +229,73 @@
                         size: self.size
                         pos: self.pos
 
-            MDNavigationDrawerLabel:
-                text: "перевод с ru"
+            BoxLayout:
+                size_hint_y: None
+                orientation: "horizontal"
+                padding: "20dp","5dp"
+                height: max(translate_from.height, from_translater_selector.height)
+
+                Label:
+                    id: translate_from
+                    color: (0,0,0,1)
+                    text: Get_text('info_translate_from')
+
+                    size: self.texture_size
+                    size_hint_x: None
+                
+                MDDropDownItem:
+                    id: from_translater_selector
+                    text: reader.from_lang
+                    on_press:
+                        def work(lang): menu.dismiss();reader.from_lang=lang;reader.present(reader.word)
+                        def produse(lang): return {'text': lang, 'on_release': lambda x='ru': work(lang),"viewclass": "MDFlatButton", "height": 76}
+                        
+                        menu_items = [produse(lang) for lang in reader.supported_languages ]
+
+                        menu = MDDropdownMenu( \
+                        caller = self, \
+                        items=menu_items, \
+                        width_mult=3, \
+                        )
+                        menu.open()
             
             MDNavigationDrawerDivider:
             Translation_widget:
                 text: reader.word
 
             MDNavigationDrawerDivider:
-            MDNavigationDrawerLabel:
-                text: "на en"
+            
+            BoxLayout:
+                size_hint_y: None
+                size_hint_x: None
+                orientation: "horizontal"
+                padding: "20dp","5dp"
+                spacing: "5dp"
+                height: max(translate_to.height, to_translater_selector.height)
+
+                Label:
+                    id: translate_to
+                    text: Get_text('info_translate_to')
+                    color: (0,0,0,1)
+
+                    size: self.texture_size
+                    size_hint_x: None
+                
+                MDDropDownItem:
+                    text: reader.to_lang
+                    id: to_translater_selector
+                    on_press:
+                        def work(lang): menu.dismiss();reader.to_lang=lang;reader.present(reader.word)
+                        def produse(lang): return {'text': lang, 'on_release': lambda x='ru': work(lang),"viewclass": "MDFlatButton", "height": 76}
+                        
+                        menu_items = [produse(lang) for lang in reader.supported_languages ]
+
+                        menu = MDDropdownMenu( \
+                        caller = self, \
+                        items=menu_items, \
+                        width_mult=3, \
+                        )
+                        menu.open()
             
             MDNavigationDrawerDivider:
             Translation_widget:
@@ -248,7 +305,7 @@
             MDNavigationDrawerLabel:
                 text: 'translated with Argos'
 
-    # right drawer with menu 
+    # left drawer with menu 
     MDNavigationDrawer:
         id: app_menu
         md_bg_color: get_color_from_hex("#f7f4e7")
