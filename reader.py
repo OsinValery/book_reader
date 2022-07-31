@@ -1,6 +1,7 @@
 
 import os
 import shutil
+from turtle import onclick
 
 from kivy.uix.widget import Widget
 from kivy.uix.boxlayout import BoxLayout
@@ -21,7 +22,7 @@ from kivymd.uix.menu.menu import MDDropdownMenu
 from kivymd.uix.bottomsheet.bottomsheet import MDCustomBottomSheet
 from kivymd.uix.dialog import MDDialog
 from kivymd.uix.button import MDRaisedButton, MDFlatButton
-from kivymd.uix.list import MDList, OneLineAvatarIconListItem, IconLeftWidget
+from kivymd.uix.list import MDList, OneLineAvatarIconListItem, IconLeftWidget, IconRightWidget
 from kivymd.uix.filemanager.filemanager import MDFileManager
 
 from libretranslatepy import LibreTranslateAPI
@@ -266,6 +267,12 @@ class LibraryPresenter(MDList):
                 icon='book', 
                 on_press=lambda x: self.choose_book(x.parent.parent))
             )
+            line.add_widget(IconRightWidget(
+                icon = 'delete',
+                icon_color = [1,0,0,1],
+                on_press=lambda x: self.remove_book(x.parent.parent.text)
+            ))
+
             self.add_widget(line)
 
     def choose_book(self, arg):
@@ -276,6 +283,12 @@ class LibraryPresenter(MDList):
         root = self.root_screen
         root.ids.page_presenter.change_book()
         root.ids.page_screen.current = 'book'
+    
+    def remove_book(self, name):
+        full_path = os.path.join(app_values.app_info.book_dir, name)
+        app_values.app_info.library.remove(name)
+        os.remove(full_path)
+        self.update_library()
 
     @property
     def root_screen(self):
