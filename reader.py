@@ -90,9 +90,11 @@ class PagePresenter(Widget):
 
     def back(self):
         self.seek(self.cur_page-1)
+        app_values.app_info.remember_page(self.cur_page)
 
     def forward(self):
         self.seek(self.cur_page+1)
+        app_values.app_info.remember_page(self.cur_page)
 
     def seek(self, number):
         self.cur_page = self.page.page = number

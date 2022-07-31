@@ -20,6 +20,7 @@ from kivy.resources import resource_add_path
 
 from kivymd.app import MDApp
 from kivy.core.window import Window
+from kivy.clock import Clock
 
 
 from reader import PageScreen
@@ -75,6 +76,23 @@ class ReaderApp(MDApp):
         filename = 'about.fb2'
         file = os.path.join(self.user_data_dir,'books', filename)
         app_values.app_info.book.read(file,app_values.app_info.max_elements_per_page)
+
+    def on_start(self):
+        super().on_start()
+        def load_last(dt):
+            try:
+                last_book = app_values.app_info.get_last_page()
+                if last_book:
+                    # != None
+                    app_values.app_info.book.read(
+                        os.path.join(app_values.app_info.book_dir, last_book[0]), 
+                        app_values.app_info.max_elements_per_page
+                    )
+                    self.root.ids.page_presenter.change_book()
+                    self.root.ids.page_presenter.seek(last_book[1])
+            except:
+                pass
+        Clock.schedule_once(load_last)
 
     @property
     def books_dir(self):
