@@ -1,2 +1,2 @@
-.buildozer/
-.__pycache__/
+/.buildozer/*
+/__pycache__/*
