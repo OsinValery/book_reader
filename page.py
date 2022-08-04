@@ -1,6 +1,5 @@
 
 from kivy.uix.widget import Widget
-from kivy.uix.bubble import Bubble, BubbleButton
 from kivy.factory import Factory
 from kivy.clock import Clock
 from kivy.properties import NumericProperty, BooleanProperty

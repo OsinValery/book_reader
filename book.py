@@ -55,8 +55,9 @@ class Book():
         # encoding = ??
         with open(self.file_path, 'rb') as file:
             line = str(file.readline())
-        suffix = line[line.find('encoding="')+10:]
-        encoding = suffix[:suffix.find('"')]
+        enc_pos = line.find('encoding=') + 10
+        enc_end = line.find('"', enc_pos)
+        encoding = line[enc_pos:enc_end]
         with open(self.file_path, 'r', encoding=encoding) as file:
             content = file.read()
         body_pos = content.find('<body>')

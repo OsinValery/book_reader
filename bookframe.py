@@ -58,16 +58,14 @@ class BookFrame():
         text = text.replace('<sup>', ' [sup] ').replace('</sup>',' [/sup] ')
         return text
 
-    def referize_text(self, text:str) -> str:
+    def referize_text(self, text:str):
         refers = []
         i = 0
         result = ''
 
         for word in text.split():
-            # faster then format strings
-            piece = '[ref=' + str(i) + ']' + word + '[/ref] '
-            # old = f'[ref={i}]{word}[/ref] '
-            result += piece
+            # this solution works faster then format strings
+            result += '[ref=' + str(i) + ']' + word + '[/ref] '
             refers.append(word)
             i += 1
         return result, refers
