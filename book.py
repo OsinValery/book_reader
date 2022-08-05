@@ -1,5 +1,4 @@
 import os
-import xml.etree.ElementTree as ElementTree
 import fb2_book
 
 class Book():
@@ -22,30 +21,9 @@ class Book():
             raise Exception('unknown file format: '+ self.format)
         
     def read_fb2(self):
-        content = ElementTree.parse(self.file_path)
         elements = []
-        notes = {}
+        self.notes = {}
         assets = {}
-
-        for child in content.getroot():
-            elements.append(child)
-        for element in elements:
-            if element.attrib == {'name': 'notes'}:
-                # text notes 
-                pass
-                # work it downside
-            elif 'binary' in element.tag:
-                # pictures
-                child = element
-                assets[child.attrib['id']] = {'type': child.attrib['content-type'], 'data': child.text}
-
-            elif 'body' in element.tag:
-                # main text (body)
-                # realization downside
-                pass
-            else:
-                pass
-                # description of the book
 
         # encoding = ??
         with open(self.file_path, 'rb') as file:
@@ -53,6 +31,7 @@ class Book():
         enc_pos = line.find('encoding=') + 10
         enc_end = line.find('"', enc_pos)
         encoding = line[enc_pos:enc_end]
+
         # read content
         with open(self.file_path, 'r', encoding=encoding) as file:
             content = file.read()
@@ -61,6 +40,41 @@ class Book():
         body = content[body_pos: pos_close+7]
         book_body = fb2_book.fb2_parser(body, 0)[0]
         elements = book_body.work()
+
+        # read notes
+        have_body = True
+        while have_body:
+            next_body = content.find('<body', pos_close + 7)
+            if next_body == -1:
+                have_body = False
+            else:
+                end_body = content.find('</body>', next_body)
+                pos_close = content.find('>', next_body) + 1
+                body_data = content[next_body:end_body+7]
+                body_tag = fb2_book.fb2_parser(body_data)[0]
+                if 'name' in body_tag.attr and body_tag.attr['name'] == 'notes':
+                    for child in body_tag.content:
+                        if child.tag == 'section':
+                            if 'id' in child.attr:
+                                s_id = child.attr['id']
+                                self.notes[s_id] = child
+                                child.add_attribute('note', True)
+
+        # read bin data
+        have_bin = True
+        while have_bin:
+            bin_pos = content.find('<binary', pos_close)
+            if bin_pos == -1:
+                have_bin = False
+            else:
+                start_content = content.find('>', bin_pos)
+                end_bin = content.find('</binary>', start_content)
+                tag = content[bin_pos+1:start_content]
+                bin_content = content[start_content+1:end_bin]
+                tag, attributs = fb2_book.get_tag_arguments(tag)
+                assets[attributs['id']] = {'type': attributs['content-type'], 'data': bin_content}
+                pos_close = end_bin + 9
+
         # divide into pages
         page = []
         i = 0
@@ -87,27 +101,6 @@ class Book():
                 page = []
         if page != []:
             self.content.append(page)
-        
-        # read notes
-        have_body = True
-        while have_body:
-            next_body = content.find('<body', pos_close + 7)
-            if next_body == -1:
-                have_body = False
-            else:
-                end_body = content.find('</body>', next_body)
-                pos_close = content.find('>', next_body) + 1
-                body_data = content[next_body:end_body+7]
-                body_tag = fb2_book.fb2_parser(body_data)[0]
-                if 'name' in body_tag.attr and body_tag.attr['name'] == 'notes':
-                    self.notes = {}
-                    for child in body_tag.content:
-                        if child.tag == 'section':
-                            if 'id' in child.attr:
-                                s_id = child.attr['id']
-                                self.notes[s_id] = child
-                                child.add_attribute('note', True)
-
 
 
     

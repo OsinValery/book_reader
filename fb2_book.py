@@ -125,7 +125,7 @@ def get_tag_arguments(tag:str):
             val_start = tag.find('"',eq_pos)
             val_end = tag.find('"', val_start+1)
             value = tag[val_start+1:val_end]
-            pos = val_end
+            pos = val_end + 1
             attr[name] = value
     return real_tag, attr
 
