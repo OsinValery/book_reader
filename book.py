@@ -70,12 +70,19 @@ class Book():
         i = 0
         for el in elements:
             if el.type == 'image':
-                name = el.content[1:]
-                if name in assets:
-                    el.content = assets[name]['data']
-                    el.attributs = {'type':assets[name]['type']}
+                if 'l:href' in el.attributs:
+                    name = el.attributs['l:href']
                 else:
-                    el.attributs['broken'] = 1
+                    name = ''
+                if name[0] == '#':
+                    name = name[1:]
+                    if name in assets:
+                        el.content = assets[name]['data']
+                        el.add_attribute('type', assets[name]['type'])
+                    else:
+                        el.add_attribute('broken', 1)
+                else:
+                    print('unknown image src: ' + name)
             page.append(el)
             i += 1
             if i == self.max_elements_per_page:

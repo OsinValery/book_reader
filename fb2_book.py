@@ -19,10 +19,10 @@ class FB2_tag:
             result.append(bookframe.BookFrame(None,'title_empty', {}))
             for child in self.content:
                 if child.tag == 'empty-line/':
-                    result.append(bookframe.BookFrame(None, 'empty', {}))
+                    result.append(bookframe.BookFrame(None, 'empty', child.attr))
                 else:
                     # p
-                    result.append(bookframe.BookFrame(child.text, 'title', {}))
+                    result.append(bookframe.BookFrame(child.text, 'title', child.attr))
             result.append(bookframe.BookFrame(None,'title_empty', {}))
             return result
 
@@ -30,7 +30,7 @@ class FB2_tag:
             for child in self.content:
                 if child.tag == 'stanza':
                     result += child.work()
-                    result.append(bookframe.BookFrame(None, 'stanza_empty' , {}))
+                    result.append(bookframe.BookFrame(None, 'stanza_empty' , child.attr))
 
                 elif child.tag == 'epigraph':
                     result += child.work()
@@ -45,7 +45,7 @@ class FB2_tag:
                 elif child.tag[:4] == 'date':
                     print('note for poem -> date')
                     print('date can contain key "value" in tag')
-                    result.append(child.text, 'date', {})
+                    result.append(child.text, 'date', child.attr)
             
             return result
 
@@ -58,7 +58,10 @@ class FB2_tag:
                     temp_tag.add_attribute('epigraph', True)
                     result.append(temp_tag)
                 elif child.tag == 'text-author':
-                    result.append(bookframe.BookFrame(child.text, 'text-author', {'epigraph': True}))
+                    frames = child.work()
+                    for frame in frames:
+                        frame.add_attribute('epigraph',True)
+                        result.append(frame)
                 elif child.tag in ('poem','cite'):
                     elements = child.work()
                     for el in elements:
@@ -90,16 +93,32 @@ class FB2_tag:
         element = None
         if self.tag == 'empty-line/':
             element = bookframe.BookFrame(None, 'empty', {})
-        elif self.tag[:5] == 'image':
-            start = self.tag.find('"')
-            close = self.tag.find('"', start + 1)
-            link = self.tag[start+1:close]
-            element = bookframe.BookFrame(link, 'image', {})
+        elif self.tag == 'image':
+            element = bookframe.BookFrame(None, 'image', self.attr)
         else:
             element = bookframe.BookFrame(self.text, self.tag, self.attr)
         result.append(element)
         return result
 
+def get_tag_arguments(tag:str):
+    attr = {}
+    space_pos = tag.find(' ')
+    if space_pos == -1:
+        return tag, attr
+    real_tag = tag[:space_pos]
+    pos = space_pos + 1
+    while pos < len(tag):
+        eq_pos = tag.find('=',pos)
+        if eq_pos == -1:
+            pos = len(tag) + 10
+        else:
+            name = tag[pos:eq_pos].strip()
+            val_start = tag.find('"',eq_pos)
+            val_end = tag.find('"', val_start+1)
+            value = tag[val_start+1:val_end]
+            pos = val_end
+            attr[name] = value
+    return real_tag, attr
 
 def fb2_parser(text:str, pos=0):
     root = FB2_tag()
@@ -107,7 +126,8 @@ def fb2_parser(text:str, pos=0):
         pos += 1
     close = text.find('>', pos)
     tag = text[pos+1:close]
-    root.tag = tag
+    # divide tag and hml arguments here!!
+    root.tag, root.attr = get_tag_arguments(tag)
     pos = close + 1
     if tag == 'p':
         close_tag = text.find('</p>', close)
@@ -181,7 +201,7 @@ def fb2_parser(text:str, pos=0):
             else:
                 closed = True
                 pos += 6
-    
+
     elif tag == 'epigraph':
         pos = close + 1
         closed = False
@@ -197,7 +217,7 @@ def fb2_parser(text:str, pos=0):
             else:
                 closed = True
                 pos += 10
-    
+
     elif tag == 'cite':
         pos = close + 1
         closed = False
