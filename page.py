@@ -100,11 +100,17 @@ class Page(Widget):
         if have:
             content.append(Factory.NotesDelimeter())
             for note in comments:
-                code : str = comments[note] 
-                code = code.replace(']','').replace('[','').replace('&bl;', '').replace('&br;','')
                 ind = note[1:]
                 note_text = book.notes[ind] if ind in book.notes else Get_text('info_unknown_note')
-                content.append(Factory.Note(text= f'{code} - {note_text}'))
+                if type(note_text) == str:
+                    code : str = comments[note] 
+                    code = code.replace(']','').replace('[','').replace('&bl;', '').replace('&br;','')
+                    content.append(Factory.Note(text= f'{code} - {note_text}'))
+                else:
+                    note_elements = note_text.work()
+                    for el in note_elements:
+                        content.append(el.make_content())
+
         content.append(Factory.Space())
         return content
 

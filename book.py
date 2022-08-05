@@ -32,17 +32,13 @@ class Book():
         for element in elements:
             if element.attrib == {'name': 'notes'}:
                 # text notes 
-                for child in element:
-                    if child.attrib != {}:
-                        notes[child.attrib['id']] = ''
-                        for el in child:
-                            if el.text:
-                                notes[child.attrib['id']] += el.text
+                pass
+                # work it downside
             elif 'binary' in element.tag:
                 # pictures
                 child = element
                 assets[child.attrib['id']] = {'type': child.attrib['content-type'], 'data': child.text}
-            
+
             elif 'body' in element.tag:
                 # main text (body)
                 # realization downside
@@ -51,13 +47,13 @@ class Book():
                 pass
                 # description of the book
 
-        self.notes = notes
         # encoding = ??
         with open(self.file_path, 'rb') as file:
             line = str(file.readline())
         enc_pos = line.find('encoding=') + 10
         enc_end = line.find('"', enc_pos)
         encoding = line[enc_pos:enc_end]
+        # read content
         with open(self.file_path, 'r', encoding=encoding) as file:
             content = file.read()
         body_pos = content.find('<body>')
@@ -91,6 +87,29 @@ class Book():
                 page = []
         if page != []:
             self.content.append(page)
+        
+        # read notes
+        have_body = True
+        while have_body:
+            next_body = content.find('<body', pos_close + 7)
+            if next_body == -1:
+                have_body = False
+            else:
+                end_body = content.find('</body>', next_body)
+                pos_close = content.find('>', next_body) + 1
+                body_data = content[next_body:end_body+7]
+                body_tag = fb2_book.fb2_parser(body_data)[0]
+                if 'name' in body_tag.attr and body_tag.attr['name'] == 'notes':
+                    self.notes = {}
+                    for child in body_tag.content:
+                        if child.tag == 'section':
+                            if 'id' in child.attr:
+                                s_id = child.attr['id']
+                                self.notes[s_id] = child
+                                child.add_attribute('note', True)
+
+
+
     
     @property
     def length(self):

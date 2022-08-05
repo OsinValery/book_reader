@@ -11,9 +11,17 @@ class FB2_tag:
     def append(self, tag):
         self.content.append(tag)
 
+    def add_attribute(self, name, value):
+        self.attr[name] = value
+
     def work(self, n=0) -> List[bookframe.BookFrame]:
         """returns list of bookframe.Bookframe of this element"""
         result = []
+        note = False
+        if 'note' in self.attr and self.attr['note']:
+            note = True
+            for child in self.content:
+                child.add_attribute('note', True)
 
         if self.tag == 'title':
             result.append(bookframe.BookFrame(None,'title_empty', {}))
@@ -23,7 +31,8 @@ class FB2_tag:
                 else:
                     # p
                     result.append(bookframe.BookFrame(child.text, 'title', child.attr))
-            result.append(bookframe.BookFrame(None,'title_empty', {}))
+            if not note: 
+                result.append(bookframe.BookFrame(None,'title_empty', {}))
             return result
 
         elif self.tag == 'poem':
