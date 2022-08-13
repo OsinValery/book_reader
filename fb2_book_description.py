@@ -21,6 +21,9 @@ class Person():
             else:
                 tag_end = text.find('>', tag_start)
                 tag_text = text[tag_start+1: tag_end]
+                if tag_text[-1] == '/':
+                    pos = tag_end + 1
+                    continue
                 info_end = text.find('</', tag_start+1)
                 close_end = text.find('>', info_end)
                 pos = close_end + 1
@@ -33,12 +36,15 @@ class Person():
                     self.patronimic = tag_text
                 elif tag_text == 'email':
                     self.emails.append(information)
+                elif tag_text == 'id':
+                    self.id = information
                 elif tag_text == 'nickname':
                     self.nickname = information
                 elif tag_text == 'home-page':
                     self.cites.append(information)
                 else:
                     print(f'unknown info about person: {tag_text} \n content: {information}')
+                    print(text)
 
 
 class Date():
@@ -87,7 +93,13 @@ class Title_Info():
                         close_tag_text = '</' + tag_content + '>'
                     else:
                         close_tag_text = '</date>'
-                    close = text.find(close_tag_text)
+                    close = text.find(close_tag_text,end_tag)
+                    if close == -1:
+                        pos = end_tag + 1
+                        print('no close tag for:', tag_content)
+                        print('!'*20)
+                        print(text)
+                        continue
                     pos = close + len(close_tag_text)
                     content = text[end_tag+1:close]
                     if tag_content == 'genre':
@@ -124,6 +136,7 @@ class Title_Info():
 class Document_Info():
     def __init__(self) -> None:
         self.document_authors = []
+        self.publishers = []
         self.program_used = ''
         self.program_used_id = ''
         self.document_date = Date()
@@ -134,7 +147,7 @@ class Document_Info():
         # Fb2_Tag
         self.history = None   
 
-    def parse(self, text):
+    def parse(self, text:str):
         pos = 0
         while pos < len(text):
             start_tag = text.find('<', pos)
@@ -148,12 +161,22 @@ class Document_Info():
                 else:
                     close_tag_text = '</date>'
                 close_tag = text.find(close_tag_text, end_tag)
+                if close_tag == -1:
+                    pos = end_tag + 1
+                    print('no close tag for:', tag_content)
+                    print('!'*20)
+                    print(text)
+                    continue
                 content = text[end_tag+1:close_tag]
                 pos = close_tag + len(close_tag_text)
                 if tag_content == 'author':
                     person = Person()
                     person.parse(content)
                     self.document_authors.append(person)
+                elif tag_content == 'publisher':
+                    person = Person()
+                    person.parse(content)
+                    self.publishers.append(person)
                 elif tag_content == 'program-used':
                     self.program_used = content
                 elif tag_content == 'program-id':
@@ -203,6 +226,12 @@ class Publish_info():
                     # others have close tag
                     close_tag_text = '</' + tag_content + '>'
                     close_tag = text.find(close_tag_text, end_tag)
+                    if close_tag == -1:
+                        pos = end_tag + 1
+                        print('no close tag for:', tag_content)
+                        print('!'*20)
+                        print(text)
+                        continue
                     content = text[end_tag+1:close_tag]
                     pos = close_tag + len(close_tag_text)
                     if tag_content == 'book-name':
@@ -280,6 +309,9 @@ class FB2_Book_Deskription():
                     pos = close_tag + len('</custom-info>')
                     self.custom_info = text[tag_end+1:close_tag]
                 else:
+                    if tag_text[-1] == '/':
+                        pos = tag_end + 1
+                        continue
                     print('unknown tag: ', tag_text)
                     real, attr = get_tag_arguments(tag_text)
                     close = '</' + real + '>'
