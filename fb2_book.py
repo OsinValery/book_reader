@@ -137,6 +137,7 @@ def fb2_parser(text:str, pos=0):
     tag = text[pos+1:close]
     # divide tag and hml arguments here!!
     root.tag, root.attr = get_tag_arguments(tag)
+    tag = root.tag
     pos = close + 1
     if tag == 'p':
         close_tag = text.find('</p>', close)
@@ -169,7 +170,7 @@ def fb2_parser(text:str, pos=0):
         pos = close_tag + len('</text-author>') - 1
         root.text = tag_text
     elif tag == 'subtitle':
-        close_tag = pos + text[close:].find('</subtitle>')
+        close_tag = text.find('</subtitle>', close)
         tag_text = text[close+1:close_tag]
         pos = close_tag + len('</subtitle>') - 1
         root.text = tag_text
@@ -298,7 +299,7 @@ def fb2_parser(text:str, pos=0):
         while not closed:
             while text[pos] != '<':
                 pos += 1
-            if text[pos:pos+11] != '</annotation>':
+            if text[pos:pos+13] != '</annotation>':
                 sub_tag, new_pos = fb2_parser(text, pos)
                 root.append(sub_tag)
                 pos = new_pos
@@ -307,6 +308,38 @@ def fb2_parser(text:str, pos=0):
             else:
                 closed = True
                 pos += 12
+    
+    elif 'coverpage' in tag:
+        pos = close + 1
+        closed = False
+        while not closed:
+            while text[pos] != '<':
+                pos += 1
+            if text[pos:pos+12] != '</coverpage>':
+                sub_tag, new_pos = fb2_parser(text, pos)
+                root.append(sub_tag)
+                pos = new_pos
+                if pos >= len(text):
+                    closed = True
+            else:
+                closed = True
+                pos += 11
+
+    elif 'history' in tag:
+        pos = close + 1
+        closed = False
+        while not closed:
+            while text[pos] != '<':
+                pos += 1
+            if text[pos:pos+10] != '</history>':
+                sub_tag, new_pos = fb2_parser(text, pos)
+                root.append(sub_tag)
+                pos = new_pos
+                if pos >= len(text):
+                    closed = True
+            else:
+                closed = True
+                pos += 9
 
     else:
         print('---uncnown---')

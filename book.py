@@ -1,5 +1,6 @@
 import os
 import fb2_book
+import fb2_book_description
 
 class Book():
     def __init__(self) -> None:
@@ -7,7 +8,8 @@ class Book():
         self.content = []
         self.notes = {}
         self.format = 'fb2'
-    
+        self.description = fb2_book_description.FB2_Book_Deskription()
+
     def read(self, filepath, max_elements_per_page=20):
         self.content = []
         self.notes = {}
@@ -22,7 +24,6 @@ class Book():
         
     def read_fb2(self):
         elements = []
-        self.notes = {}
         assets = {}
 
         # encoding = ??
@@ -32,10 +33,22 @@ class Book():
         enc_end = line.find('"', enc_pos)
         encoding = line[enc_pos:enc_end]
 
+
+
         # read content
         with open(self.file_path, 'r', encoding=encoding) as file:
             content = file.read()
-        body_pos = content.find('<body>')
+
+        # read description        
+        des_pos = content.find('<description')
+        des_end = content.find('>', des_pos)
+        des_fin = content.find('</description>')
+        description_text = content[des_end+1:des_fin]
+        self.description = fb2_book_description.FB2_Book_Deskription()
+        self.description.parse(description_text)
+
+        # read text
+        body_pos = content.find('<body>', des_fin)
         pos_close = content.find('</body>')
         body = content[body_pos: pos_close+7]
         book_body = fb2_book.fb2_parser(body, 0)[0]
