@@ -29,7 +29,7 @@ class Person():
                     self.name = information
                 elif tag_text == 'last-name':
                     self.surname = information
-                elif tag_text == 'last-name':
+                elif tag_text == 'middle-name':
                     self.patronimic = tag_text
                 elif tag_text == 'email':
                     self.emails.append(information)
