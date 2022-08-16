@@ -173,6 +173,18 @@ class BookFrame():
                 poem=is_poem,
                 note=is_note,
             )
+        
+        elif self.type == 'note':
+            text = self.escape_text(self.content.strip())
+            text, refs = self.referize_text(text)
+            widget = page_widgets.Note(
+                text=text, 
+                referization=refs,
+                cite=is_cite,
+                epigraph=is_epigraph,
+                poem=is_poem,
+                note=is_note,
+            )
 
         elif self.type == 'image':
             if 'broken' in self.attributs:

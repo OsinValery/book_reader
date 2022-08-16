@@ -1,3 +1,4 @@
+
 from kivy.utils import platform
 import app_values
 
@@ -53,6 +54,8 @@ def Get_text(text, lang = None, details = None):
         return error_message(text[6:], lang, details)
     elif text[:5] == 'lang_':
         return lang_code_text(text[5:])
+    elif text[:4] == 'des_':
+        return description_text(text[4:], lang, details)
     return 'unknown type of message: ' + text
 
 def lang_code_text(code):
@@ -229,6 +232,199 @@ def error_message(text, lang, details):
 
     return 'unknown text: ' + text
 
+def description_text(text, lang, details=None):
+    if text == 'description':
+        if lang == 'ru':
+            return 'Описание книги'
+        elif lang == 'en':
+            return 'Book description'
+    if text == 'name':
+        if lang == 'ru':
+            return 'Название: '
+        elif lang == 'en':
+            return 'Title: '
+    if text == 'unknown':
+        if lang == 'ru':
+            return 'Неизвестно'
+        elif lang == 'en':
+            return 'Unknown'
+    if text == 'author':
+        if lang == 'ru':
+            return 'Автор: '
+        elif lang == 'en':
+            return 'Author: '
+    if text == 'authors':
+        if lang == 'ru':
+            return 'Авторы: '
+        elif lang == 'en':
+            return 'Authors: '
+    if text == 'empty_person':
+        if lang == 'ru':
+            return 'Нет информации об этом человеке'
+        elif lang == 'en':
+            return 'No info about this person'
+    if text == 'fio':
+        if lang == 'ru':
+            return 'ФИО: '
+        elif lang == 'en':
+            return 'Full name: '
+
+    if text == 'nick':
+        if lang == 'ru':
+            return 'Ник: '
+        elif lang == 'en':
+            return 'Nickname: '
+    if text == 'cites':
+        if lang == 'ru':
+            return 'Странички'
+        elif lang == 'en':
+            return 'Cites'
+    if text == 'date':
+        if lang == 'ru':
+            return 'Дата написания: '
+        elif lang == 'en':
+            return 'Written at: '
+    if text == 'lang':
+        if lang == 'ru':
+            return 'Язык: '
+        elif lang == 'en':
+            return 'Language: '
+    if text == 'src-lang':
+        if lang == 'ru':
+            return 'Язык оригинала: '
+        elif lang == 'en':
+            return 'Original language: '
+    if text == 'ganres':
+        if lang == 'ru':
+            return 'Жанры: '
+        elif lang == 'en':
+            return 'Genres: '
+    if text == 'annotation':
+        if lang == 'ru':
+            return 'Аннотация: '
+        elif lang == 'en':
+            return 'Annotation: '
+    if text == 'keywords':
+        if lang == 'ru':
+            return 'Ключевые слова: '
+        elif lang == 'en':
+            return 'Keywords: '
+    if text == 'seq':
+        if lang == 'ru':
+            return 'Цикл: '
+        elif lang == 'en':
+            return 'Sequence: '
+    if text == 'part':
+        if lang == 'ru':
+            return 'Часть '
+        elif lang == 'en':
+            return 'Part '
+    if text == 'translator':
+        if lang == 'ru':
+            return 'Переводчик: '
+        elif lang == 'en':
+            return 'Translator: '
+    if text == 'translators':
+        if lang == 'ru':
+            return 'Переводчики: '
+        elif lang == 'en':
+            return 'Translators: '
+    if text == 'foreign':
+        if lang == 'ru':
+            return 'Оригинальная книга'
+        elif lang == 'en':
+            return 'Original book'
+    if text == 'original_note':
+        if lang == 'ru':
+            return 'Некоторые поля в данном разделе могут быть незаполнены. Возможно, часть из них есть в первом разделе. '
+        elif lang == 'en':
+            return 'Some fields in this section may be left blank. Perhaps some of them are in the first section.'
+    if text == 'publication':
+        if lang == 'ru':
+            return 'Публикация'
+        elif lang == 'en':
+            return 'Publication info'
+    if text == 'custom':
+        if lang == 'ru':
+            return 'Дополнительная информация'
+        elif lang == 'en':
+            return 'Additional information'
+    if text == 'type':
+        if lang == 'ru':
+            return 'Тип: '
+        elif lang == 'en':
+            return 'Type: '
+    if text == 'info':
+        if lang == 'ru':
+            return 'Содержимое: '
+        elif lang == 'en':
+            return 'Content: '
+    if text == 'document':
+        if lang == 'ru':
+            return 'О документе'
+        elif lang == 'en':
+            return 'About document'
+    if text == 'publisher':
+        if lang == 'ru':
+            return 'Издатель: '
+        elif lang == 'en':
+            return 'Publisher: '
+    if text == 'city':
+        if lang == 'ru':
+            return 'Город: '
+        elif lang == 'en':
+            return 'City: '
+    if text == 'time':
+        if lang == 'ru':
+            return 'Дата: '
+        elif lang == 'en':
+            return 'Date: '
+    if text == 'program':
+        if lang == 'ru':
+            return 'Создано программой: '
+        elif lang == 'en':
+            return 'Program used: '
+    if text == 'program_id':
+        if lang == 'ru':
+            return 'Id программы: '
+        elif lang == 'en':
+            return 'Program id: '
+    if text == 'scanner':
+        if lang == 'ru':
+            return 'Кто сканировал(для бумажного носителя): '
+        elif lang == 'en':
+            return 'Who scanned (for paper): '
+
+    if text == 'doc_authors':
+        if lang == 'ru':
+            return 'Авторы документа: '
+        elif lang == 'en':
+            return 'Document\'s authors: '
+    if text == 'source':
+        if lang == 'ru':
+            return 'Источник (ссылка): '
+        elif lang == 'en':
+            return 'Source (link): '
+    if text == 'owner':
+        if lang == 'ru':
+            return 'Владельцы: '
+        elif lang == 'en':
+            return 'Owners: '
+    if text == 'version':
+        if lang == 'ru':
+            return 'Версия: '
+        elif lang == 'en':
+            return 'Version: '
+    if text == 'history':
+        if lang == 'ru':
+            return 'История: '
+        elif lang == 'en':
+            return 'History: '
+    if text == 'id_note':
+        if lang == 'ru':
+            return 'Если где-то указано id, имеется ввиду внутренний id библиотеки, откуда скачан документ.'
+        elif lang == 'en':
+            return 'If an id is specified somewhere, it means the internal id of the library from where the document was downloaded.'
 
 
 def template(text, lang):

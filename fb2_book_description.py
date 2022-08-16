@@ -1,5 +1,13 @@
 
+from typing import List
 from fb2_book import get_tag_arguments, fb2_parser
+from bookframe import BookFrame
+from localizator import Get_text
+
+def resolve_space(text:str):
+    if text == '' or text.isspace():
+        text = Get_text('des_unknown')
+    return text
 
 class Person():
     def __init__(self):
@@ -33,7 +41,7 @@ class Person():
                 elif tag_text == 'last-name':
                     self.surname = information
                 elif tag_text == 'middle-name':
-                    self.patronimic = tag_text
+                    self.patronimic = information
                 elif tag_text == 'email':
                     self.emails.append(information)
                 elif tag_text == 'id':
@@ -46,6 +54,29 @@ class Person():
                     print(f'unknown info about person: {tag_text} \n content: {information}')
                     print(text)
 
+    def describe(self) -> str:
+        text = ''
+        if self.name == '' and self.surname == '' and self.patronimic == '' and\
+            self.emails == [] and self.nickname == '' and self.cites == [] and self.id == '':
+            return Get_text('des_empty_person')
+        text = ' - ' + Get_text('des_fio')
+        fio = f'{self.surname} {self.name} {self.patronimic}'
+        if fio.isspace():
+            text += Get_text('des_unknown')
+        else:
+            text += fio
+        if self.nickname != '' and not self.nickname.isspace():
+            text += '\n - ' + Get_text('des_nick') + self.nickname
+        if self.emails != []:
+            text += '\n - email: ' + ', '.join(self.emails)
+        if self.id != '' and not self.id.isspace():
+            text += '\n - id: ' + self.id
+        if self.cites != []:
+            text += '\n - ' + Get_text('des_cites')
+            text += ' \n'.join(self.cites)
+        text += '\n'
+        return text
+
 
 class Date():
     def __init__(self) -> None:
@@ -57,6 +88,17 @@ class Date():
         if 'value' in attr:
             self.value = attr['value']
         self.text = text.strip()
+    
+    def present(self)-> str:
+        if self.text != '' and not self.text.isspace():
+            text = self.text
+            if self.value != '' and not self.value.isspace():
+                text = f'{text} ({self.value})'
+        elif self.value != '' and not self.value.isspace():
+            text = self.value
+        else:
+            text = Get_text('des_unknown')
+        return text
 
 
 class Title_Info():
@@ -70,7 +112,6 @@ class Title_Info():
         self.annotation = None
         self.date = Date()
         # FB2_Tag
-        print('image - FB2_Tag, may contain a lot of pictures')
         self.image = None
         self.lang = 'unknown'
         self.src_lang = 'unknown'
@@ -132,6 +173,75 @@ class Title_Info():
                         print('unknown tag in title-info', tag_content)
                         print(content)
 
+    def get_cover(self):
+        if self.image == None:
+            return []
+        return self.image.work()
+    
+    def get_description(self) -> List[BookFrame]:
+        result = []
+        text = Get_text('des_name')
+        if self.name == '':
+            text += Get_text('des_unknown')
+        else:
+            text += self.name
+        result.append(BookFrame(text, 'text', {}))
+        if len(self.authors) == 0:
+            text = Get_text('des_author') + Get_text('des_unknown')
+            result.append(BookFrame(text, 'text', {}))        
+        else:
+            if len(self.authors) >= 2:
+                text = Get_text('des_authors')
+            else:
+                text = Get_text('des_author')
+            result.append(BookFrame(text, 'text', {}))
+            for person in self.authors:
+                text = person.describe()
+                result.append(BookFrame(text, 'text', {}))
+        text = Get_text('des_date') + self.date.present()
+        result.append(BookFrame(text, 'text', {}))
+        text = Get_text('des_lang') + resolve_space(self.lang)
+        result.append(BookFrame(text, 'text', {}))
+        if type(self) == Title_Info:
+            text = Get_text('des_src-lang') + resolve_space(self.src_lang)
+            result.append(BookFrame(text, 'text', {}))
+        text = Get_text('des_ganres')
+        if self.ganres == []:
+            text += Get_text('des_unknown')
+        else:
+            text += ', '.join(self.ganres)
+        result.append(BookFrame(text, 'text', {}))
+        text = Get_text('des_seq')
+        if self.sequence == []:
+            text += Get_text('des_unknown')
+        else:
+            if len(self.sequence) > 1: text += '\n'
+            for seq in self.sequence:
+                cicle = ''
+                if 'name' in seq:
+                    cicle += seq['name']
+                if 'number' in seq:
+                    cicle += ' (' +  Get_text('des_part') + seq['number'] + ')'
+                text += cicle + '\n'
+        result.append(BookFrame(text, 'text', {}))
+
+        if not self.annotation:
+            result.append(BookFrame(Get_text('des_annotation') + Get_text('des_unknown'), 'text', {}))
+        else:
+            result.append(BookFrame(Get_text('des_annotation'), 'text', {}))
+            result += self.annotation.work()
+        text = Get_text('des_keywords') + resolve_space(self.key_words)
+        result.append(BookFrame(text, 'text', {}))
+        if len(self.translators) == 0:
+            text = Get_text('des_translator') + Get_text('des_unknown')
+            result.append(BookFrame(text, 'text', {}))
+        else:
+            des = 'translator' if len(self.translators) == 1 else 'translators'
+            result.append(BookFrame(Get_text(f'des_{des}'), 'text', {}))
+            for person in self.translators:
+                result.append(BookFrame(person.describe(), 'text', {}))
+        return result
+
 
 class Document_Info():
     def __init__(self) -> None:
@@ -141,7 +251,7 @@ class Document_Info():
         self.program_used_id = ''
         self.document_date = Date()
         self.src_url = ''
-        self.src_scanner_person = None
+        self.src_scanner_person = ''
         self.id = ''
         self.version = ''
         # Fb2_Tag
@@ -198,6 +308,48 @@ class Document_Info():
                     print('unknown tag in document-info:', tag_content)
                     print(content)
 
+    def get_description(self) -> List[BookFrame]:
+        texts = [
+            Get_text('des_program') + resolve_space(self.program_used),
+            Get_text('des_program_id') + resolve_space(self.program_used_id),
+            Get_text('des_time') + resolve_space(self.document_date.present()),
+            Get_text('des_scanner') + resolve_space(self.src_scanner_person),
+        ]
+        if len(self.document_authors) == 0:
+            texts += [Get_text('des_doc_authors') + Get_text('des_unknown')]
+        else:
+            text = Get_text('des_doc_authors') + '\n'
+            for person in self.document_authors:
+                text += person.describe() 
+                text+= '\n'
+            texts.append(text)
+
+        texts.append(Get_text('des_source') + resolve_space(self.src_url))
+
+        if len(self.publishers) == 0:
+            texts += [Get_text('des_owner') + Get_text('des_unknown')]
+        else:
+            des = 'owner' if len(self.publishers) == 1 else 'owners'
+            text = Get_text('des_' + des) + '\n'
+            for person in self.publishers:
+                text += person.describe() + '\n'
+            texts.append(text)
+        
+        texts += ['id: ' + resolve_space(self.id)]
+        texts.append(Get_text('des_version') + resolve_space(self.version))
+        text = Get_text('des_history')
+        if self.history is None:
+            text += Get_text('des_unknown')
+        texts.append(text)
+
+        result = []
+        for text in texts:
+            result.append(BookFrame(text, 'text', {}))
+
+        if self.history is not None:
+            result += self.history.work()
+
+        return result
 
 class Publish_info():
     def __init__(self) -> None:
@@ -247,12 +399,43 @@ class Publish_info():
                     else:
                         print('unknown data in publish-info: ', tag_content)
 
+    def get_description(self) -> List[BookFrame]:
+        texts = [
+            Get_text('des_name') + resolve_space(self.book_name),
+            Get_text('des_publisher') + resolve_space(self.publisher),
+            Get_text('des_city') + resolve_space(self.publication_city),
+            Get_text('des_time') + resolve_space(self.publication_time),
+        ]
+        text = Get_text('des_seq')
+        if self.sequences == []:
+            text += Get_text('des_unknown')
+        else:
+            text += '\n'
+        for seq in self.sequences:
+            cicle = ''
+            if 'name' in seq:
+                cicle += seq['name']
+            if 'number' in seq:
+                cicle += ' (' +  Get_text('des_part') + seq['number'] + ')'
+            text += cicle + '\n'
+        texts.append(text)
+        texts.append('isbn: ' + resolve_space(self.isbn))
+        result = []
+        for text in texts:
+            result.append(BookFrame(text, 'text', {}))
+
+        return result
+
 
 class Original_Info(Title_Info):
     def __init__(self) -> None:
         super().__init__()
         self.lang = 'unknown'
         self.src_lang = 'unknown'
+    def get_description(self) -> List[BookFrame]:
+        result = super().get_description()
+        result.append(BookFrame(Get_text('des_original_note'), 'p', {}))
+        return result
 
 
 class FB2_Book_Deskription():
@@ -286,13 +469,13 @@ class FB2_Book_Deskription():
                     content = text[tag_end+1:close_tag]
                     self.document_info.parse(content)
                 elif tag_text == 'publish-info':
-                    self.document_info = Publish_info()
+                    self.publish_info = Publish_info()
                     close_tag = text.find('</publish-info>',tag_end)
                     pos = close_tag + 15
                     content = text[tag_end+1:close_tag]
                     self.publish_info.parse(content)
                 elif tag_text == 'src-title-info':
-                    self.document_info = Original_Info()
+                    self.original_info = Original_Info()
                     close_tag = text.find('</src-title-info>',tag_end)
                     pos = close_tag + 17
                     content = text[tag_end+1:close_tag]
@@ -321,6 +504,34 @@ class FB2_Book_Deskription():
                         close_tag = text.find(close, tag_end)
                         pos = close_tag + len(close)
 
+    def get_cover(self):
+        return self.title_info.get_cover()
+
+    def get_foreign_cover(self):
+        return self.original_info.get_cover()
+    
+    def get_description(self) -> List[BookFrame]:
+        result = [
+            BookFrame(Get_text('des_description'), 'title', {}),
+            BookFrame(None, 'empty', {})
+        ]
+        result += self.title_info.get_description()
+        result.append(BookFrame(Get_text('des_foreign'), 'title', {}))
+        result += self.original_info.get_description()
+        result.append(BookFrame(Get_text('des_publication'),'title', {}))
+        result += self.publish_info.get_description()
+        if self.custom_info != '':
+            result.append(BookFrame(Get_text('des_custom'),'title', {}))
+            text = Get_text('des_type') + resolve_space(self.custom_info_type)
+            result.append(BookFrame(text, 'text', {}))
+            text = Get_text('des_info') + resolve_space(self.custom_info)
+            result.append(BookFrame(text, 'text', {}))
+        result.append(BookFrame(Get_text('des_document'), 'title', {}))
+        result += self.document_info.get_description()
+        text = Get_text('des_id_note')
+        result.append(BookFrame(text, 'note', {}))
+
+        return result
 
 
 

@@ -33,8 +33,6 @@ class Book():
         enc_end = line.find('"', enc_pos)
         encoding = line[enc_pos:enc_end]
 
-
-
         # read content
         with open(self.file_path, 'r', encoding=encoding) as file:
             content = file.read()
@@ -49,7 +47,7 @@ class Book():
 
         # read text
         body_pos = content.find('<body>', des_fin)
-        pos_close = content.find('</body>')
+        pos_close = content.find('</body>', body_pos)
         body = content[body_pos: pos_close+7]
         book_body = fb2_book.fb2_parser(body, 0)[0]
         elements = book_body.work()
@@ -88,10 +86,10 @@ class Book():
                 assets[attributs['id']] = {'type': attributs['content-type'], 'data': bin_content}
                 pos_close = end_bin + 9
 
-        # divide into pages
-        page = []
-        i = 0
-        for el in elements:
+
+        # get result: book content
+
+        def work_book_element(el, page):
             if el.type == 'image':
                 if 'l:href' in el.attributs:
                     name = el.attributs['l:href']
@@ -107,6 +105,30 @@ class Book():
                 else:
                     print('unknown image src: ' + name)
             page.append(el)
+
+        # get cover
+        cover = self.description.get_cover()
+        if cover != []:
+            page = []
+            for el in cover:
+                work_book_element(el, page)
+            self.content.append(page)
+        
+        f_cover = self.description.get_foreign_cover()
+        if f_cover != []:
+            page = []
+            for el in cover:
+                work_book_element(el, page)
+            self.content.append(page)
+
+        # present book description
+        self.content.append(self.description.get_description())
+
+        # divide into pages
+        page = []
+        i = 0
+        for el in elements:
+            work_book_element(el, page)
             i += 1
             if i == self.max_elements_per_page:
                 self.content.append(page)
@@ -115,8 +137,6 @@ class Book():
         if page != []:
             self.content.append(page)
 
-
-    
     @property
     def length(self):
         return len(self.content)

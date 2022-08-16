@@ -96,7 +96,7 @@ class FB2_tag:
         if self.tag == 'annotation':
             result.append(bookframe.BookFrame(None,'annotation_empty', {}))
 
-        if self.tag in ['body', 'section', 'stanza', 'annotation']:
+        if self.tag in ['body', 'section', 'stanza', 'annotation', 'coverpage', 'history']:
             return result
 
         element = None

@@ -1,12 +1,11 @@
 import os
 from kivy.app import App
-from book import Book
 
 # настройки приложения и константы с переменными времени выполнения
 
 class AppInfo():
     def __init__(self) -> None:
-        self.book = Book()
+        self.book = None
         self.max_elements_per_page = 10
         self.library = []
         self.book_dir = ''
