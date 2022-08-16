@@ -17,6 +17,7 @@ class BookFrame():
 
     def escape_text(self, text: str):
         # service symbols
+        text = text.replace('&amp;', '&')
         text = escape_markup(text)
         # work link
 
@@ -63,7 +64,9 @@ class BookFrame():
         i = 0
         result = ''
 
-        for word in text.split():
+        for word in text.split(' '):
+            if word == '' or (word != '\n' and word.isspace()):
+                continue
             # this solution works faster then format strings
             result += '[ref=' + str(i) + ']' + word + '[/ref] '
             refers.append(word)
@@ -163,7 +166,7 @@ class BookFrame():
             )
 
         elif self.type == 'text':
-            text = self.escape_text(self.content.strip())
+            text = self.escape_text(self.content)
             text, refs = self.referize_text(text)
             widget = page_widgets.Text(
                 text=text, 

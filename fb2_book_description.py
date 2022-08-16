@@ -196,8 +196,8 @@ class Title_Info():
                 text = Get_text('des_author')
             result.append(BookFrame(text, 'text', {}))
             for person in self.authors:
-                text = person.describe()
-                result.append(BookFrame(text, 'text', {}))
+                text:str = person.describe()
+                result.append(BookFrame(text.rstrip(), 'text', {}))
         text = Get_text('des_date') + self.date.present()
         result.append(BookFrame(text, 'text', {}))
         text = Get_text('des_lang') + resolve_space(self.lang)
@@ -239,7 +239,7 @@ class Title_Info():
             des = 'translator' if len(self.translators) == 1 else 'translators'
             result.append(BookFrame(Get_text(f'des_{des}'), 'text', {}))
             for person in self.translators:
-                result.append(BookFrame(person.describe(), 'text', {}))
+                result.append(BookFrame(person.describe().rstrip(), 'text', {}))
         return result
 
 
@@ -320,9 +320,8 @@ class Document_Info():
         else:
             text = Get_text('des_doc_authors') + '\n'
             for person in self.document_authors:
-                text += person.describe() 
-                text+= '\n'
-            texts.append(text)
+                text += person.describe() + '\n'
+            texts.append(text.rstrip())
 
         texts.append(Get_text('des_source') + resolve_space(self.src_url))
 
@@ -333,7 +332,7 @@ class Document_Info():
             text = Get_text('des_' + des) + '\n'
             for person in self.publishers:
                 text += person.describe() + '\n'
-            texts.append(text)
+            texts.append(text.rstrip())
         
         texts += ['id: ' + resolve_space(self.id)]
         texts.append(Get_text('des_version') + resolve_space(self.version))
