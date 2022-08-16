@@ -2,7 +2,7 @@
 from typing import List
 from fb2_book import get_tag_arguments, fb2_parser
 from bookframe import BookFrame
-from localizator import Get_text
+from localizator import Get_text,get_genre
 
 def resolve_space(text:str):
     if text == '' or text.isspace():
@@ -209,7 +209,7 @@ class Title_Info():
         if self.ganres == []:
             text += Get_text('des_unknown')
         else:
-            text += ', '.join(self.ganres)
+            text += ', '.join([get_genre(genre) for genre in self.ganres])
         result.append(BookFrame(text, 'text', {}))
         text = Get_text('des_seq')
         if self.sequence == []:

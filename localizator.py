@@ -10,7 +10,7 @@ if platform == 'macosx':
     try:
         from pyobjus import autoclass
     except:
-        print('pyobjus not imported')
+        print('pyobjus was not imported')
 
 def get_lang():
     # try detect device system language
@@ -276,9 +276,9 @@ def description_text(text, lang, details=None):
             return 'Nickname: '
     if text == 'cites':
         if lang == 'ru':
-            return 'Странички'
+            return 'Странички: '
         elif lang == 'en':
-            return 'Cites'
+            return 'Cites: '
     if text == 'date':
         if lang == 'ru':
             return 'Дата написания: '
@@ -425,6 +425,456 @@ def description_text(text, lang, details=None):
             return 'Если где-то указано id, имеется ввиду внутренний id библиотеки, откуда скачан документ.'
         elif lang == 'en':
             return 'If an id is specified somewhere, it means the internal id of the library from where the document was downloaded.'
+
+def get_genre(genre, lang = None):
+    if lang == None or lang not in app_values.app_info.supported_interface_languages:
+        if app_values.app_info.interface_language == '':
+            lang = get_lang()
+        else:
+            lang = app_values.app_info.interface_language 
+    
+    genres = {
+        'sf_history': {
+            'ru': "Альтернативная история",
+            'en': "Alternative history",
+        },
+        'sf_action': {
+            'ru': "Боевая фантастика",
+            'en': "Combat fiction",
+        },
+        'sf_epic': {
+            'ru': "Эпическая фантастика",
+            'en': "Epic fiction",
+        },
+        'sf_heroic': {
+            'ru': "Героическая фантастика",
+            'en': "Heroic fiction",
+        },
+        'sf_detective': {
+            'ru': "Детективная фантастика",
+            'en': "Detective fiction",
+        },
+        'sf_cyberpunk': {
+            'ru': "Киберпанк",
+            'en': "Cyberpunk",
+        },
+        'sf_space': {
+            'ru': "Космическая фантастика",
+            'en': "Space fiction",
+        },
+        'sf_social': {
+            'ru': "Социально-психологическая фантастика",
+            'en': "Socio-psychological fiction",
+        },
+        'sf_horror': {
+            'ru': "Ужасы и Мистика",
+            'en': "Horror and Mysticism",
+        },
+        'sf_humor': {
+            'ru': "Юмористическая фантастика",
+            'en': "Humorous fiction",
+        },
+        'sf_fantasy': {
+            'ru': "Фэнтези",
+            'en': "Fantasy",
+        },
+        'sf': {
+            'ru': "Научная Фантастика",
+            'en': "Science fiction",
+        },
+        'det_classic': {
+            'ru': "Классический детектив",
+            'en': "Classic detective",
+        },
+        'det_police': {
+            'ru': "Полицейский детектив",
+            'en': "Police Detective",
+        },
+        'det_action': {
+            'ru': "Боевик",
+            'en': "Action",
+        },
+        'det_irony': {
+            'ru': "Иронический детектив",
+            'en': "Ironic Detective",
+        },
+        'det_history': {
+            'ru': "Исторический детектив",
+            'en': "Historical Detective",
+        },
+        'det_espionage': {
+            'ru': "Шпионский детектив",
+            'en': "Spy Detective",
+        },
+        'det_crime': {
+            'ru': "Криминальный детектив",
+            'en': "Criminal Detective",
+        },
+        'det_political': {
+            'ru': "Политический детектив",
+            'en': "Political Detective",
+        },
+        'det_maniac': {
+            'ru': "Маньяки",
+            'en': "Maniacs",
+        },
+        'det_hard': {
+            'ru': "Крутой детектив",
+            'en': "Cool detective",
+        },
+        'thriller': {
+            'ru': "Триллер",
+            'en': "Thriller",
+        },
+        'detective': {
+            'ru': "Детектив",
+            'en': "Detective",
+        },
+        'prose_classic': {
+            'ru': "Классическая проза",
+            'en': "Classical prose",
+        },
+        'prose_history': {
+            'ru': "Историческая проза",
+            'en': "Historical prose",
+        },
+        'prose_contemporary': {
+            'ru': "Современная проза",
+            'en': "Contemporary prose",
+        },
+        'prose_counter': {
+            'ru': "Контркультура",
+            'en': "Counterculture",
+        },
+        'prose_rus_classic': {
+            'ru': "Русская классическая проза",
+            'en': "Russian classical prose",
+        },
+        'prose_su_classics': {
+            'ru': "Советская классическая проза",
+            'en': "Soviet classical prose",
+        },
+        'love_contemporary': {
+            'ru': "Современные любовные романы",
+            'en': "Contemporary romance novels",
+        },
+        'love_history': {
+            'ru': "Исторические любовные романы",
+            'en': "Historical romance novels",
+        },
+        'love_detective': {
+            'ru': "Остросюжетные любовные романы",
+            'en': "Action-packed romance novels",
+        },
+        'love_short': {
+            'ru': "Короткие любовные романы",
+            'en': "Short romance novels",
+        },
+        'love_erotica': {
+            'ru': "Эротика",
+            'en': "Erotica",
+        },
+        'adv_western': {
+            'ru': "Вестерн",
+            'en': "Western",
+        },
+        'adv_history': {
+            'ru': "Исторические приключения",
+            'en': "Historical adventures",
+        },
+        'adv_indian': {
+            'ru': "Приключения про индейцев",
+            'en': "Adventures about Indians",
+        },
+        'adv_maritime': {
+            'ru': "Морские приключения",
+            'en': "Sea adventures",
+        },
+        'adv_geo': {
+            'ru': "Путешествия и география",
+            'en': "Travel and geography",
+        },
+        'adv_animal': {
+            'ru': "Природа и животные",
+            'en': "Nature and animals",
+        },
+        'adventure': {
+            'ru': "Приключения",
+            'en': "Adventure",
+        },
+        'child_tale': {
+            'ru': "Сказка",
+            'en': "fairy tale",
+        },
+        'child_verse': {
+            'ru': "Детские стихи",
+            'en': "Children's poems",
+        },
+        'child_prose': {
+            'ru': "Детскиая проза",
+            'en': "Children's prose",
+        },
+        'child_sf': {
+            'ru': "Детская фантастика",
+            'en': "Children's fiction",
+        },
+        'child_det': {
+            'ru': "Детские остросюжетные",
+            'en': "Children's action - packed",
+        },
+        'child_adv': {
+            'ru': "Детские приключения",
+            'en': "Children's adventures",
+        },
+        'child_education': {
+            'ru': "Детская образовательная литература",
+            'en': "Children's educational literature",
+        },
+        'children': {
+            'ru': "Детская литература",
+            'en': "children's literature",
+        },
+        'poetry': {
+            'ru': "Поэзия",
+            'en': "Poetry",
+        },
+        'dramaturgy': {
+            'ru': "Драматургия",
+            'en': "Dramaturgy",
+        },
+        'antique_ant': {
+            'ru': "Античная литература",
+            'en': "Ancient literature",
+        },
+        'antique_european': {
+            'ru': "Европейская старинная литература",
+            'en': "European ancient literature",
+        },
+        'antique_russian': {
+            'ru': "Древнерусская литература",
+            'en': "Ancient Russian literature",
+        },
+        'antique_east': {
+            'ru': "Древневосточная литература",
+            'en': "Ancient Eastern literature",
+        },
+        'antique_myths': {
+            'ru': "Мифы. Легенды. Эпос",
+            'en': "Myths. Legends. Epic",
+        },
+        'antique': {
+            'ru': "Cтаринная литература",
+            'en': "Ancient literature",
+        },
+        'sci_history': {
+            'ru': "История",
+            'en': "History",
+        },
+        'sci_psychology': {
+            'ru': "Психология",
+            'en': "Psychology",
+        },
+        'sci_culture': {
+            'ru': "Культурология",
+            'en': "Cultural studies",
+        },
+        'sci_religion': {
+            'ru': "Религиоведение",
+            'en': "Religious studies",
+        },
+        'sci_philosophy': {
+            'ru': "Философия",
+            'en': "Philosophy",
+        },
+        'sci_politics': {
+            'ru': "Политика",
+            'en': "Politics",
+        },
+        'sci_business': {
+            'ru': "Деловая литература",
+            'en': "Business literature",
+        },
+        'sci_juris': {
+            'ru': "Юриспруденция",
+            'en': "Jurisprudence",
+        },
+        'sci_linguistic': {
+            'ru': "Языкознание",
+            'en': "Linguistics",
+        },
+        'sci_medicine': {
+            'ru': "Медицина",
+            'en': "Medicine",
+        },
+        'sci_phys': {
+            'ru': "Физика",
+            'en': "Physics",
+        },
+        'sci_math': {
+            'ru': "Математика",
+            'en': "Math",
+        },
+        'sci_chem': {
+            'ru': "Химия",
+            'en': "Chemistry",
+        },
+        'sci_biology': {
+            'ru': "Биология",
+            'en': "Biology",
+        },
+        'sci_tech': {
+            'ru': "Технические науки",
+            'en': "Technical sciences",
+        },
+        'science': {
+            'ru': "Научная литература",
+            'en': "Scientific literature",
+        },
+        'comp_www': {
+            'ru': "Интернет",
+            'en': "Internet",
+        },
+        'comp_programming': {
+            'ru': "Программирование",
+            'en': "Programming",
+        },
+        'comp_hard': {
+            'ru': "Компьютерное \"железо\" (аппаратное обеспечение)",
+            'en': "Computer hardware (hardware)",
+        },
+        'comp_soft': {
+            'ru': "Программы",
+            'en': "Programs",
+        },
+        'comp_db': {
+            'ru': "Базы данных",
+            'en': "Databases",
+        },
+        'comp_osnet': {
+            'ru': "ОС и Сети",
+            'en': "OS and Networks",
+        },
+        'computers': {
+            'ru': "Околокомпьтерная литература",
+            'en': "Computer literature",
+        },
+        'ref_encyc': {
+            'ru': "Энциклопедии",
+            'en': "Encyclopedias",
+        },
+        'ref_dict': {
+            'ru': "Словари",
+            'en': "Dictionaries",
+        },
+        'ref_ref': {
+            'ru': "Справочники",
+            'en': "References",
+        },
+        'ref_guide': {
+            'ru': "Руководства",
+            'en': "Manuals",
+        },
+        'reference': {
+            'ru': "Справочная литература",
+            'en': "Reference literature",
+        },
+        'nonf_biography': {
+            'ru': "Биографии и Мемуары",
+            'en': "Biographies and Memoirs",
+        },
+        'nonf_publicism': {
+            'ru': "Публицистика",
+            'en': "Publicism",
+        },
+        'nonf_criticism': {
+            'ru': "Публицистика",
+            'en': "Cricitism",
+        },
+        'design': {
+            'ru': "Искусство и Дизайн",
+            'en': "Art and Design",
+        },
+        'nonfiction': {
+            'ru': "Документальная литература ",
+            'en': "Nonfiction",
+        },
+        'religion_rel': {
+            'ru': "Религия",
+            'en': "Religion",
+        },
+        'religion_esoterics': {
+            'ru': "Эзотерика",
+            'en': "Esotericism",
+        },
+        'religion_self': {
+            'ru': "Самосовершенствование",
+            'en': "Self-improvement",
+        },
+        'religion': {
+            'ru': "Духовная литература",
+            'en': "Spiritual literature",
+        },
+        'humor_anecdote': {
+            'ru': "Анекдоты",
+            'en': "funny stories",
+        },
+        'humor_prose': {
+            'ru': "Юмористическая проза",
+            'en': "Humorous prose",
+        },
+        'humor_verse': {
+            'ru': "Юмористические стихи",
+            'en': "Humorous poems",
+        },
+        'humor': {
+            'ru': "Юмор",
+            'en': "Humor",
+        },
+        'home_cooking': {
+            'ru': "Кулинария",
+            'en': "Cooking",
+        },
+        'home_pets': {
+            'ru': "Домашние животные",
+            'en': "Pets",
+        },
+        'home_crafts': {
+            'ru': "Хобби и ремесла",
+            'en': "Hobbies and crafts",
+        },
+        'home_entertain': {
+            'ru': "Развлечения",
+            'en': "Entertainments",
+        },
+        'home_health': {
+            'ru': "Здоровье",
+            'en': "Health",
+        },
+        'home_garden': {
+            'ru': "Сад и огород",
+            'en': "Garden and vegetable garden",
+        },
+        'home_diy': {
+            'ru': "Сделай сам",
+            'en': "Do it yourself",
+        },
+        'home_sport': {
+            'ru': "Спорт",
+            'en': "Sport",
+        },
+        'home_sex': {
+            'ru': "Эротика, Секс",
+            'en': "Erotica, Sex",
+        },
+        'home': {
+            'ru': "Прочиее домоводство",
+            'en': "Home economics",
+        },
+    }
+
+    if genre in genres:
+        return genres[genre][lang]
+    return genre
 
 
 def template(text, lang):
