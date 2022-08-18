@@ -9,6 +9,7 @@ from kivy.graphics import Color, Rectangle
 from kivy.factory import Factory
 from kivy.core.window import Window
 
+import app_values
 
 #
 # study kvfiles/page_widgets.kv
@@ -75,7 +76,7 @@ class SelectableLabel(Label):
         return os.path.join(folder, 'assets', 'fonts', name)
 
     def on_touch_up(self, touch):
-        if self.choosenWord != '':
+        if self.choosenWord != '' and app_values.app_info.translate_text:
             choosenWord = self.referization[int(self.choosenWord)]
             root = self.root_screen
             if root:
@@ -83,6 +84,7 @@ class SelectableLabel(Label):
             else:
                 print('can\'t present content in SelectableLabel.on_refference')
             self.choosenWord = ''
+        # clear value
         self.first_pos = list(self.center)
         return super().on_touch_up(touch)
     
@@ -113,6 +115,8 @@ class SelectableLabel(Label):
         return super().on_touch_move(touch)
 
     def select(self, pos):
+        if not app_values.app_info.select_text:
+            return
         shapes = []
         words = []
         pos = [pos[0], pos[1]]

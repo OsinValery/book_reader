@@ -12,7 +12,9 @@ class AppInfo():
         self.supported_formats = ['.fb2']
         self.supported_interface_languages = ['ru', 'en']
         self.interface_language = ''
-    
+        self.select_text = True
+        self.translate_text = True
+
     def read_settings(self):
         dir = App.get_running_app().user_data_dir 
         filename = os.path.join(dir, 'settings.txt')
@@ -20,8 +22,10 @@ class AppInfo():
             return False
         try:
             with open(filename) as file:
-                data = file.readlines()
+                data = file.read().split('\n')
                 self.interface_language = data[0]
+                self.translate_text = data[1] == 'True'
+                self.select_text = data[2] == 'True'
         except Exception as e:
             print(e)
             return False
@@ -32,13 +36,24 @@ class AppInfo():
         dir = os.path.join(dir, 'settings.txt')
         try:
             with open(dir, mode='w') as file:
-                file.write(self.interface_language)
+                file.write(self.interface_language + '\n')
+                file.write(str(self.translate_text) + '\n')
+                file.write(str(self.select_text) + '\n')
+
         except Exception as e:
             print('can\'t write settings')
             print(e)
 
     def set_language(self, new_lang):
         self.interface_language = new_lang
+        self.write_settings()
+    
+    def set_selection(self, value: bool):
+        self.select_text = value
+        self.write_settings()
+    
+    def set_translation(self, value: bool):
+        self.translate_text = value
         self.write_settings()
     
     def remember_page(self, page):

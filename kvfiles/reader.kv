@@ -11,7 +11,7 @@
 #: import app_values app_values
 
 #: set icon_size 40
-
+#: set settings_padding 10
 
 <PageTurnerButton@Button>:
     background_normal: ''
@@ -83,6 +83,22 @@
         disabled: root.cur_page == 1
         on_press: root.back()
         icon: os.path.join(app.directory, 'assets', 'left.png')
+
+
+<SettingsItem@BoxLayout>:
+    orientation: "horizontal"
+    width: self.parent.width
+    size_hint_y: None
+    height: self.padding[1] + self.padding[3] + max(self.children, key = lambda x: x.height, default = Window).height
+    padding: [50, settings_padding] * 2
+
+    canvas:
+        Color:
+            rgba:
+                (221/255, 238/255, 255/255, 0.3)
+        Rectangle:
+            size: self.size
+            pos: self.pos
 
 
 <PageScreen>:
@@ -165,43 +181,71 @@
                 
                 ScrollView:
                     do_scroll_x: False
-                    do_scroll_y: False
+                    do_scroll_y: (self.height <= mdlist.height)
                     size: [Window.width, Window.height - settings_app_bar.height]
 
                     MDList:
-                        padding: [50, 50]
+                        id: mdlist
+                        height: self.minimum_height
+                        width: self.parent.width
+                        size_hint_y: None
+                        size_hint_x: None
                         spacing: 10
 
-                        Widget:
-                            size_hint_y: None
-                            height: 15
-
-                        BoxLayout:
-                            orientation: "horizontal"
-
+                        SettingsItem:
                             MDLabel:
                                 id: language_label
                                 text: Get_text('info_language')
-                                
-                            MDDropDownItem:
-                                id: language_drop_down_image
-                                text: Get_text('lang_'+app_values.app_info.interface_language)
-                                size_hint_x: None
-                                
-                                on_press:
-                                    def work(lang): menu.dismiss();language_drop_down_image.text = Get_text('lang_'+lang);app_values.app_info.set_language(lang);reader.change_language();
-                                    def produse(lang): return {'text': Get_text('lang_'+lang), 'on_release': lambda x=None: work(lang),"viewclass": "MDFlatButton", "height": 76}
-                                    
-                                    menu_items = [ produse(lang) \
-                                    for lang in app_values.app_info.supported_interface_languages
-                                    ]
 
-                                    menu = MDDropdownMenu( \
-                                    caller = language_drop_down_image, \
-                                    items=menu_items, \
-                                    width_mult=3, \
-                                    )
-                                    menu.open()
+                            AnchorLayout:
+                                anchor_y: 'center'
+                                size_hint_x: None
+                                width: language_drop_down_image.width
+                                
+                                MDDropDownItem:
+                                    id: language_drop_down_image
+                                    text: Get_text('lang_'+app_values.app_info.interface_language)
+                                    color: (221/255, 238/255, 255/255, 1)
+                                    opacity: 1
+                                    
+                                    on_press:
+                                        def work(lang): menu.dismiss();language_drop_down_image.text = Get_text('lang_'+lang);app_values.app_info.set_language(lang);reader.change_language();
+                                        def produse(lang): return {'text': Get_text('lang_'+lang), 'on_release': lambda x=None: work(lang),"viewclass": "MDFlatButton", "height": 76}
+                                        
+                                        menu_items = [ produse(lang) \
+                                        for lang in app_values.app_info.supported_interface_languages
+                                        ]
+
+                                        menu = MDDropdownMenu( \
+                                        caller = language_drop_down_image, \
+                                        items=menu_items, \
+                                        width_mult=3, \
+                                        )
+                                        menu.open()
+
+                        SettingsItem:
+                            MDLabel:
+                                id: translation_text
+                                text: Get_text('info_translate_text')
+
+                            CheckBox:
+                                size_hint_x: None
+                                active: app_values.app_info.translate_text
+                                on_active:
+                                    app_values.app_info.set_translation(args[1])
+
+                        SettingsItem:
+                            MDLabel:
+                                id: select_text
+                                text: Get_text('info_select_text')
+                        
+                            CheckBox:
+                                size_hint_x: None
+                                active: app_values.app_info.select_text
+                                on_active:
+                                    app_values.app_info.set_selection(args[1])
+                        
+                        
 
     # right drawer
     MDNavigationDrawer:

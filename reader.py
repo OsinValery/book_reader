@@ -77,6 +77,8 @@ class PageScreen(MDNavigationLayout):
         self.ids.menu_select_book.text = Get_text('info_select_book')
         self.ids.translate_to.text = Get_text('info_translate_to')
         self.ids.translate_from.text = Get_text('info_translate_from')
+        self.ids.select_text.text = Get_text('info_select_text')
+        self.ids.translation_text.text = Get_text('info_translate_text')
         self.ids.pagePresenterAppBar.change_language()
 
 

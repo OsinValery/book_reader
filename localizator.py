@@ -196,11 +196,24 @@ def infotext(text, lang, details):
         elif lang == 'en':
             return 'Translate to'
 
+    if text == 'translate_text':
+        if lang == 'ru':
+            return 'Переводить текст\nпо клику'
+        elif lang == 'en':
+            return 'Translate text\nby click'
+
+    if text == 'select_text':
+        if lang == 'ru':
+            return 'Выделять текст'
+        elif lang == 'en':
+            return 'Select text'
+
     if text == '':
         if lang == 'ru':
             return ''
         elif lang == 'en':
             return ''
+
     return 'Unknown text: ' + text
 
 def error_message(text, lang, details):
