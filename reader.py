@@ -79,6 +79,9 @@ class PageScreen(MDNavigationLayout):
         self.ids.translate_from.text = Get_text('info_translate_from')
         self.ids.select_text.text = Get_text('info_select_text')
         self.ids.translation_text.text = Get_text('info_translate_text')
+        self.ids.change_theme.text = Get_text('info_change_theme')
+        theme = kivy.app.App.get_running_app().theme_cls.theme_style
+        self.ids.theme_changer.text = Get_text('theme_' + theme)
         self.ids.pagePresenterAppBar.change_language()
 
 

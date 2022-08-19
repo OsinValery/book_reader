@@ -51,6 +51,7 @@ class ReaderApp(MDApp):
         if not app_values.app_info.read_settings():
             app_values.app_info.interface_language = get_lang()
             app_values.app_info.write_settings()
+        self.set_theme(app_values.app_info.theme)
         self.load_all_kv_files(os.path.join(self.directory, 'kvfiles'))
 
         asset_dir = os.path.join(self.directory, 'assets')
@@ -99,6 +100,22 @@ class ReaderApp(MDApp):
     @property
     def books_dir(self):
         return os.path.join(self.user_data_dir, 'books')
+    
+    def set_theme(self, theme):
+        if theme in ['Dark', 'Light']:
+            self.theme_cls.theme_style = theme
+            if theme == 'Light':
+                self.theme_cls.primary_hue = '500'
+                self.theme_cls.primary_palette = 'Blue'
+            else:
+                self.theme_cls.primary_hue = '500'
+                self.theme_cls.primary_palette = 'Gray'
+            app_values.app_info.set_theme(theme)
+        else:
+            print('ReaderApp.set_theme:')
+            print('unknown theme style: ', theme)
+            print('Must be "Dark" or "Light" !!!!')
+        
 
 
 if __name__ == '__main__':

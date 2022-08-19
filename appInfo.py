@@ -14,6 +14,7 @@ class AppInfo():
         self.interface_language = ''
         self.select_text = True
         self.translate_text = True
+        self.theme = 'Light'
 
     def read_settings(self):
         dir = App.get_running_app().user_data_dir 
@@ -26,6 +27,7 @@ class AppInfo():
                 self.interface_language = data[0]
                 self.translate_text = data[1] == 'True'
                 self.select_text = data[2] == 'True'
+                self.theme = data[3]
         except Exception as e:
             print(e)
             return False
@@ -39,6 +41,7 @@ class AppInfo():
                 file.write(self.interface_language + '\n')
                 file.write(str(self.translate_text) + '\n')
                 file.write(str(self.select_text) + '\n')
+                file.write(self.theme + '\n')
 
         except Exception as e:
             print('can\'t write settings')
@@ -55,6 +58,11 @@ class AppInfo():
     def set_translation(self, value: bool):
         self.translate_text = value
         self.write_settings()
+    
+    def set_theme(self, theme):
+        if theme != self.theme:
+            self.theme = theme
+            self.write_settings()
     
     def remember_page(self, page):
         dir = App.get_running_app().user_data_dir 

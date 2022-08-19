@@ -16,17 +16,24 @@
 <PageTurnerButton@Button>:
     background_normal: ''
     background_color: (0,0,0,0)
-    size: (icon_size, 60)
+    size: (icon_size, self.parent.height)
     text: ''
     icon: ""
 
     canvas:
+        Color:
+            rgba: (0, 0, 0, .05)
+        Rectangle:
+            pos: self.pos
+            size: self.size
+        
         Color: 
             rgba: (0,1,0,1) if not self.disabled else (220/255,220/255,220/255)
+        
         Rectangle:
-            size: self.size
+            size: [self.width, icon_size]
             source: self.icon
-            pos: self.pos
+            pos: self.pos[0], self.center[1]
 
 
 <Translation_widget@ScrollView>:
@@ -47,7 +54,7 @@
 
     Label:
         text: self.parent.text
-        color: (0,0,0,1)
+        color: app.theme_cls.text_color
         size_hint_y: None
         text_size: self.parent.width, None
         size: self.texture_size
@@ -65,21 +72,22 @@
 
     canvas.before:
         Color:
-            rgba: (1,1,1,0.5)
+            rgba: (1,1,1,0.5) if app.theme_cls.theme_style == 'Light' else (0.4 ,0.4, 0.4, 0.5)
         Rectangle:
             size: self.size
             source: os.path.join(app.directory, 'assets', 'paper.jpg')
+        Color:
+            rgba: (0,0,0,1)
 
     PageTurnerButton:
         id: page_forward
-        pos: (self.parent.size[0] - self.size[0], self.parent.size[1]/2)
+        pos: (self.parent.size[0] - self.size[0], 0)
         icon: os.path.join(app.directory, 'assets', 'right.png')
         on_press: root.forward()
         disabled: root.cur_page == root.book.length
 
     PageTurnerButton:
         id: page_back
-        pos: (0, self.parent.size[1]/2)
         disabled: root.cur_page == 1
         on_press: root.back()
         icon: os.path.join(app.directory, 'assets', 'left.png')
@@ -205,8 +213,6 @@
                                 MDDropDownItem:
                                     id: language_drop_down_image
                                     text: Get_text('lang_'+app_values.app_info.interface_language)
-                                    color: (221/255, 238/255, 255/255, 1)
-                                    opacity: 1
                                     
                                     on_press:
                                         def work(lang): menu.dismiss();language_drop_down_image.text = Get_text('lang_'+lang);app_values.app_info.set_language(lang);reader.change_language();
@@ -221,6 +227,38 @@
                                         items=menu_items, \
                                         width_mult=3, \
                                         )
+                                        menu.open()
+
+                        SettingsItem:
+                            MDLabel:
+                                id: change_theme
+                                text: Get_text('info_change_theme')
+
+                            AnchorLayout:
+                                anchor_y: 'center'
+                                size_hint_x: None
+                                width: theme_changer.width
+                            
+                                MDDropDownItem:
+                                    id: theme_changer
+                                    text: Get_text('theme_' + app.theme_cls.theme_style)
+                                    on_press:
+                                        def work(theme): menu.dismiss();app.set_theme(theme);theme_changer.text = Get_text('theme_'+theme)
+                                        items = [ \
+                                        { \
+                                        'text': Get_text('theme_Light'), \
+                                        'on_release': lambda x=None: work('Light'), \
+                                        "viewclass": "MDFlatButton", \
+                                        "height": 76 \
+                                        }, \
+                                        { \
+                                        'text': Get_text('theme_Dark'), \
+                                        'on_release': lambda x=None: work('Dark'), \
+                                        "viewclass": "MDFlatButton", \
+                                        "height": 76 \
+                                        } \
+                                        ]
+                                        menu = MDDropdownMenu(caller = theme_changer, items=items, width_mult=3)
                                         menu.open()
 
                         SettingsItem:
@@ -244,13 +282,12 @@
                                 active: app_values.app_info.select_text
                                 on_active:
                                     app_values.app_info.set_selection(args[1])
-                        
-                        
+
 
     # right drawer
     MDNavigationDrawer:
         id: translater
-        md_bg_color: get_color_from_hex("#f7f4e7")
+        md_bg_color: get_color_from_hex("#f7f4e7") if app.theme_cls.theme_style == 'Light' else get_color_from_hex("#49423D")
         close_on_click: True
         swipe_distance: 30
         anchor: 'right'
@@ -262,17 +299,23 @@
             MDNavigationDrawerHeader:
                 id: translater_header
                 title: Get_text('info_translater')
-                title_color: get_color_from_hex("#4a4939")
+                title_color: (1,1,1,1)
+                text_color: (1,1,1,1)
                 text: ""
-                # spacing: "4dp"
-                padding: "15dp", 0, 0, "62dp"
+                spacing: "4dp"
+                padding: "15dp", "10dp", "20dp", "62dp"
 
                 canvas.before:
                     Color:
-                        rgba: get_color_from_hex("#3cbee6")
-                    Rectangle:
-                        size: self.size
+                        rgba: app.theme_cls.primary_color
+                    RoundedRectangle:
                         pos: self.pos
+                        size: (self.width, self.height + 16)
+                        radius: (12,0,0,0)
+            
+            Widget:
+                size_hint_y: None
+                height: "10dp"
 
             BoxLayout:
                 size_hint_y: None
@@ -282,27 +325,27 @@
 
                 Label:
                     id: translate_from
-                    color: (0,0,0,1)
+                    color: app.theme_cls.text_color
                     text: Get_text('info_translate_from')
 
                     size: self.texture_size
                     size_hint_x: None
                 
-                MDDropDownItem:
-                    id: from_translater_selector
-                    text: reader.from_lang
-                    on_press:
-                        def work(lang): menu.dismiss();reader.from_lang=lang;reader.present(reader.word)
-                        def produse(lang): return {'text': lang, 'on_release': lambda x='ru': work(lang),"viewclass": "MDFlatButton", "height": 76}
-                        
-                        menu_items = [produse(lang) for lang in reader.supported_languages ]
+                AnchorLayout:
+                    anchor_y: 'center'
+                    anchor_x: "left"
+                    width: from_translater_selector.width
 
-                        menu = MDDropdownMenu( \
-                        caller = self, \
-                        items=menu_items, \
-                        width_mult=3, \
-                        )
-                        menu.open()
+                    MDDropDownItem:
+                        id: from_translater_selector
+                        text: reader.from_lang
+                        on_press:
+                            def work(lang): menu.dismiss();reader.from_lang=lang;reader.present(reader.word)
+                            def produse(lang): return {'text': lang, 'on_release': lambda x='ru': work(lang),"viewclass": "MDFlatButton", "height": 76}
+
+                            menu_items = [produse(lang) for lang in reader.supported_languages ]
+                            menu = MDDropdownMenu(caller = self, items=menu_items, width_mult=3)
+                            menu.open()
             
             MDNavigationDrawerDivider:
             Translation_widget:
@@ -321,27 +364,27 @@
                 Label:
                     id: translate_to
                     text: Get_text('info_translate_to')
-                    color: (0,0,0,1)
+                    color: app.theme_cls.text_color
 
                     size: self.texture_size
                     size_hint_x: None
-                
-                MDDropDownItem:
-                    text: reader.to_lang
-                    id: to_translater_selector
-                    on_press:
-                        def work(lang): menu.dismiss();reader.to_lang=lang;reader.present(reader.word)
-                        def produse(lang): return {'text': lang, 'on_release': lambda x='ru': work(lang),"viewclass": "MDFlatButton", "height": 76}
-                        
-                        menu_items = [produse(lang) for lang in reader.supported_languages ]
 
-                        menu = MDDropdownMenu( \
-                        caller = self, \
-                        items=menu_items, \
-                        width_mult=3, \
-                        )
-                        menu.open()
-            
+                AnchorLayout:
+                    anchor_y: 'center'
+                    anchor_x: "left"
+                    width: from_translater_selector.width
+
+                    MDDropDownItem:
+                        text: reader.to_lang
+                        id: to_translater_selector
+                        on_press:
+                            def work(lang): menu.dismiss();reader.to_lang=lang;reader.present(reader.word)
+                            def produse(lang): return {'text': lang, 'on_release': lambda x='ru': work(lang),"viewclass": "MDFlatButton", "height": 76}
+                            
+                            menu_items = [produse(lang) for lang in reader.supported_languages ]
+                            menu = MDDropdownMenu(caller = self, items=menu_items, width_mult=3)
+                            menu.open()
+
             MDNavigationDrawerDivider:
             Translation_widget:
                 text: reader.translation_result
@@ -353,7 +396,7 @@
     # left drawer with menu 
     MDNavigationDrawer:
         id: app_menu
-        md_bg_color: get_color_from_hex("#f7f4e7")
+        md_bg_color: get_color_from_hex("#f7f4e7") if app.theme_cls.theme_style == 'Light' else get_color_from_hex("#49423D")
         close_on_click: True
         anchor: 'left'
         padding: [0,0,0,16]
@@ -363,11 +406,27 @@
 
             MDNavigationDrawerHeader:
                 id: menu_header
+                padding: "12dp", "10dp", 0, "56dp"
                 title: Get_text('info_reader')
-            
+                title_color: (1,1,1,1)
+                text_color: (1,1,1,1)
+
+                canvas.before:
+                    Color:
+                        rgba: app.theme_cls.primary_color
+                    RoundedRectangle:
+                        pos: self.pos
+                        size: (self.width, self.height + 16)
+                        radius: (0,12,0,0)                
+
             MDNavigationDrawerItem:
                 id: menu_select_book
                 text: Get_text('info_select_book')
+                text_color: app.theme_cls.text_color
+                selected_color: app.theme_cls.text_color
+                selected: False
+                icon_color: get_color_from_hex('#696e79')
+                icon: os.path.join(app.directory, 'assets', 'book.png')
 
                 on_press:
                     app_menu.set_state('close')
@@ -377,6 +436,10 @@
             MDNavigationDrawerItem:
                 id: menu_settings
                 text: Get_text('info_settings')
+                icon: os.path.join(app.directory, 'assets', 'setting.png')
+                icon_color: app.theme_cls.text_color
+                text_color: app.theme_cls.text_color
+                selected_color: app.theme_cls.text_color
 
                 on_press:
                     app_menu.set_state('close')

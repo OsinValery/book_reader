@@ -1,4 +1,5 @@
 
+
 from kivy.utils import platform
 import app_values
 
@@ -54,6 +55,8 @@ def Get_text(text, lang = None, details = None):
         return error_message(text[6:], lang, details)
     elif text[:5] == 'lang_':
         return lang_code_text(text[5:])
+    elif text[:6] == 'theme_':
+        return theme_texts(text[6:], lang=lang)
     elif text[:4] == 'des_':
         return description_text(text[4:], lang, details)
     return 'unknown type of message: ' + text
@@ -62,6 +65,19 @@ def lang_code_text(code):
     if code == 'ru': return 'Русский'
     if code == 'en': return 'English'
     return 'unknown code: ' + code
+
+def theme_texts(text, lang):
+    if text == 'Light':
+        if lang == 'ru':
+            return 'Светлая'
+        elif lang == 'en':
+            return 'Light'
+    if text == 'Dark':
+        if lang == 'ru':
+            return 'Тёмная'
+        elif lang == 'en':
+            return 'Dark'
+    return 'unknown text or color'
 
 def infotext(text, lang, details):
     if text == 'copy':
@@ -207,6 +223,12 @@ def infotext(text, lang, details):
             return 'Выделять текст'
         elif lang == 'en':
             return 'Select text'
+
+    if text == 'change_theme':
+        if lang == 'ru':
+            return 'Тема'
+        elif lang == 'en':
+            return 'App theme'
 
     if text == '':
         if lang == 'ru':

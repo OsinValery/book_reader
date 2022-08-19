@@ -16,11 +16,13 @@
             points: (0, page_number_height, self.width, page_number_height)
             width: 0.5
         Color:
-            rgba: (1,1,1,1)
+            rgba: (0,0,0,1)
 
     ScrollView:
         size: (self.parent.size[0], self.parent.size[1] - page_number_height)
         pos: (0, page_number_height)
+        bar_width: icon_size / 5
+        bar_inactive_color: self.bar_color
         do_scroll_x: False
         do_scroll_y: True
         scroll_timeout: 300
@@ -37,7 +39,8 @@
             on_parent:
                 widgets = root.prepare()
                 for widget in widgets: self.add_widget(widget)
+
     Label:
         center: (Window.size[0]/2,page_number_height/2)
         text: str(root.page)
-        color: (0,0,0,1)
+        color: app.theme_cls.text_color

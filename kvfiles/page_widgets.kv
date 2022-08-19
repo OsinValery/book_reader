@@ -4,7 +4,8 @@
 <SelectableLabel>:
     text: ''
     markup: True
-    color: (0,0,0,1) if not root.note else (10/255, 183 / 255 , 122 / 255 , 1)
+    color: app.theme_cls.text_color
+    color: app.theme_cls.text_color if not root.note else (10/255, 183 / 255 , 122 / 255 , 1)
     font_size: 32
 
     text_size: Window.width - 2 * icon_size , None
@@ -67,7 +68,7 @@
 
     canvas:
         Color:
-            rgba: (0,0.5,1,1)
+            rgba: (0,0.5,1,1) if app.theme_cls.theme_style == 'Light' else (135/255, 206/255, 250/255, 1)
         Line:
             points: self.pos[0], self.pos[1], self.pos[0] + self.size[0], self.pos[1]
             width: 0.75
