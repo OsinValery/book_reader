@@ -1,0 +1,30 @@
+#:import Color kivy.graphics.Color
+#:import RoundedRectangle kivy.graphics.RoundedRectangle
+
+<BottomSheet>:
+    id: sheet
+    content_background: get_color_from_hex("#f7f4e7") if app.theme_cls.theme_style == 'Light' else get_color_from_hex("#49423D")
+    size_hint_y: None
+
+    canvas:
+        Color:
+            rgba: root.background_color
+        Rectangle:
+            id: background
+            size:Window.size
+            pos: [0,0]
+        Color:
+            rgba: root.content_background
+        RoundedRectangle:
+            id: content_background
+            size: self.size
+            pos: self.pos
+            radius:[root.radius,root.radius,0,0]
+    
+    on_height:
+        if 'content_background' in root.ids: root.ids.content_background.size = self.width, args[1]
+
+    BoxLayout:
+        id: box
+        size: sheet.size
+        padding: [0, root.padding,0,0]

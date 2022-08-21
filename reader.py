@@ -7,6 +7,7 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.properties import NumericProperty, StringProperty, ObjectProperty
 from kivy.metrics import dp
 import kivy.app
+from kivy.core.window import Window
 from kivy.clock import Clock
 from kivy.utils import platform
 
@@ -18,12 +19,12 @@ from plyer import filechooser
 from kivymd.uix.navigationdrawer.navigationdrawer import MDNavigationLayout
 from kivymd.uix.toolbar.toolbar import MDTopAppBar
 from kivymd.uix.menu.menu import MDDropdownMenu
-from kivymd.uix.bottomsheet.bottomsheet import MDCustomBottomSheet
 from kivymd.uix.dialog import MDDialog
 from kivymd.uix.button import MDRaisedButton, MDFlatButton
 from kivymd.uix.list import MDList, OneLineAvatarIconListItem, IconLeftWidget, IconRightWidget
 from kivymd.uix.filemanager.filemanager import MDFileManager
 
+from bottom_sheet import BottomSheet
 from libretranslatepy import LibreTranslateAPI
 from localizator import Get_text
 
@@ -163,12 +164,21 @@ class MyAppBar(MDTopAppBar):
         
     def seek(self, *args):
         self.menu.dismiss()
+        """
         bottom_sheet = MDCustomBottomSheet(
             screen=PageTurnerSheet(
                 maximum=self.page_turner.book.length, 
                 on_select = lambda page: self.seek_to_page(page),
                 current = self.page_turner.cur_page
             )
+        )
+        """
+        bottom_sheet = BottomSheet(
+            content = PageTurnerSheet(
+                maximum=self.page_turner.book.length, 
+                on_select = lambda page: self.seek_to_page(page),
+                current = self.page_turner.cur_page
+            ),
         )
         bottom_sheet.open()
     
@@ -198,6 +208,15 @@ class PageTurnerSheet(BoxLayout):
 
     def seek(self, page):
         self.on_select(page)
+
+    def resolve_size(self, expanded):
+        """returns new height of content depending on system keyboard size"""
+        if not expanded or platform not in ['android', 'ios']:
+            return 0.25 * Window.height
+        # if hasattr(Window, 'keyboard_height') and Window.keyboard_height != None:
+        #     return 0.25 * Window.height + Window.keyboard_height
+        return 0.5 * Window.height
+        
 
 
 class LibraryPresenter(MDList):

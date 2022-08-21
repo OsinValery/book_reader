@@ -1,11 +1,11 @@
 #: import Window kivy.core.window.Window
 #: import Get_text localizator.Get_text 
+#: import Rectangle kivy.graphics.Rectangle
 
 <PageTurnerSheet>:
+    id: page_turner_sheet
     height: Window.height * 0.25
-    size_hint_y: None
     orientation: "vertical"
-    spacing: 20
 
     on_current:
         root.seek(root.current)
@@ -14,10 +14,13 @@
         page.text = Get_text('info_page') + ': '
 
     GridLayout:
+        id: field_line
         size_hint_x: 1
         cols: 3
         spacing: 15
         padding: [20, 20, 20, 10]
+        height: self.minimum_height
+        size_hint_y: None
 
         Label: 
             id: page
@@ -31,6 +34,10 @@
             text: str(root.current)
             multiline: False
             input_filter: "int"
+
+            on_focus:
+                new_size = root.resolve_size(args[1])
+                page_turner_sheet.parent.parent.resize(new_size)
 
             on_text:
                 text = self.text
@@ -48,13 +55,16 @@
             size: self.texture_size
             size_hint_x: None
 
-    MDSlider:
-        id: slider
-        min: 1
-        max: root.maximum
-        value: root.current
-        step: 1
-        icon: 'book'
+    AnchorLayout:
+        anchor_y: "top"
 
-        on_value:
-            root.current = int(self.value)
+        MDSlider:
+            id: slider
+            min: 1
+            max: root.maximum
+            value: root.current
+            step: 1
+            size_hint_y: None
+
+            on_value:
+                root.current = int(self.value)

@@ -77,7 +77,7 @@ android.presplash_color = #FFFFFF
 android.permissions = INTERNET, READ_EXTERNAL_STORAGE
 
 # (int) Target Android API, should be as high as possible.
-#android.api = 27
+android.api = 32
 
 # (int) Minimum API your APK will support.
 #android.minapi = 21
