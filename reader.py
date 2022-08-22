@@ -14,8 +14,6 @@ from kivy.utils import platform
 if platform == 'android':
     from android.permissions import request_permission,check_permission, Permission
 
-from plyer import filechooser
-
 from kivymd.uix.navigationdrawer.navigationdrawer import MDNavigationLayout
 from kivymd.uix.toolbar.toolbar import MDTopAppBar
 from kivymd.uix.menu.menu import MDDropdownMenu

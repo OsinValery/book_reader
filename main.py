@@ -3,6 +3,7 @@
 import sys
 import os
 import shutil
+from threading import Thread
 
 os.environ['KIVY_NO_FILELOG'] = '1'
 # os.environ["KIVY_NO_CONSOLELOG"] = "1"
@@ -82,20 +83,24 @@ class ReaderApp(MDApp):
 
     def on_start(self):
         super().on_start()
-        def load_last(dt):
-            try:
-                last_book = app_values.app_info.get_last_page()
-                if last_book:
-                    # != None
-                    app_values.app_info.book.read(
-                        os.path.join(app_values.app_info.book_dir, last_book[0]), 
-                        app_values.app_info.max_elements_per_page
-                    )
-                    self.root.ids.page_presenter.change_book()
-                    self.root.ids.page_presenter.seek(last_book[1])
-            except:
-                pass
-        Clock.schedule_once(load_last)
+
+        def read_last_book():
+            last_book = app_values.app_info.get_last_page()
+            if last_book:
+                # != None
+                app_values.app_info.book.read(
+                    os.path.join(app_values.app_info.book_dir, last_book[0]), 
+                    app_values.app_info.max_elements_per_page
+                )
+            def after(dt=0):
+                self.root.ids.page_presenter.change_book()
+                self.root.ids.page_presenter.seek(last_book[1])
+            # can't influe on graphics from another thread - 
+            # this is old bag!!!!!
+            # Clock does function in main thread
+            Clock.schedule_once(after)
+        thread = Thread(target = read_last_book, daemon=True)
+        thread.start()
 
     @property
     def books_dir(self):
