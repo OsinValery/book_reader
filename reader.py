@@ -26,28 +26,55 @@ from kivymd.uix.filemanager.filemanager import MDFileManager
 
 from bottom_sheet import BottomSheet
 from libretranslatepy import LibreTranslateAPI
+from googletrans import Translator, constants
 from localizator import Get_text
 
 import app_values
 from page import Page
 
 class PageScreen(MDNavigationLayout):
+    cur_translater = StringProperty('')
+    # не переводит сейчас - 0
+    translation_progress = [0,0]
     word = StringProperty(Get_text('info_click_text') )
     translation_result = StringProperty(Get_text('info_translated_text'))
+    google_translation_result = StringProperty(Get_text('info_translated_text'))
 
+    # argos
     translater = ObjectProperty(LibreTranslateAPI())
-    supported_languages = ['en','ar','zh','fr','de','hi','id','ga','it','ja','ko','pl','pt','ru','es','tr','vi',]
+    supported_languages = sorted(['en','ar','zh','fr','de','hi','id','ga','it','ja','ko','pl','pt','ru','es','tr','vi',])
     from_lang = StringProperty('ru')
     to_lang = StringProperty('en')
 
+    # google
+    google_translator = ObjectProperty(Translator())
+    google_supported_languages = sorted(list(constants.LANGUAGES.keys()))
+    google_from_lang = StringProperty('en')
+    google_to_lang = StringProperty('ru')
 
     def close_library(self):
         self.ids.page_screen.current = 'book'
 
     def present(self, word):
+        if self.cur_translater == '':
+            self.cur_translater = app_values.app_info.translator
         self.word = word
         try:
-            self.translation_result = self.translater.translate(self.word, self.from_lang, self.to_lang)
+            if self.cur_translater == 'argos':
+                if self.translation_progress[0] == 1:
+                    return
+                self.translation_progress[0] = 1
+                self.translation_result = self.translater.translate(self.word, self.from_lang, self.to_lang)
+                self.translation_progress[0] = 0
+            elif self.cur_translater == 'google':
+                if self.translation_progress[1] == 1:
+                    return
+                self.translation_progress[1] = 1
+                text = self.google_translator.translate(self.word, src=self.google_from_lang, dest=self.google_to_lang).text
+                self.google_translation_result = text
+                self.translation_progress[1] = 0
+            else:
+                print('unknown translater')
             self.ids.translater.set_state("open")
         except:
             def cancel(data=...):
@@ -67,6 +94,35 @@ class PageScreen(MDNavigationLayout):
     def close_settings(self):
         self.ids.page_screen.current = 'book'
 
+    # from settings
+    def set_translator(self, translator):
+        app_values.app_info.set_translator(translator)
+        self.cur_translater = translator
+
+    def set_menu_translater(self, page):
+        if page == self.cur_translater:
+            return
+        if page == 'argos':
+            if self.cur_translater == 'google':
+                if self.google_from_lang in self.supported_languages:
+                    self.from_lang = self.google_from_lang
+                if self.google_to_lang in self.supported_languages:
+                    self.to_lang = self.google_to_lang
+            else:
+                print('set_menu_translator: add action!!!')
+        elif page == 'google':
+            if self.cur_translater == 'argos':
+                if self.from_lang in self.google_supported_languages:
+                    self.google_from_lang = self.from_lang
+                if self.to_lang in self.google_supported_languages:
+                    self.google_to_lang = self.to_lang
+            else:
+                print('set_menu_translator: unknown translator for google!!!!!')
+        else:
+            print('set_menu_translator: unknown page !!!!!')
+        self.cur_translater = page
+        self.present(self.word)
+
     def change_language(self, arg = ...):
         self.ids.pagePresenterAppBar.title = Get_text('info_reader')
         self.ids.menu_header.title = Get_text('info_reader')        
@@ -81,6 +137,9 @@ class PageScreen(MDNavigationLayout):
         self.ids.select_text.text = Get_text('info_select_text')
         self.ids.translation_text.text = Get_text('info_translate_text')
         self.ids.change_theme.text = Get_text('info_change_theme')
+        self.ids.translator_chooser_label.text = Get_text('info_translater')
+        self.ids.google_translate_from.text = Get_text('info_translate_from')
+        self.ids.google_translate_to.text = Get_text('info_translate_to')
         theme = kivy.app.App.get_running_app().theme_cls.theme_style
         self.ids.theme_changer.text = Get_text('theme_' + theme)
         self.ids.pagePresenterAppBar.change_language()

@@ -135,7 +135,7 @@ def fb2_parser(text:str, pos=0):
         pos += 1
     close = text.find('>', pos)
     tag = text[pos+1:close]
-    # divide tag and hml arguments here!!
+    # divide tag and xml arguments here!!
     root.tag, root.attr = get_tag_arguments(tag)
     tag = root.tag
     pos = close + 1

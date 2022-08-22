@@ -15,6 +15,7 @@ class AppInfo():
         self.select_text = True
         self.translate_text = True
         self.theme = 'Light'
+        self.translator = 'argos'
 
     def read_settings(self):
         dir = App.get_running_app().user_data_dir 
@@ -28,6 +29,7 @@ class AppInfo():
                 self.translate_text = data[1] == 'True'
                 self.select_text = data[2] == 'True'
                 self.theme = data[3]
+                self.translator = data[4]
         except Exception as e:
             print(e)
             return False
@@ -42,6 +44,7 @@ class AppInfo():
                 file.write(str(self.translate_text) + '\n')
                 file.write(str(self.select_text) + '\n')
                 file.write(self.theme + '\n')
+                file.write(self.translator + '\n')
 
         except Exception as e:
             print('can\'t write settings')
@@ -49,6 +52,10 @@ class AppInfo():
 
     def set_language(self, new_lang):
         self.interface_language = new_lang
+        self.write_settings()
+    
+    def set_translator(self, translator):
+        self.translator = translator
         self.write_settings()
     
     def set_selection(self, value: bool):

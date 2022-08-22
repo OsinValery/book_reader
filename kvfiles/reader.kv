@@ -107,6 +107,24 @@
         Rectangle:
             size: self.size
             pos: self.pos
+              
+
+<Tab@MDTabsBase>:
+    page_id: "argos"
+    background_color: (0.1, 0.1, 0.1, 0.2)
+
+
+<Divider@Widget>:
+    size_hint_y: None
+    line_padding: 30
+    line_color: (1,0,0,1)
+
+    canvas:
+        Color:
+            rgba: self.line_color
+        Line:
+            width: 2
+            points: (self.pos[0] + self.line_padding, self.pos[1] + self.height/2, self.pos[0] + self.width - self.line_padding, self.pos[1] + self.height/2)
 
 
 <PageScreen>:
@@ -135,7 +153,7 @@
 
                 PagePresenter:
                     id: page_presenter
-        
+
         # page with list of books
         Screen:
             id: library
@@ -231,6 +249,39 @@
 
                         SettingsItem:
                             MDLabel:
+                                id: translator_chooser_label
+                                text: Get_text('info_translater')
+
+                            AnchorLayout:
+                                anchor_y: 'center'
+                                size_hint_x: None
+                                width: translator_chooser.width
+
+                                MDDropDownItem:
+                                    id: translator_chooser
+                                    text: app_values.app_info.translator.title()
+                                    
+                                    on_press:
+                                        def work(translator): menu.dismiss();root.set_translator(translator);translator_chooser.text = translator.title()
+                                        items = [ \
+                                        { \
+                                        'text': "Argos", \
+                                        'on_release': lambda x=None: work('argos'), \
+                                        "viewclass": "MDFlatButton", \
+                                        "height": 76 \
+                                        }, \
+                                        { \
+                                        'text': 'Google', \
+                                        'on_release': lambda x=None: work('google'), \
+                                        "viewclass": "MDFlatButton", \
+                                        "height": 76 \
+                                        } \
+                                        ]
+                                        menu = MDDropdownMenu(caller = translator_chooser, items=items, width_mult=3)
+                                        menu.open()
+
+                        SettingsItem:
+                            MDLabel:
                                 id: change_theme
                                 text: Get_text('info_change_theme')
 
@@ -292,106 +343,231 @@
         swipe_distance: 30
         anchor: 'right'
         padding: [0,0,0,16]
+        orientation: "vertical"
 
-        MDNavigationDrawerMenu:      
-            do_scroll_y: False    
+        on_state:
+            title = root.cur_translater.title()
+            translators_tabs.switch_tab(title, 'title')
 
-            MDNavigationDrawerHeader:
-                id: translater_header
-                title: Get_text('info_translater')
-                title_color: (1,1,1,1)
-                text_color: (1,1,1,1)
-                text: ""
-                spacing: "4dp"
-                padding: "15dp", "10dp", "20dp", "62dp"
+        MDNavigationDrawerHeader:
+            id: translater_header
+            title: Get_text('info_translater')
+            title_color: (1,1,1,1)
+            text_color: (1,1,1,1)
+            text: ""
+            spacing: "4dp"
+            padding: "15dp", "10dp", "20dp", "62dp"
 
-                canvas.before:
-                    Color:
-                        rgba: app.theme_cls.primary_color
-                    RoundedRectangle:
-                        pos: self.pos
-                        size: (self.width, self.height + 16)
-                        radius: (12,0,0,0)
+            canvas.before:
+                Color:
+                    rgba: app.theme_cls.primary_color
+                RoundedRectangle:
+                    pos: self.pos
+                    size: (self.width, self.height + 16)
+                    radius: (12,0,0,0)
+
+        MDTabs:
+            id: translators_tabs
+            size_hint_y: None
+            height: translater.height - translater_header.height
+
+            on_tab_switch:
+                root.set_menu_translater(args[1].page_id)
+
+            Tab:
+                page_id: 'argos'
+                title: "Argos"
+
+                GridLayout:
+                    cols: 1
+                    spacing: 10
+                    width: translators_tabs.width
+                    height: translators_tabs.height - translators_tabs.tab_bar_height
+                    padding: [20, '10dp', 0, 0]
+
+                    BoxLayout:
+                        size_hint_y: None
+                        orientation: "horizontal"
+                        padding: "20dp","5dp"
+                        height: max(translate_from.height, from_translater_selector.height)
+
+                        Label:
+                            id: translate_from
+                            color: app.theme_cls.text_color
+                            text: Get_text('info_translate_from')
+
+                            size: self.texture_size
+                            size_hint_x: None
+                        
+                        AnchorLayout:
+                            anchor_y: 'center'
+                            anchor_x: "left"
+                            width: from_translater_selector.width
+
+                            MDDropDownItem:
+                                id: from_translater_selector
+                                text: reader.from_lang
+                                on_press:
+                                    def work(lang): menu.dismiss();reader.from_lang=lang;reader.present(reader.word)
+                                    def produse(lang): return {'text': lang, 'on_release': lambda x='ru': work(lang),"viewclass": "MDFlatButton", "height": 76}
+
+                                    menu_items = [produse(lang) for lang in reader.supported_languages ]
+                                    menu = MDDropdownMenu(caller = self, items=menu_items, width_mult=3)
+                                    menu.open()            
+                    Divider:
+                        line_color: (0.4 ,0.4 ,0.4 ,0.4)
+
+                    Translation_widget:
+                        text: reader.word
+                    
+                    Divider:
+                        line_color: (0.4 ,0.4 ,0.4 ,0.4)
+
+                    BoxLayout:
+                        size_hint_y: None
+                        orientation: "horizontal"
+                        padding: "20dp","5dp"
+                        spacing: "5dp"
+                        height: max(translate_to.height, to_translater_selector.height)
+
+                        Label:
+                            id: translate_to
+                            text: Get_text('info_translate_to')
+                            color: app.theme_cls.text_color
+
+                            size: self.texture_size
+                            size_hint_x: None
+
+
+                        AnchorLayout:
+                            anchor_y: 'center'
+                            anchor_x: "left"
+                            width: from_translater_selector.width
+
+                            MDDropDownItem:
+                                text: reader.to_lang
+                                id: to_translater_selector
+                                on_press:
+                                    def work(lang): menu.dismiss();reader.to_lang=lang;reader.present(reader.word)
+                                    def produse(lang): return {'text': lang, 'on_release': lambda x='ru': work(lang),"viewclass": "MDFlatButton", "height": 76}
+                                    
+                                    menu_items = [produse(lang) for lang in reader.supported_languages ]
+                                    menu = MDDropdownMenu(caller = self, items=menu_items, width_mult=3)
+                                    menu.open()
             
-            Widget:
-                size_hint_y: None
-                height: "10dp"
+                    Divider:
+                        line_color: (0.4 ,0.4 ,0.4 ,0.4)
 
-            BoxLayout:
-                size_hint_y: None
-                orientation: "horizontal"
-                padding: "20dp","5dp"
-                height: max(translate_from.height, from_translater_selector.height)
+                    Translation_widget:
+                        text: reader.translation_result
+                    
+                    Divider:
+                        line_color: (0.4 ,0.4 ,0.4 ,0.4)
 
-                Label:
-                    id: translate_from
-                    color: app.theme_cls.text_color
-                    text: Get_text('info_translate_from')
+                    MDLabel:
+                        text: 'translated with Argos'
+                        size_hint_y: None
+                    
+                    Widget:
+                        size_hint_y: 1
 
-                    size: self.texture_size
-                    size_hint_x: None
-                
-                AnchorLayout:
-                    anchor_y: 'center'
-                    anchor_x: "left"
-                    width: from_translater_selector.width
+            Tab:
+                page_id: 'google'
+                title: 'Google'
 
-                    MDDropDownItem:
-                        id: from_translater_selector
-                        text: reader.from_lang
-                        on_press:
-                            def work(lang): menu.dismiss();reader.from_lang=lang;reader.present(reader.word)
-                            def produse(lang): return {'text': lang, 'on_release': lambda x='ru': work(lang),"viewclass": "MDFlatButton", "height": 76}
+                GridLayout:
+                    cols: 1
+                    spacing: 10
+                    width: translators_tabs.width
+                    height: translators_tabs.height - translators_tabs.tab_bar_height
+                    padding: [20, '10dp', 0, 0]
 
-                            menu_items = [produse(lang) for lang in reader.supported_languages ]
-                            menu = MDDropdownMenu(caller = self, items=menu_items, width_mult=3)
-                            menu.open()
+                    BoxLayout:
+                        size_hint_y: None
+                        orientation: "horizontal"
+                        padding: "20dp","5dp"
+                        height: max(google_translate_from.height, google_from_translater_selector.height)
+
+                        Label:
+                            id: google_translate_from
+                            color: app.theme_cls.text_color
+                            text: Get_text('info_translate_from')
+
+                            size: self.texture_size
+                            size_hint_x: None
+                        
+                        AnchorLayout:
+                            anchor_y: 'center'
+                            anchor_x: "left"
+                            width: google_from_translater_selector.width
+
+                            MDDropDownItem:
+                                id: google_from_translater_selector
+                                text: reader.google_from_lang
+                                on_press:
+                                    def work(lang): menu.dismiss();reader.google_from_lang=lang;reader.present(reader.word)
+                                    def produse(lang): return {'text': lang, 'on_release': lambda x='ru': work(lang),"viewclass": "MDFlatButton", "height": 76}
+
+                                    menu_items = [produse(lang) for lang in reader.google_supported_languages ]
+                                    menu = MDDropdownMenu(caller = self, items=menu_items, width_mult=3)
+                                    menu.open()            
+                    Divider:
+                        line_color: (0.4 ,0.4 ,0.4 ,0.4)
+
+                    Translation_widget:
+                        text: reader.word
+                    
+                    Divider:
+                        line_color: (0.4 ,0.4 ,0.4 ,0.4)
+
+                    BoxLayout:
+                        size_hint_y: None
+                        orientation: "horizontal"
+                        padding: "20dp","5dp"
+                        spacing: "5dp"
+                        height: max(google_translate_to.height, google_to_translater_selector.height)
+
+                        Label:
+                            id: google_translate_to
+                            text: Get_text('info_translate_to')
+                            color: app.theme_cls.text_color
+
+                            size: self.texture_size
+                            size_hint_x: None
+
+
+                        AnchorLayout:
+                            anchor_y: 'center'
+                            anchor_x: "left"
+                            width: google_to_translater_selector.width
+
+                            MDDropDownItem:
+                                text: reader.google_to_lang
+                                id: google_to_translater_selector
+                                on_press:
+                                    def work(lang): menu.dismiss();reader.google_to_lang=lang;reader.present(reader.word)
+                                    def produse(lang): return {'text': lang, 'on_release': lambda x='ru': work(lang),"viewclass": "MDFlatButton", "height": 76}
+                                    
+                                    menu_items = [produse(lang) for lang in reader.google_supported_languages ]
+                                    menu = MDDropdownMenu(caller = self, items=menu_items, width_mult=3)
+                                    menu.open()
             
-            MDNavigationDrawerDivider:
-            Translation_widget:
-                text: reader.word
+                    Divider:
+                        line_color: (0.4 ,0.4 ,0.4 ,0.4)
 
-            MDNavigationDrawerDivider:
+                    Translation_widget:
+                        text: reader.google_translation_result
+                    
+                    Divider:
+                        line_color: (0.4 ,0.4 ,0.4 ,0.4)
+
+                    MDLabel:
+                        text: 'translated with Google'
+                        size_hint_y: None
+                    
+                    Widget:
+                        size_hint_y: 1
             
-            BoxLayout:
-                size_hint_y: None
-                size_hint_x: None
-                orientation: "horizontal"
-                padding: "20dp","5dp"
-                spacing: "5dp"
-                height: max(translate_to.height, to_translater_selector.height)
-
-                Label:
-                    id: translate_to
-                    text: Get_text('info_translate_to')
-                    color: app.theme_cls.text_color
-
-                    size: self.texture_size
-                    size_hint_x: None
-
-                AnchorLayout:
-                    anchor_y: 'center'
-                    anchor_x: "left"
-                    width: from_translater_selector.width
-
-                    MDDropDownItem:
-                        text: reader.to_lang
-                        id: to_translater_selector
-                        on_press:
-                            def work(lang): menu.dismiss();reader.to_lang=lang;reader.present(reader.word)
-                            def produse(lang): return {'text': lang, 'on_release': lambda x='ru': work(lang),"viewclass": "MDFlatButton", "height": 76}
-                            
-                            menu_items = [produse(lang) for lang in reader.supported_languages ]
-                            menu = MDDropdownMenu(caller = self, items=menu_items, width_mult=3)
-                            menu.open()
-
-            MDNavigationDrawerDivider:
-            Translation_widget:
-                text: reader.translation_result
-            
-            MDNavigationDrawerDivider:
-            MDNavigationDrawerLabel:
-                text: 'translated with Argos'
 
     # left drawer with menu 
     MDNavigationDrawer:

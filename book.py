@@ -93,7 +93,10 @@ class Book():
             if el.type == 'image':
                 if 'l:href' in el.attributs:
                     name = el.attributs['l:href']
+                elif 'xlink:href' in el.attributs:
+                    name = 'xlink:href'
                 else:
+                    print(el.attributs)
                     name = ''
                 if name[0] == '#':
                     name = name[1:]
