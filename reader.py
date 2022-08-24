@@ -54,8 +54,7 @@ class PageScreen(MDNavigationLayout):
         self.ids.page_screen.current = 'book'
 
     def present(self, word):
-        if self.cur_translater == '':
-            self.cur_translater = app_values.app_info.translator
+        self.check_translator()
         self.word = word
         try:
             if self.cur_translater == 'argos':
@@ -91,6 +90,12 @@ class PageScreen(MDNavigationLayout):
 
     def close_settings(self):
         self.ids.page_screen.current = 'book'
+    
+    def check_translator(self):
+        if app_values.app_info.translator == '':
+            app_values.app_info.set_translator('argos')
+        if self.cur_translater == '':
+            self.cur_translater = app_values.app_info.translator
 
     # from settings
     def set_translator(self, translator):

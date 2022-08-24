@@ -346,6 +346,7 @@
         orientation: "vertical"
 
         on_state:
+            root.check_translator()
             title = root.cur_translater.title()
             translators_tabs.switch_tab(title, 'title')
 
