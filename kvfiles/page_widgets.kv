@@ -4,7 +4,6 @@
 <SelectableLabel>:
     text: ''
     markup: True
-    color: app.theme_cls.text_color
     color: app.theme_cls.text_color if not root.note else (10/255, 183 / 255 , 122 / 255 , 1)
     font_size: 32
 
@@ -41,15 +40,28 @@
 
 <ImageData>:
     size_hint_y: None
+    size_hint_x: 1
     height: root.get_size(icon_size)[1]
-    
-    canvas:
-        Color:
-            rgba: (1,1,1,1)
-        Rectangle:
-            texture: root.texture
-            size: self.size
-            pos: self.pos
+
+    AnchorLayout:
+        size: self.parent.size
+        pos: self.parent.pos
+        anchor_x: "center"
+        anchor_y: "center"
+
+        Widget:
+            size_hint_x: None
+            size: root.get_size(icon_size)
+            pos: self.parent.pos
+
+            canvas:
+                Color:
+                    # set alpha to 1
+                    rgba: (1,1,1,0.5) if app.theme_cls.theme_style == 'Dark' else (1,1,1,1)
+                Rectangle:
+                    texture: root.texture
+                    size: self.size
+                    pos: self.pos
 
 <Title>:
     text: ''

@@ -1,19 +1,16 @@
 
-from kivy.uix.widget import Widget
 from kivy.factory import Factory
 from kivy.clock import Clock
 from kivy.properties import NumericProperty, BooleanProperty
 from kivy.core.clipboard import Clipboard
 
-from kivymd.uix.snackbar import Snackbar
 from kivymd.uix.bottomsheet.bottomsheet import MDListBottomSheet
-
 
 import app_values
 from localizator import Get_text
 
-class Page(Widget):
-    page = NumericProperty(5)
+class Page(Factory.Widget):
+    page = NumericProperty(0)
     selection = BooleanProperty(False)
 
     def __init__(self, **kwargs):
@@ -77,7 +74,7 @@ class Page(Widget):
     
     def copy_text(self, text):
         Clipboard.copy(text)
-        snack = Snackbar(
+        snack = Factory.Snackbar(
             text = Get_text('info_text_copied'),
             snackbar_x="10dp",
             snackbar_y="10dp",
@@ -90,7 +87,11 @@ class Page(Widget):
     def prepare(self):
         book = app_values.app_info.book
         elements = book.get_page(self.page-1)
-        content = [Factory.Space()] + [el.make_content() for el in elements]
+        add_space = not elements[0].is_cover
+        content = []
+        if add_space:
+            content = [Factory.Space()]
+        content += [el.make_content() for el in elements]
         have = False
         comments = {}
         for el in elements:
@@ -110,11 +111,20 @@ class Page(Widget):
                     note_elements = note_text.work()
                     for el in note_elements:
                         content.append(el.make_content())
-
-        content.append(Factory.Space())
+        
+        if add_space:
+            content.append(Factory.Space())
         return content
 
     def deselect(self):
         self.selection = False
         for child in self.ids.page_content.children:
             child.deselect()
+
+    def reset_content(self):
+        self.deselect()
+        content = self.ids.page_content
+        content.clear_widgets()
+        self.ids.page_scroll.scroll_y = 1
+        for el in self.prepare():
+            content.add_widget(el)

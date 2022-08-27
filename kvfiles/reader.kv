@@ -1,5 +1,4 @@
 
-
 #: import os os
 #: import Window kivy.core.window.Window
 #: import ObjectProperty kivy.properties.ObjectProperty
@@ -67,9 +66,6 @@
     size_hint_y: 1
     size_hint_x: 1
 
-    on_parent:
-        root.init_page()
-
     canvas.before:
         Color:
             rgba: (1,1,1,0.5) if app.theme_cls.theme_style == 'Light' else (0.4 ,0.4, 0.4, 0.5)
@@ -91,6 +87,11 @@
         disabled: root.cur_page == 1
         on_press: root.back()
         icon: os.path.join(app.directory, 'assets', 'left.png')
+    
+    Page:
+        id: page
+        size: self.parent.size
+        page: root.cur_page
 
 
 <SettingsItem@BoxLayout>:
@@ -135,14 +136,16 @@
         size: self.parent.size
         id: page_screen
 
-        # main page with book
+        # main page with book was opened
         Screen:
+            # self.parent produces error for some cases
             size: page_screen.size
             name: 'book'
 
             BoxLayout:
                 orientation: 'vertical'
                 size: self.parent.size
+                spacing: 0
 
                 MyAppBar:
                     id: pagePresenterAppBar
@@ -153,6 +156,7 @@
 
                 PagePresenter:
                     id: page_presenter
+                    height: self.parent.height - pagePresenterAppBar.height
 
         # page with list of books
         Screen:

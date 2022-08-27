@@ -14,6 +14,10 @@ class BookFrame():
 
     def add_attribute(self, name, value):
         self.attributs[name] = value
+    
+    @property
+    def is_cover(self):
+        return self.type == 'image' and 'cover' in self.attributs and self.attributs['cover']
 
     def escape_text(self, text: str):
         # service symbols
@@ -198,7 +202,8 @@ class BookFrame():
                 data = io.BytesIO(data)
                 ext = self.attributs['type'][6:] 
                 img = Image(data, ext=ext)
-                return page_widgets.ImageData(texture=img.texture)
+                is_cover = 'cover' in self.attributs and self.attributs['cover']
+                return page_widgets.ImageData(texture=img.texture, cover = is_cover)
             except Exception as e:
                 print(e)
                 return page_widgets.Mistake(text=f'picture wasn\'t loaded! ')

@@ -176,7 +176,10 @@ class Title_Info():
     def get_cover(self):
         if self.image == None:
             return []
-        return self.image.work()
+        content = self.image.work()
+        for el in content:
+            el.add_attribute('cover', True)
+        return content
     
     def get_description(self) -> List[BookFrame]:
         result = []

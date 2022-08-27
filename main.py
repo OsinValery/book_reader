@@ -28,6 +28,8 @@ from book import Book
 from reader import PageScreen
 import app_values
 from localizator import get_lang
+# this import adds class Page into Factory
+import page
 
 class ReaderApp(MDApp):
     def load_all_kv_files(self, path_to_directory: str) -> None:

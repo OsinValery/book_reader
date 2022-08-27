@@ -1,4 +1,6 @@
 import os
+from typing import List
+from bookframe import BookFrame
 import fb2_book
 import fb2_book_description
 
@@ -111,17 +113,15 @@ class Book():
 
         # get cover
         cover = self.description.get_cover()
-        if cover != []:
+        for el in cover:
             page = []
-            for el in cover:
-                work_book_element(el, page)
+            work_book_element(el, page)
             self.content.append(page)
         
         f_cover = self.description.get_foreign_cover()
-        if f_cover != []:
+        for el in f_cover:
             page = []
-            for el in cover:
-                work_book_element(el, page)
+            work_book_element(el, page)
             self.content.append(page)
 
         # present book description
@@ -144,6 +144,6 @@ class Book():
     def length(self):
         return len(self.content)
     
-    def get_page(self, number):
+    def get_page(self, number) -> List[BookFrame]:
         return self.content[number]
 

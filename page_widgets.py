@@ -28,12 +28,22 @@ class PageContent:
     def get_selected_text(self):
         return ''
 
+    @property
+    def page_widget(self):
+        """returns Page widget or None"""
+        widget = self
+        while widget.parent != None:
+            if type(widget) == Factory.Page:
+                return widget
+            widget = widget.parent
+        return None
+
 
 class Space(Widget, PageContent):
     pass
 
 # base class for all active elements of page
-class SelectableLabel(Label):
+class SelectableLabel(Label, PageContent):
     selections = ListProperty([])
     selection_figures = ListProperty([])
     first_pos = ListProperty([0,0])
@@ -41,12 +51,6 @@ class SelectableLabel(Label):
 
     referization = ListProperty([])
     choosenWord = StringProperty('')
-
-    # for graphics
-    cite = BooleanProperty(False)
-    poem = BooleanProperty(False)
-    note = BooleanProperty(False)
-    epigraph = BooleanProperty(False)
 
     @property
     def root_screen(self):
@@ -58,22 +62,8 @@ class SelectableLabel(Label):
             widget = widget.parent
         return None
 
-    @property
-    def page_widget(self):
-        """returns Page widget or None"""
-        widget = self
-        while widget.parent != None:
-            if type(widget) == Factory.Page:
-                return widget
-            widget = widget.parent
-        return None
-
     def on_refference(self, inst, data=...):
         self.choosenWord = data
-
-    def get_font(self, name):
-        folder = App.get_running_app().directory
-        return os.path.join(folder, 'assets', 'fonts', name)
 
     def on_touch_up(self, touch):
         if self.choosenWord != '' and app_values.app_info.translate_text:
@@ -222,7 +212,19 @@ class SelectablePair(BoxLayout):
         return text
 
 
-class Paragraph(SelectableLabel):
+class PresentableLabel(SelectableLabel):
+    # for graphics
+    cite = BooleanProperty(False)
+    poem = BooleanProperty(False)
+    note = BooleanProperty(False)
+    epigraph = BooleanProperty(False)
+
+    def get_font(self, name):
+        folder = App.get_running_app().directory
+        return os.path.join(folder, 'assets', 'fonts', name)
+
+
+class Paragraph(PresentableLabel):
 
     def resolve_state(self):
         if self.cite: 
@@ -241,23 +243,27 @@ class Paragraph(SelectableLabel):
                 self.font_name = self.get_font('NotoSans-Thin.ttf')
 
 
-class Unknown(SelectableLabel):
+class Unknown(PresentableLabel):
     pass
 
-class Mistake(SelectableLabel):
+class Mistake(PresentableLabel):
     pass
 
 class ImageData(Widget, PageContent):
     texture = ObjectProperty()
+    cover = BooleanProperty(False)
 
     def get_size(self, icon_size):
-        width = 0.7 * (Window.width - icon_size * 2)
-        scale = width / self.texture.size[0]
-        return [width, scale * self.texture.size[1]]
+        if not self.cover:
+            width = 0.8 * (Window.width - icon_size * 2)
+            scale = width / self.texture.size[0]
+            return [width, scale * self.texture.size[1]]
+        else:
+            size = App.get_running_app().root.ids.page_presenter.ids.page.size
+            return size[0] - 2 * icon_size, size[1]
 
 
-class Title(SelectableLabel):
-    
+class Title(PresentableLabel):
     def resolve_state(self):
         if self.cite: 
             self.font_size = 38
@@ -275,10 +281,10 @@ class Title(SelectableLabel):
 class NotesDelimeter(Widget,PageContent):
     pass
 
-class Note(SelectableLabel):
+class Note(PresentableLabel):
     pass
 
-class SubTitle(SelectableLabel):
+class SubTitle(PresentableLabel):
     def resolve_state(self):
         if self.cite:
             self.font_name = self.get_font('NotoSans-ThinItalic.ttf')
@@ -295,7 +301,7 @@ class SubTitle(SelectableLabel):
 class Stanza_empty(Space):
     pass
 
-class Author(SelectableLabel):
+class Author(PresentableLabel):
     def resolve_state(self):
         if self.epigraph:
             self.font_size = 28
@@ -311,7 +317,7 @@ class Author(SelectableLabel):
 
 
 # this class != Paragraph
-class Text(SelectableLabel):
+class Text(PresentableLabel):
     def resolve_state(self):
         if self.cite: 
             self.font_size = 30
@@ -328,7 +334,7 @@ class Text(SelectableLabel):
             else:
                 self.font_name = self.get_font('NotoSans-Thin.ttf')
 
-class Poem_line(SelectableLabel):
+class Poem_line(PresentableLabel):
     def resolve_state(self):
         if self.epigraph:
             self.size_hint_x = None

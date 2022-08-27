@@ -28,7 +28,6 @@ from googletrans import Translator, constants
 from localizator import Get_text
 
 import app_values
-from page import Page
 
 class PageScreen(MDNavigationLayout):
     cur_translater = StringProperty('')
@@ -155,13 +154,6 @@ class PagePresenter(Widget):
     def book(self):
         return app_values.app_info.book
 
-    def init_page(self):
-        self.page = Page(
-            size = self.parent.size, 
-            page = self.cur_page
-        )
-        self.add_widget(self.page)
-
     def back(self):
         self.seek(self.cur_page-1)
         app_values.app_info.remember_page(self.cur_page)
@@ -171,13 +163,9 @@ class PagePresenter(Widget):
         app_values.app_info.remember_page(self.cur_page)
 
     def seek(self, number):
-        self.cur_page = self.page.page = number
-        content = self.page.ids.page_content
-        content.clear_widgets()
-        self.page.ids.page_scroll.scroll_y = 1
-        self.page.selection = False
-        for el in self.page.prepare():
-            content.add_widget(el)
+        page = self.ids.page
+        self.cur_page = page.page = number
+        page.reset_content()
 
     def change_book(self):
         self.seek(1)
@@ -223,18 +211,9 @@ class MyAppBar(MDTopAppBar):
             "on_release": self.seek
             }]
         self.menu = MDDropdownMenu(items=menu_items, width_mult=3)
-        
+
     def seek(self, *args):
         self.menu.dismiss()
-        """
-        bottom_sheet = MDCustomBottomSheet(
-            screen=PageTurnerSheet(
-                maximum=self.page_turner.book.length, 
-                on_select = lambda page: self.seek_to_page(page),
-                current = self.page_turner.cur_page
-            )
-        )
-        """
         bottom_sheet = BottomSheet(
             content = PageTurnerSheet(
                 maximum=self.page_turner.book.length, 
