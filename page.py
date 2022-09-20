@@ -4,6 +4,7 @@ from kivy.clock import Clock
 from kivy.properties import NumericProperty, BooleanProperty
 from kivy.core.clipboard import Clipboard
 
+from kivymd.uix.snackbar.snackbar import Snackbar
 from kivymd.uix.bottomsheet.bottomsheet import MDListBottomSheet
 
 import app_values
@@ -74,7 +75,7 @@ class Page(Factory.Widget):
     
     def copy_text(self, text):
         Clipboard.copy(text)
-        snack = Factory.Snackbar(
+        snack = Snackbar(
             text = Get_text('info_text_copied'),
             snackbar_x="10dp",
             snackbar_y="10dp",
