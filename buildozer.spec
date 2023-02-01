@@ -30,7 +30,8 @@ version = 0.1
 # comma separated e.g. requirements = sqlite3,kivy
 
 # only googletrans requires: httpcore, anyio, sniffio, h11, httpx,idna, rfc3986, h2, hyperframe, hpack, hstspreload, chardet
-requirements = python3,kivy,plyer, libretranslatepy, https://github.com/kivymd/KivyMD/archive/master.zip, pillow, googletrans==4.0.0-rc1, httpcore==0.9.0, anyio, sniffio, h11==0.8, httpx==0.13.3,idna==2.*, rfc3986==1.3, h2==3.*, hyperframe, hpack, hstspreload, chardet
+#  https://github.com/kivymd/KivyMD/archive/master.zip
+requirements =  kivymd==1.0.2, sdl2_ttf == 2.0.15, pillow python3,plyer, libretranslatepy, googletrans==4.0.0-rc1, httpcore==0.9.0, anyio, sniffio, h11==0.8, httpx==0.13.3,idna==2.*, rfc3986==1.3, h2==3.*, hyperframe, hpack, hstspreload, chardet
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
@@ -261,10 +262,13 @@ ios.ios_deploy_branch = 1.7.0
 
 # (str) Name of the certificate to use for signing the debug version
 # Get a list of available identities: buildozer ios list_identities
-#ios.codesign.debug = "iPhone Developer: <lastname> <firstname> (<hexstring>)"
+ios.codesign.debug = "Apple Development: osinwaleriy@icloud.com (8P55QVJ435)"
 
 # (str) Name of the certificate to use for signing the release version
-#ios.codesign.release = %(ios.codesign.debug)s
+ios.codesign.release = %(ios.codesign.debug)s
+
+# (bool) Whether or not to sign the code
+ios.codesign.allowed = true
 
 
 [buildozer]

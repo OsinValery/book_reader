@@ -74,8 +74,9 @@ class ReaderApp(MDApp):
             app_values.app_info.library.append(file)
 
         self.read_book()
-
-        return PageScreen(size = Window.size)
+        widget = PageScreen(size = Window.size)
+        Window.bind(on_drop_file=widget.on_drop_file)
+        return widget
 
     def read_book(self):
         filename = 'about.fb2'
@@ -107,7 +108,7 @@ class ReaderApp(MDApp):
     @property
     def books_dir(self):
         return os.path.join(self.user_data_dir, 'books')
-    
+
     def set_theme(self, theme):
         if theme in ['Dark', 'Light']:
             self.theme_cls.theme_style = theme

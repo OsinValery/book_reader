@@ -19,6 +19,7 @@ from kivymd.uix.toolbar.toolbar import MDTopAppBar
 from kivymd.uix.menu.menu import MDDropdownMenu
 from kivymd.uix.dialog import MDDialog
 from kivymd.uix.button import MDRaisedButton, MDFlatButton
+from kivymd.uix.list import BaseListItem
 from kivymd.uix.list import MDList, OneLineAvatarIconListItem, IconLeftWidget, IconRightWidget
 from kivymd.uix.filemanager.filemanager import MDFileManager
 
@@ -146,6 +147,12 @@ class PageScreen(MDNavigationLayout):
         self.ids.theme_changer.text = Get_text('theme_' + theme)
         self.ids.pagePresenterAppBar.change_language()
 
+    def on_drop_file(self, window, file_path: bytes, x, y):
+        file_path = file_path.decode("utf-8")
+        ext = file_path[file_path.rfind('.'):]
+        if ext in app_values.app_info.supported_formats:
+            self.ids.page_screen.current = 'library'
+            self.ids.library_list.load_book(file_path)
 
 class PagePresenter(Widget):
     cur_page = NumericProperty(1)
@@ -170,6 +177,7 @@ class PagePresenter(Widget):
     def change_book(self):
         self.seek(1)
         self.ids.page_forward.disabled = self.book.length == 1
+
 
 
 class MyAppBar(MDTopAppBar):
@@ -277,8 +285,9 @@ class LibraryPresenter(MDList):
 
     def load_book(self, path):
         # adds book into the library from internal storage
-        self.manager_open = False
-        self._file_manager.close()
+        if self.manager_open:
+            self.manager_open = False
+            self._file_manager.close()
         folder_with_books: str = kivy.app.App.get_running_app().books_dir
         filename = path.split('/')[-1]
         if filename in app_values.app_info.library:
@@ -347,6 +356,7 @@ class LibraryPresenter(MDList):
             ))
 
             self.add_widget(line)
+        self.add_widget(BaseListItem(height = 200))
 
     def choose_book(self, arg):
         app_values.app_info.book.read(

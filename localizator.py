@@ -473,6 +473,10 @@ def get_genre(genre, lang = None):
             'ru': "Альтернативная история",
             'en': "Alternative history",
         },
+        "sf_litrpg": {
+            'ru': "Лит РПГ",
+            'en': "Lit RTG",
+        },
         'sf_action': {
             'ru': "Боевая фантастика",
             'en': "Combat fiction",
