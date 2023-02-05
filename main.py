@@ -24,12 +24,16 @@ from kivymd.app import MDApp
 from kivy.core.window import Window
 from kivy.clock import Clock
 
+# this import adds class Page into Factory
+import page
+import mytab
+
 from book import Book
 from reader import PageScreen
 import app_values
 from localizator import get_lang
-# this import adds class Page into Factory
-import page
+
+
 
 class ReaderApp(MDApp):
     def load_all_kv_files(self, path_to_directory: str) -> None:

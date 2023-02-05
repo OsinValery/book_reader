@@ -267,7 +267,6 @@ class PageTurnerSheet(BoxLayout):
         return 0.5 * Window.height
         
 
-
 class LibraryPresenter(MDList):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -382,6 +381,7 @@ class LibraryPresenter(MDList):
                 return widget.parent
             widget = widget.parent
         return None
+
 
 def show_alert_no_permission():
     def close(data=...):

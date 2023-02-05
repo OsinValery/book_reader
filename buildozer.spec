@@ -31,7 +31,7 @@ version = 0.1
 
 # only googletrans requires: httpcore, anyio, sniffio, h11, httpx,idna, rfc3986, h2, hyperframe, hpack, hstspreload, chardet
 #  https://github.com/kivymd/KivyMD/archive/master.zip
-requirements =  kivymd==1.0.2, sdl2_ttf == 2.0.15, pillow python3,plyer, libretranslatepy, googletrans==4.0.0-rc1, httpcore==0.9.0, anyio, sniffio, h11==0.8, httpx==0.13.3,idna==2.*, rfc3986==1.3, h2==3.*, hyperframe, hpack, hstspreload, chardet
+requirements =  kivymd==1.1.1, sdl2_ttf == 2.0.15, pillow python3,plyer, libretranslatepy, googletrans==4.0.0-rc1, httpcore==0.9.0, anyio, sniffio, h11==0.8, httpx==0.13.3,idna==2.*, rfc3986==1.3, h2==3.*, hyperframe, hpack, hstspreload, chardet
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
