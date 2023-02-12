@@ -31,7 +31,8 @@ version = 0.1
 
 # only googletrans requires: httpcore, anyio, sniffio, h11, httpx,idna, rfc3986, h2, hyperframe, hpack, hstspreload, chardet
 #  https://github.com/kivymd/KivyMD/archive/master.zip
-requirements =  kivymd==1.1.1, sdl2_ttf == 2.0.15, pillow python3,plyer, libretranslatepy, googletrans==4.0.0-rc1, httpcore==0.9.0, anyio, sniffio, h11==0.8, httpx==0.13.3,idna==2.*, rfc3986==1.3, h2==3.*, hyperframe, hpack, hstspreload, chardet
+# sdl2_ttf==2.0.15
+requirements =  kivymd==1.1.1, pillow, python3,plyer, libretranslatepy, googletrans==4.0.0-rc1, httpcore==0.9.0, anyio, sniffio, h11==0.8, httpx==0.13.3,idna==2.*, rfc3986==1.3, h2==3.*, hyperframe, hpack, hstspreload, chardet
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
@@ -57,7 +58,7 @@ orientation = portrait
 # author = © Copyright Info
 
 # change the major version of python used by the app
-osx.python_version = 3
+osx.python_version = 3.9
 
 # Kivy version to use
 osx.kivy_version = 1.9.1
@@ -80,7 +81,7 @@ android.presplash_color = #FFFFFF
 android.permissions = INTERNET, READ_EXTERNAL_STORAGE
 
 # (int) Target Android API, should be as high as possible.
-android.api = 32
+android.api = 30
 
 # (int) Minimum API your APK will support.
 #android.minapi = 21

@@ -9,7 +9,7 @@ class AppInfo():
         self.max_elements_per_page = 10
         self.library = []
         self.book_dir = ''
-        self.supported_formats = ['.fb2']
+        self.supported_formats = ['.fb2', '.txt']
         self.supported_interface_languages = ['ru', 'en']
         self.interface_language = ''
         self.select_text = True

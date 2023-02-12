@@ -1,8 +1,10 @@
 import os
+import chardet
 from typing import List
 from bookframe import BookFrame
 import fb2_book
 import fb2_book_description
+import txt_book
 
 class Book():
     def __init__(self) -> None:
@@ -10,6 +12,7 @@ class Book():
         self.content = []
         self.notes = {}
         self.format = 'fb2'
+        self.max_elements_per_page = 10
         self.description = fb2_book_description.FB2_Book_Deskription()
 
     def read(self, filepath, max_elements_per_page=20):
@@ -21,6 +24,8 @@ class Book():
         self.max_elements_per_page = max_elements_per_page
         if self.format == 'fb2':
             self.read_fb2()
+        elif self.format == 'txt':
+            self.read_txt()
         else:
             raise Exception('unknown file format: '+ self.format)
         
@@ -139,6 +144,39 @@ class Book():
                 page = []
         if page != []:
             self.content.append(page)
+
+    def read_txt(self):
+        elements = []
+        full_content = []
+        encoding = 'utf-8'
+        found_notes = False
+        notes_lines: List[BookFrame] = []
+        with open(self.file_path, mode="rb") as test_file:
+            test_content = test_file.read()
+            enc = chardet.detect(test_content)
+        # here I have language of book, encoding and confidence of detection in !(enc)
+        encoding = enc['encoding']
+        with open(self.file_path, mode = "rt", encoding=encoding) as file:
+            for line in file.readlines():
+                text = line.strip()
+                if text != "" and not text.isspace():
+                    frame = BookFrame(text, "txt_p", {})
+                    full_content.append(frame)
+                    elements.append(frame)
+                    if found_notes:
+                        notes_lines.append(text)
+                if text == 'notes':
+                    found_notes = True
+                elif len(elements) == self.max_elements_per_page:
+                    self.content.append(elements)
+                    elements = []
+        if len(elements) != 0:
+            self.content.append(elements)
+        if found_notes:
+            self.notes = txt_book.organise_notes(notes_lines)
+            for frame in full_content:
+                frame.add_list_of_notes(txt_book.detect_notes(frame.content, self.notes))
+                frame.content = txt_book.underline_notes(frame.content)
 
     @property
     def length(self):

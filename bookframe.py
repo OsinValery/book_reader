@@ -15,6 +15,11 @@ class BookFrame():
     def add_attribute(self, name, value):
         self.attributs[name] = value
     
+    def add_list_of_notes(self, notes: dict):
+        if notes != {}:
+            self.have_note = True
+            self.notes.update(notes)
+    
     @property
     def is_cover(self):
         return self.type == 'image' and 'cover' in self.attributs and self.attributs['cover']
@@ -109,6 +114,24 @@ class BookFrame():
                 poem=is_poem,
                 note=is_note,
             )
+
+        elif self.type == 'txt_p':
+            text: str = self.content.lstrip()
+            n = 8
+            # 2 different unicode simbols
+            if text[0] in ['-', '—']:
+                n = 3
+            text, refs = self.referize_text(text)
+            text = ' ' * n + text
+            widget = page_widgets.Paragraph(
+                text= text, 
+                referization=refs, 
+                cite=is_cite,
+                epigraph=is_epigraph,
+                poem=is_poem,
+                note=is_note,
+            )
+
         elif self.type == 'v':
             text = self.escape_text(self.content)
             text, refs = self.referize_text(text)
