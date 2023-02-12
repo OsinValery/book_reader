@@ -1,6 +1,7 @@
 
 from kivy.factory import Factory
 from kivy.clock import Clock
+from kivy.clock import _default_time as time
 from kivy.properties import NumericProperty, BooleanProperty
 from kivy.core.clipboard import Clipboard
 
@@ -120,11 +121,25 @@ class Page(Factory.Widget):
         self.selection = False
         for child in self.ids.page_content.children:
             child.deselect()
+        
+    def reset_task(self, content):
+        limit = Clock.get_time() + 1/25
+        finished = False
+        while (time() < limit) and not finished:
+            try:
+                content.add_widget(self.widgets_generator.__next__())
+            except:
+                finished = True
+        if not finished:
+            Clock.schedule_once(lambda dt: self.reset_task(content), 0)
+
 
     def reset_content(self):
         self.deselect()
         content = self.ids.page_content
         content.clear_widgets()
+        self.widgets_generator = self.prepare()
         self.ids.page_scroll.scroll_y = 1
-        for el in self.prepare():
-            content.add_widget(el)
+        self.reset_task(content)
+        """        for el in self.widgets_generator:
+            content.add_widget(el)"""
