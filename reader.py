@@ -25,7 +25,7 @@ from kivymd.uix.filemanager.filemanager import MDFileManager
 
 from bottom_sheet import BottomSheet
 from libretranslatepy import LibreTranslateAPI
-from googletrans import Translator, constants
+import deep_translator
 from localizator import Get_text
 
 import app_values
@@ -45,8 +45,8 @@ class PageScreen(MDNavigationLayout):
     to_lang = StringProperty('en')
 
     # google
-    google_translator = ObjectProperty(Translator())
-    google_supported_languages = sorted(list(constants.LANGUAGES.keys()))
+    google_translator = ObjectProperty(deep_translator.GoogleTranslator())
+    google_supported_languages = sorted(deep_translator.GoogleTranslator().get_supported_languages(as_dict=True).values())
     google_from_lang = StringProperty('en')
     google_to_lang = StringProperty('ru')
 
@@ -57,6 +57,7 @@ class PageScreen(MDNavigationLayout):
         self.check_translator()
         self.word = word
         try:
+            print('start translation for word:\n', word)
             if self.cur_translater == 'argos':
                 if self.translation_progress[0] == 1:
                     return
@@ -67,13 +68,14 @@ class PageScreen(MDNavigationLayout):
                 if self.translation_progress[1] == 1:
                     return
                 self.translation_progress[1] = 1
-                text = self.google_translator.translate(self.word, src=self.google_from_lang, dest=self.google_to_lang).text
+                text = self.google_translator.translate(self.word, source=self.google_from_lang, target=self.google_to_lang)
                 self.google_translation_result = text
                 self.translation_progress[1] = 0
             else:
                 print('unknown translater')
             self.ids.translater.set_state("open")
-        except:
+        except Exception as e:
+            print(e)
             def cancel(data=...):
                 dialog.dismiss()
             def retry(data=...):
