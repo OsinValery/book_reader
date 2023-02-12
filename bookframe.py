@@ -11,6 +11,7 @@ class BookFrame():
         self.attributs = args
         self.have_note = False
         self.notes = {}
+        self.cashed_widget = None
 
     def add_attribute(self, name, value):
         self.attributs[name] = value
@@ -84,6 +85,8 @@ class BookFrame():
     
     def make_content(self):
         "returns widget view to present it to user"
+        if self.cashed_widget is not None:
+            return self.cashed_widget
         is_cite = (('cite' in self.attributs) and self.attributs['cite'])
         is_poem = (('poem' in self.attributs) and self.attributs['poem'])
         is_note = (('note' in self.attributs) and self.attributs['note'])
@@ -234,8 +237,9 @@ class BookFrame():
             text = self.type + '\n' + self.content + '\n' + str(self.attributs)
             text = 'Uncnown element;\nThat\'s content:\n' + text
             widget = page_widgets.Unknown(text = text)
-    
+
         if is_epigraph:
-            return page_widgets.SelectablePair(pad = 0.5,child = widget)
+            self.cashed_widget = page_widgets.SelectablePair(pad = 0.5,child = widget)
         else:
-            return widget
+            self.cashed_widget = widget
+        return self.cashed_widget

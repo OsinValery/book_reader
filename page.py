@@ -89,10 +89,10 @@ class Page(Factory.Widget):
         book = app_values.app_info.book
         elements = book.get_page(self.page-1)
         add_space = not elements[0].is_cover
-        content = []
         if add_space:
-            content = [Factory.Space()]
-        content += [el.make_content() for el in elements]
+            yield Factory.Space()
+        for el in elements:
+            yield el.make_content()
         have = False
         comments = {}
         for el in elements:
@@ -100,22 +100,21 @@ class Page(Factory.Widget):
                 have = True
                 comments.update(el.notes)
         if have:
-            content.append(Factory.NotesDelimeter())
+            yield Factory.NotesDelimeter()
             for note in comments:
                 ind = note[1:]
                 note_text = book.notes[ind] if ind in book.notes else Get_text('info_unknown_note')
                 if type(note_text) == str:
                     code : str = comments[note] 
                     code = code.replace(']','').replace('[','').replace('&bl;', '').replace('&br;','')
-                    content.append(Factory.Note(text= f'{code} - {note_text}'))
+                    yield Factory.Note(text= f'{code} - {note_text}')
                 else:
                     note_elements = note_text.work()
                     for el in note_elements:
-                        content.append(el.make_content())
+                        yield el.make_content()
         
         if add_space:
-            content.append(Factory.Space())
-        return content
+            yield Factory.Space()
 
     def deselect(self):
         self.selection = False
