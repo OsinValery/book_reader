@@ -16,6 +16,99 @@ class FB2_tag:
 
     def work(self, n=0) -> List[bookframe.BookFrame]:
         """returns list of bookframe.Bookframe of this element"""
+        note = False
+        if 'note' in self.attr and self.attr['note']:
+            note = True
+            for child in self.content:
+                child.add_attribute('note', True)
+
+        if self.tag == 'title':
+            yield bookframe.BookFrame(None,'title_empty', {})
+            for child in self.content:
+                if child.tag == 'empty-line/':
+                    yield bookframe.BookFrame(None, 'empty', child.attr)
+                else:
+                    # p
+                    yield bookframe.BookFrame(child.text, 'title', child.attr)
+            if not note: 
+                yield bookframe.BookFrame(None,'title_empty', {})
+            return
+
+        elif self.tag == 'poem':
+            for child in self.content:
+                if child.tag == 'stanza':
+                    for _el in child.work():
+                        yield _el
+                    yield bookframe.BookFrame(None, 'stanza_empty' , child.attr)
+
+                elif child.tag == 'epigraph':
+                    for _el in child.work():
+                        yield _el
+
+                elif child.tag in ['title', 'text-author']:
+                    # list of BookFrame
+                    for el in child.work():
+                        el.add_attribute('poem', True)
+                        yield el
+
+                elif child.tag[:4] == 'date':
+                    print('note for poem -> date')
+                    print('date can contain key "value" in tag')
+                    bookframe.BookFrame(child.text, 'date', child.attr)
+            return 
+
+        elif self.tag == 'epigraph':
+            for child in self.content:
+                if child.tag == 'empty-line/':
+                    for _el in child.work():
+                        yield _el
+                elif child.tag == 'p':
+                    for temp_tag in child.work():
+                        temp_tag.add_attribute('epigraph', True)
+                        yield temp_tag
+                elif child.tag == 'text-author':
+                    for frame in child.work():
+                        frame.add_attribute('epigraph',True)
+                        yield frame
+                elif child.tag in ('poem','cite'):
+                    elements = child.work()
+                    for el in elements:
+                        el.add_attribute('epigraph', True)
+                        yield el
+                else:
+                    print('unknown content for')
+                    print('epigraph:')
+                    print(child.tag)
+            return
+
+        elif self.tag == 'cite':
+            for child in self.content:
+                for el in child.work():
+                    el.add_attribute('cite', True)
+                    yield el
+            return
+
+        for child in self.content:
+            for _el in child.work():
+                yield _el
+
+        if self.tag == 'annotation':
+            yield bookframe.BookFrame(None,'annotation_empty', {})
+
+        if self.tag in ['body', 'section', 'stanza', 'annotation', 'coverpage', 'history']:
+            return 
+
+        element = None
+        if self.tag == 'empty-line/':
+            element = bookframe.BookFrame(None, 'empty', {})
+        elif self.tag == 'image':
+            element = bookframe.BookFrame(None, 'image', self.attr)
+        else:
+            element = bookframe.BookFrame(self.text, self.tag, self.attr)
+        yield element
+
+    def work2(self, n=0) -> List[bookframe.BookFrame]:
+        """returns list of bookframe.Bookframe of this element. Works without yields"""
         result = []
         note = False
         if 'note' in self.attr and self.attr['note']:
