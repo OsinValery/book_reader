@@ -123,6 +123,26 @@
             points: (self.pos[0] + self.line_padding, self.pos[1] + self.height/2, self.pos[0] + self.width - self.line_padding, self.pos[1] + self.height/2)
 
 
+<LibraryListItem>:
+    color: (0,1,0,1)
+    width: self.parent.width if self.parent else 100
+
+    on_press:
+        #library_list
+        self.parent.parent.choose_book(root.text)
+
+    IconLeftWidget:
+        icon: 'book'
+        on_press:
+            root.parent.parent.choose_book(root.text)
+    
+    IconRightWidget:
+        icon: "delete"
+        icon_color: [1,0,0,1]
+        on_press:
+            root.parent.parent.remove_book(root.text)
+    
+
 <PageScreen>:
     id: reader
     name: 'reader'
@@ -167,21 +187,28 @@
                     title: Get_text('info_library')
                     id: library_app_bar
                     left_action_items: [['arrow-left', lambda x: root.close_library()]]
-                
-                ScrollView:
-                    do_scroll_x: False
-                    do_scroll_y: True
-                    id: library_scroll
-                    width: self.parent.width
-                    height: self.parent.height - library_app_bar.height
 
-                    LibraryPresenter:
-                        id: library_list
-                        on_parent:
-                            self.update_library()
+                LibraryPresenter:
+                    id: library_list
+                    width: library.width
+                    height: self.parent.height - library_app_bar.height - library_space.height
+                    size_hint_y: None
+                    viewclass: "LibraryListItem"
+                    
+                    RecycleBoxLayout:
+                        size_hint_y: None
+                        height: self.minimum_height
+                        width: self.parent.width
+                        id: LibraryListLayout
+                        orientation: 'vertical'
+                Widget:
+                    height: add_book_btn.height + 10
+                    width: library.width
+                    id: library_space
 
             MDFloatingActionButton:
                 icon: "plus"
+                id: add_book_btn
                 md_bg_color: app.theme_cls.primary_color
                 pos: [Window.width * 0.98 - self.width, 0.02 * Window.height]
 

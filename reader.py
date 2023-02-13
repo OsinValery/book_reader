@@ -4,6 +4,8 @@ import shutil
 
 from kivy.uix.widget import Widget
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.recycleview import RecycleView
+from kivy.uix.recycleview.views import RecycleDataViewBehavior
 from kivy.properties import NumericProperty, StringProperty, ObjectProperty
 from kivy.metrics import dp
 import kivy.app
@@ -19,8 +21,7 @@ from kivymd.uix.toolbar.toolbar import MDTopAppBar
 from kivymd.uix.menu.menu import MDDropdownMenu
 from kivymd.uix.dialog import MDDialog
 from kivymd.uix.button import MDRaisedButton, MDFlatButton
-from kivymd.uix.list import BaseListItem
-from kivymd.uix.list import MDList, OneLineAvatarIconListItem, IconLeftWidget, IconRightWidget
+from kivymd.uix.list import OneLineAvatarIconListItem
 from kivymd.uix.filemanager.filemanager import MDFileManager
 
 from bottom_sheet import BottomSheet
@@ -181,7 +182,6 @@ class PagePresenter(Widget):
         self.ids.page_forward.disabled = self.book.length == 1
 
 
-
 class MyAppBar(MDTopAppBar):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -267,11 +267,22 @@ class PageTurnerSheet(BoxLayout):
         # if hasattr(Window, 'keyboard_height') and Window.keyboard_height != None:
         #     return 0.25 * Window.height + Window.keyboard_height
         return 0.5 * Window.height
-        
 
-class LibraryPresenter(MDList):
+
+class LibraryListItem(RecycleDataViewBehavior,OneLineAvatarIconListItem):
+    text = StringProperty()
+    index = 0
+
+    def refresh_view_attrs(self, rv, index, data):
+        self.index = index
+        self.text = data['text']
+        super(LibraryListItem, self).refresh_view_attrs(rv, index, data)
+
+
+class LibraryPresenter(RecycleView):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.orientation = "vertical"
         self._file_manager = MDFileManager(
             exit_manager = self.cancel,
             select_path = self.load_book,
@@ -339,36 +350,19 @@ class LibraryPresenter(MDList):
         self._file_manager.show('/')
 
     def update_library(self):
-        self.clear_widgets()
-        for book in app_values.app_info.library:
-            line = OneLineAvatarIconListItem(
-                on_press = self.choose_book,
-                text = book
-            )
-            # x.parent.parent is link on "line"
-            line.add_widget(IconLeftWidget(
-                icon='book', 
-                on_press=lambda x: self.choose_book(x.parent.parent))
-            )
-            line.add_widget(IconRightWidget(
-                icon = 'delete',
-                icon_color = [1,0,0,1],
-                on_press=lambda x: self.remove_book(x.parent.parent.text)
-            ))
+        self.data = [{"text": book} for book in app_values.app_info.library]
+        #self.add_widget(BaseListItem(height = 200))
 
-            self.add_widget(line)
-        self.add_widget(BaseListItem(height = 200))
-
-    def choose_book(self, arg):
+    def choose_book(self, arg: str):
         app_values.app_info.book.read(
-            os.path.join(app_values.app_info.book_dir, arg.text), 
+            os.path.join(app_values.app_info.book_dir, arg), 
             app_values.app_info.max_elements_per_page
         )
         root = self.root_screen
         root.ids.page_presenter.change_book()
         root.ids.page_screen.current = 'book'
     
-    def remove_book(self, name):
+    def remove_book(self, name: str):
         full_path = os.path.join(app_values.app_info.book_dir, name)
         app_values.app_info.library.remove(name)
         os.remove(full_path)
