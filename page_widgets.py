@@ -9,6 +9,7 @@ from kivy.properties import ListProperty, BooleanProperty, \
 from kivy.graphics import Color, Rectangle
 from kivy.factory import Factory
 from kivy.core.window import Window
+from kivy.utils import rgba
 
 import app_values
 
@@ -244,12 +245,13 @@ class PresentableLabel(SelectableLabel):
                 pass
             elif property_ in ['text-indent', 'margin', 'padding']:
                 pass
+
             elif property_ == 'color':
                 if value[0] == '#':
-                    if len(value) == 4:
+                    if len(value) <= 5:
                         v = '#'
-                        for ch in value:
-                            v += ch * 2
+                        value = value.replace('#',  '')
+                        for ch in value: v += ch * 2
                         self.color = v
                     else:
                         self.color = value
@@ -258,6 +260,16 @@ class PresentableLabel(SelectableLabel):
                     colors = get_color_from_code(value)
                     if colors != None:
                         self.color = colors
+                elif 'hsla' in value:
+                    value:str = value.replace("hsl", '').replace('(', '').replace(')', "")
+                    colors = get_color_from_code(value)
+                    if colors != None:
+                        color = list(Color(colors[0], colors[1], colors[2], mode = "hsv").rgba)
+                        if len(color) == 3:
+                            color.append(colors[-1])
+                        else:
+                            color[-1] = colors[-1]
+                        self.color = color
                 elif 'hsl' in value:
                     value:str = value.replace("hsl", '').replace('(', '').replace(')', "")
                     colors = get_color_from_code(value)
@@ -266,6 +278,51 @@ class PresentableLabel(SelectableLabel):
                         self.color = tuple(color)
                 elif value in colors_words:
                     self.color = colors_words[value]
+            elif property_ == 'background-color':
+                #    actions != actions for color property
+                if value[0] == '#':
+                    color = ""
+                    if len(value) <= 5:
+                        v = '#'
+                        value = value.replace('#',  '')
+                        for ch in value:  v += ch * 2
+                        color = v
+                    else:
+                        color = value
+                    color = list(rgba(color))
+                    if len(color) == 3:
+                        color.append(1)
+                    self.background_color = color
+                elif 'rgb' in value:
+                    value:str = value.replace("rgba", '').replace('rgb', '').replace('(', '').replace(')', "")
+                    colors = get_color_from_code(value)
+                    if colors != None:
+                        if len(colors) == 3:
+                            colors.append(1)
+                        self.background_color = colors
+                elif 'hsla' in value:
+                    value:str = value.replace("hsl", '').replace('(', '').replace(')', "")
+                    colors = get_color_from_code(value)
+                    if colors != None:
+                        color = list(Color(colors[0], colors[1], colors[2], mode = "hsv").rgba)
+                        if len(color) == 3:
+                            color.append(colors[-1])
+                        else:
+                            color[-1] = colors[-1]
+                        self.background_color = color
+                elif 'hsl' in value:
+                    value:str = value.replace("hsl", '').replace('(', '').replace(')', "")
+                    colors = get_color_from_code(value)
+                    if colors != None:
+                        color = list(Color(colors[0], colors[1], colors[2], mode = "hsv").rgba)
+                        if len(color) == 3:
+                            color.append(1)
+                        self.background_color = color
+                elif value in colors_words:
+                    color = colors_words[value]
+                    if len(color) == 7:
+                        color += 'ff'
+                    self.background_color = rgba(color)
             else:
                 print('unknown css property:', property_, 'with value:', value)
 

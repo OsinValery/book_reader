@@ -16,6 +16,18 @@
     on_ref_press: 
         root.on_refference(*args)
 
+<PresentableLabel>:
+    text: ""
+    background_color: (0,0,0,0)
+
+    canvas.before:
+        Color:
+            rgba: self.background_color
+        Rectangle:
+            size: self.size[0], self.height + 20
+            pos: self.pos[0], self.pos[1] - 10
+
+
 <Paragraph>:
     text: ''
     markup: True
