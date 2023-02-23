@@ -91,6 +91,7 @@ class BookFrame():
         is_poem = (('poem' in self.attributs) and self.attributs['poem'])
         is_note = (('note' in self.attributs) and self.attributs['note'])
         is_epigraph = (('epigraph' in self.attributs) and self.attributs['epigraph'])
+        another = self.attributs['another'] if 'another' in self.attributs else {}
 
         widget = page_widgets.Unknown(
             text='Initial widget. It means, that it wasn\'t choosen. Tag = ' + self.type , 
@@ -98,6 +99,7 @@ class BookFrame():
             epigraph=is_epigraph,
             poem=is_poem,
             note=is_note,
+            another_properties=another,
         )
 
         if self.type == 'p':
@@ -116,6 +118,7 @@ class BookFrame():
                 epigraph=is_epigraph,
                 poem=is_poem,
                 note=is_note,
+                another_properties=another,
             )
 
         elif self.type == 'txt_p':
@@ -145,6 +148,7 @@ class BookFrame():
                 epigraph=is_epigraph,
                 poem=is_poem,
                 note=is_note,
+                another_properties=another,
             )
         elif self.type == 'empty':
             return page_widgets.Space()
@@ -159,6 +163,7 @@ class BookFrame():
                 epigraph=is_epigraph,
                 poem=is_poem,
                 note=is_note,
+                another_properties=another,
             )
         
         elif self.type == 'title_empty':
@@ -173,6 +178,7 @@ class BookFrame():
                 referization=refs,
                 cite=is_cite,
                 epigraph=is_epigraph,
+                another_properties=another,
                 poem=is_poem,
                 note=is_note,
             )
@@ -191,6 +197,7 @@ class BookFrame():
                 referization=refs,
                 cite=is_cite,
                 epigraph=is_epigraph,
+                another_properties=another,
                 poem=is_poem,
                 note=is_note,
             )
@@ -203,6 +210,7 @@ class BookFrame():
                 referization=refs,
                 cite=is_cite,
                 epigraph=is_epigraph,
+                another_properties=another,
                 poem=is_poem,
                 note=is_note,
             )
@@ -215,6 +223,7 @@ class BookFrame():
                 referization=refs,
                 cite=is_cite,
                 epigraph=is_epigraph,
+                another_properties=another,
                 poem=is_poem,
                 note=is_note,
             )

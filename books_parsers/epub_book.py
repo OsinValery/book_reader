@@ -1,5 +1,6 @@
 import os
 from typing import List
+from copy import deepcopy
 from .xml_parser import XmlParser
 from .html_parser import Html_Parser
 from .css_descriptor import CssDescriptor
@@ -173,11 +174,13 @@ class EpubBookParser:
             html_tag = html_parser.parce_xml_file(os.path.join(root_folder, file_path))
             style_tag = html_tag.find_tag_in_tree('style')
             if style_tag != None:
-                print(style_tag.tag)
-                print(style_tag.text)
-                print(style_tag.attr)
+                style_descriptor.update_from_string(style_tag.text)
             header = html_tag.find_tag_in_tree('head')
             included_files = header.find_all_tags_in_tree("link")
+            for included_file in included_files:
+                if 'href' in included_file.attr:
+                    if '.css' in included_file.attr['href']:
+                        style_descriptor.update_from_descriptor(styles[included_file.attr['href']])
             body_tag = html_tag.find_tag_in_tree('body')
             if body_tag != None:
                 page_content = body_tag.work(style_descriptor, root_folder)

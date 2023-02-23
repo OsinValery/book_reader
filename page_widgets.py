@@ -4,7 +4,8 @@ from kivy.app import App
 from kivy.uix.label import Label
 from kivy.uix.widget import Widget
 from kivy.uix.boxlayout import BoxLayout
-from kivy.properties import ListProperty, BooleanProperty, StringProperty, ObjectProperty, NumericProperty
+from kivy.properties import ListProperty, BooleanProperty, \
+    StringProperty, ObjectProperty, NumericProperty, DictProperty
 from kivy.graphics import Color, Rectangle
 from kivy.factory import Factory
 from kivy.core.window import Window
@@ -218,29 +219,55 @@ class PresentableLabel(SelectableLabel):
     poem = BooleanProperty(False)
     note = BooleanProperty(False)
     epigraph = BooleanProperty(False)
+    another_properties = DictProperty({})
 
     def get_font(self, name):
         folder = App.get_running_app().directory
         return os.path.join(folder, 'assets', 'fonts', name)
 
+    def resolve_css_properties(self):
+        for property_ in self.another_properties:
+            value = clear_css_value(self.another_properties[property_])
+            if value in ['inherit', 'initial', 'unset']:
+                continue
+            if property_ == 'font-family':
+                try:
+                    self.font_family = value
+                except:
+                    print('can\'t set font family')
+            elif property_ == 'font-size':
+                self.font_size = value
+            elif property_ == 'text-align':
+                if value in ['center', 'right', 'left', 'justify']:
+                    self.halign = value
+            elif property_ in ['margin-bottom', 'margin-top']:
+                pass
+            elif property_ in ['text-indent', 'margin', 'padding']:
+                pass
+            else:
+                print('unknown css property:', property_, 'with value:', value)
+
 
 class Paragraph(PresentableLabel):
 
     def resolve_state(self):
-        if self.cite: 
-            self.font_size = 30
-        self.halign = 'left'
-
-        if not self.epigraph:
-            if self.cite:
-                self.font_name = self.get_font('NotoSans-ExtraLightItalic.ttf')
+        if self.another_properties != {}:
+            self.resolve_css_properties()
         else:
-            self.halign = 'right'
-            self.size_hint_x = None
-            if self.cite:
-                self.font_name = self.get_font('NotoSans-ThinItalic.ttf')
+            if self.cite: 
+                self.font_size = 30
+            self.halign = 'left'
+
+            if not self.epigraph:
+                if self.cite:
+                    self.font_name = self.get_font('NotoSans-ExtraLightItalic.ttf')
             else:
-                self.font_name = self.get_font('NotoSans-Thin.ttf')
+                self.halign = 'right'
+                self.size_hint_x = None
+                if self.cite:
+                    self.font_name = self.get_font('NotoSans-ThinItalic.ttf')
+                else:
+                    self.font_name = self.get_font('NotoSans-Thin.ttf')
 
 
 class Unknown(PresentableLabel):
@@ -252,6 +279,7 @@ class Mistake(PresentableLabel):
 class ImageData(Widget, PageContent):
     texture = ObjectProperty()
     cover = BooleanProperty(False)
+    another_properties=DictProperty({})
 
     def get_size(self, icon_size):
         if not self.cover:
@@ -265,17 +293,20 @@ class ImageData(Widget, PageContent):
 
 class Title(PresentableLabel):
     def resolve_state(self):
-        if self.cite: 
-            self.font_size = 38
-        
-        if self.cite and self.poem:
-            self.font_name = self.get_font('NotoSans-ExtraBoldItalic.ttf')
-        elif self.cite:
-            self.font_name = self.get_font('NotoSans-SemiBoldItalic.ttf')
-        elif self.poem:
-            self.font_name = self.get_font('NotoSans-ExtraBold.ttf')
+        if self.another_properties != {}:
+            self.resolve_css_properties()
         else:
-            pass
+            if self.cite: 
+                self.font_size = 38
+            
+            if self.cite and self.poem:
+                self.font_name = self.get_font('NotoSans-ExtraBoldItalic.ttf')
+            elif self.cite:
+                self.font_name = self.get_font('NotoSans-SemiBoldItalic.ttf')
+            elif self.poem:
+                self.font_name = self.get_font('NotoSans-ExtraBold.ttf')
+            else:
+                pass
 
 
 class NotesDelimeter(Widget,PageContent):
@@ -286,24 +317,29 @@ class Note(PresentableLabel):
 
 class SubTitle(PresentableLabel):
     def resolve_state(self):
-        if self.cite:
-            self.font_name = self.get_font('NotoSans-ThinItalic.ttf')
-        else:
-            self.font_name = self.get_font('NotoSans-Italic.ttf')
-  
-        if self.epigraph:
-            self.font_size = 28
-            self.size_hint_x = None
+        if self.another_properties != {}:
+            self.resolve_css_properties()
         else:
             if self.cite:
-                self.font_size = 30
+                self.font_name = self.get_font('NotoSans-ThinItalic.ttf')
+            else:
+                self.font_name = self.get_font('NotoSans-Italic.ttf')
+    
+            if self.epigraph:
+                self.font_size = 28
+                self.size_hint_x = None
+            else:
+                if self.cite:
+                    self.font_size = 30
 
 class Stanza_empty(Space):
     pass
 
 class Author(PresentableLabel):
     def resolve_state(self):
-        if self.epigraph:
+        if self.another_properties != {}:
+            self.resolve_css_properties()
+        elif self.epigraph:
             self.font_size = 28
             self.size_hint_x = None
             if self.cite:
@@ -319,32 +355,38 @@ class Author(PresentableLabel):
 # this class != Paragraph
 class Text(PresentableLabel):
     def resolve_state(self):
-        if self.cite: 
-            self.font_size = 30
-
-        if not self.epigraph:
-            if self.cite:
-                self.font_name = self.get_font('NotoSans-ExtraLightItalic.ttf')
-            else:
-                self.font_name = self.get_font('NotoSans-Medium.ttf')
+        if self.another_properties != {}:
+            self.resolve_css_properties()
         else:
-            self.size_hint_x = None
-            if self.cite:
-                self.font_name = self.get_font('NotoSans-ThinItalic.ttf')
+            if self.cite: 
+                self.font_size = 30
+
+            if not self.epigraph:
+                if self.cite:
+                    self.font_name = self.get_font('NotoSans-ExtraLightItalic.ttf')
+                else:
+                    self.font_name = self.get_font('NotoSans-Medium.ttf')
             else:
-                self.font_name = self.get_font('NotoSans-Thin.ttf')
+                self.size_hint_x = None
+                if self.cite:
+                    self.font_name = self.get_font('NotoSans-ThinItalic.ttf')
+                else:
+                    self.font_name = self.get_font('NotoSans-Thin.ttf')
 
 class Poem_line(PresentableLabel):
     def resolve_state(self):
-        if self.epigraph:
-            self.size_hint_x = None
-            self.font_name = self.get_font('NotoSans-Thin.ttf')
+        if self.another_properties != {}:
+            self.resolve_css_properties()
         else:
-            if self.cite:
-                self.italic = True
-                self.font_name = self.get_font('NotoSans-MediumItalic.ttf')
+            if self.epigraph:
+                self.size_hint_x = None
+                self.font_name = self.get_font('NotoSans-Thin.ttf')
             else:
-                self.font_name = self.get_font('NotoSans-Medium.ttf')
+                if self.cite:
+                    self.italic = True
+                    self.font_name = self.get_font('NotoSans-MediumItalic.ttf')
+                else:
+                    self.font_name = self.get_font('NotoSans-Medium.ttf')
 
 class Annotation_empty(Space):
     pass
@@ -353,3 +395,15 @@ class Title_Empty(Space):
     pass
 
 
+
+
+def clear_css_value(value: str):
+    if value == "": return ""
+    return value.split()[0]
+
+def get_in_percents(value):
+    try:
+        value = value.replace('%', '')
+        return float(value) / 100
+    except:
+        return None
