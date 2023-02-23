@@ -233,7 +233,31 @@ class BookFrame():
             except Exception as e:
                 print(e)
                 return page_widgets.Mistake(text=f'picture wasn\'t loaded! ')
+        
+        elif self.type == 'file_image':
+            extansion: str = self.attributs['path'][-4:]
+            extansion = extansion.replace('.', '')
+            if extansion in ['png', 'jpg', 'jpeg']:
+                try:
+                    with open(self.attributs['path'], mode='rb') as file:
+                        data = file.read()
+                    data = io.BytesIO(data)
+                    img = Image(data, ext=extansion)
+                    is_cover = 'cover' in self.attributs and self.attributs['cover']
+                    return page_widgets.ImageData(texture=img.texture, cover = is_cover)
+                except Exception as e:
+                    print(e)
+                    return page_widgets.Mistake(text=f'picture wasn\'t loaded! ')
+            else:
+                print("\"", extansion, "\"", 'is not supported yet')
+                widget = page_widgets.Space()
+
         else:
+            print("from bookframe!")
+            print('unknown tag: ', self.type)
+            print('content:')
+            print(self.attributs)
+            print(self.content)
             text = self.type + '\n' + self.content + '\n' + str(self.attributs)
             text = 'Uncnown element;\nThat\'s content:\n' + text
             widget = page_widgets.Unknown(text = text)

@@ -1,19 +1,9 @@
 from typing import List
+from .any_book_tag import AnyBookTag
+from .xml_parser import XmlParser
 import bookframe
 
-class FB2_tag:
-    def __init__(self) -> None:
-        self.attr = {}
-        self.tag = ''
-        self.text = ''
-        self.content : List[FB2_tag] = []
-
-    def append(self, tag):
-        self.content.append(tag)
-
-    def add_attribute(self, name, value):
-        self.attr[name] = value
-
+class FB2_tag(AnyBookTag):
     def work(self, n=0) -> List[bookframe.BookFrame]:
         """returns list of bookframe.Bookframe of this element"""
         note = False

@@ -1,6 +1,7 @@
 
 from typing import List
-from fb2_book import get_tag_arguments, fb2_parser
+from books_parsers.fb2_book import get_tag_arguments, fb2_parser
+from .xml_parser import XmlParser
 from bookframe import BookFrame
 from localizator import Get_text,get_genre
 
@@ -131,7 +132,7 @@ class Title_Info():
                     pos = end_tag + 1
                 else:
                     if not 'date' in tag_content:
-                        close_tag_text = '</' + tag_content + '>'
+                        close_tag_text = XmlParser.get_close_tag(tag_content)
                     else:
                         close_tag_text = '</date>'
                     close = text.find(close_tag_text,end_tag)
@@ -270,7 +271,7 @@ class Document_Info():
                 end_tag = text.find('>', start_tag)
                 tag_content = text[start_tag+1:end_tag]
                 if not 'date' in tag_content:
-                    close_tag_text = '</' + tag_content + '>'
+                    close_tag_text = XmlParser.get_close_tag(tag_content)
                 else:
                     close_tag_text = '</date>'
                 close_tag = text.find(close_tag_text, end_tag)
@@ -378,7 +379,7 @@ class Publish_info():
                     pos = end_tag + 1
                 else:
                     # others have close tag
-                    close_tag_text = '</' + tag_content + '>'
+                    close_tag_text = XmlParser.get_close_tag(tag_content)
                     close_tag = text.find(close_tag_text, end_tag)
                     if close_tag == -1:
                         pos = end_tag + 1

@@ -1,2 +1,5 @@
 /.buildozer/*
+*/__pycache__/*
 /__pycache__/*
+*/.DS_Srore
+.DS_Srore

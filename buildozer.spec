@@ -29,7 +29,7 @@ version = 0.1
 # (list) Application requirements
 # comma separated e.g. requirements = sqlite3,kivy
 
-# docx2txt, soupsieve, pypdf, beautifulsoup4, deep-translator, requests, urllib3, bs4
+# deep-translator, requests, urllib3, bs4
 requirements = kivy, kivymd==1.1.1, pillow, python3,plyer, libretranslatepy, deep_translator, chardet, requests, urllib3, beautifulsoup4
 
 # (str) Custom source folders for requirements

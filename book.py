@@ -1,44 +1,54 @@
 import os
+import shutil
+import zipfile
+
+from kivy.app import App
 import chardet
-from typing import List
+from typing import List, Dict
 from bookframe import BookFrame
-import fb2_book
-import fb2_book_description
-import txt_book
+
+from books_parsers.any_book_tag import AnyBookTag
+from books_parsers.xml_parser import XmlParser
+import books_parsers.fb2_book as fb2_book
+import books_parsers.fb2_book_description as fb2_book_description
+import books_parsers.txt_book as txt_book
+import books_parsers.epub_book as epub_book
 
 class Book():
     def __init__(self) -> None:
         self.file_path = ''
-        self.content = []
-        self.notes = {}
+        self.content: List[List[BookFrame]] = []
+        self.notes: Dict[str, AnyBookTag] = {}
         self.format = 'fb2'
         self.max_elements_per_page = 10
-        self.description = fb2_book_description.FB2_Book_Deskription()
 
-    def read(self, filepath, max_elements_per_page=20):
+    def read(self, filepath: str, max_elements_per_page=20):
         self.content = []
         self.notes = {}
         self.file_path = filepath
-        self.format = os.path.split(self.file_path)[-1]
-        self.format: str = self.format[-3:]
+        self.format: str = os.path.split(self.file_path)[-1]
+        print(self.format)
         self.max_elements_per_page = max_elements_per_page
-        if self.format == 'fb2':
+        if self.format[-3:] == 'fb2':
+            self.format = 'fb2'
             self.read_fb2()
-        elif self.format == 'txt':
+        elif self.format[-3:] == 'txt':
+            self.format = 'txt'
             self.read_txt()
+        elif self.format[-4:] == "epub":
+            file_folder = App.get_running_app().user_data_dir
+            file_name = self.format
+            self.format = "epub"
+            self.read_epub(file_folder, file_name)
         else:
             raise Exception('unknown file format: '+ self.format)
-        
+
     def read_fb2(self):
         elements = []
         assets = {}
 
         # encoding = ??
-        with open(self.file_path, 'rb') as file:
-            line = str(file.readline())
-        enc_pos = line.find('encoding=') + 10
-        enc_end = line.find('"', enc_pos)
-        encoding = line[enc_pos:enc_end]
+        encoding = XmlParser.determine_xml_encoding(self.file_path)
 
         # read content
         with open(self.file_path, 'r', encoding=encoding) as file:
@@ -49,8 +59,8 @@ class Book():
         des_end = content.find('>', des_pos)
         des_fin = content.find('</description>')
         description_text = content[des_end+1:des_fin]
-        self.description = fb2_book_description.FB2_Book_Deskription()
-        self.description.parse(description_text)
+        description = fb2_book_description.FB2_Book_Deskription()
+        description.parse(description_text)
 
         # read text
         body_pos = content.find('<body>', des_fin)
@@ -117,20 +127,20 @@ class Book():
             page.append(el)
 
         # get cover
-        cover = self.description.get_cover()
+        cover = description.get_cover()
         for el in cover:
             page = []
             work_book_element(el, page)
             self.content.append(page)
         
-        f_cover = self.description.get_foreign_cover()
+        f_cover = description.get_foreign_cover()
         for el in f_cover:
             page = []
             work_book_element(el, page)
             self.content.append(page)
 
         # present book description
-        self.content.append(self.description.get_description())
+        self.content.append(description.get_description())
 
         # divide into pages
         page = []
@@ -177,6 +187,23 @@ class Book():
             for frame in full_content:
                 frame.add_list_of_notes(txt_book.detect_notes(frame.content, self.notes))
                 frame.content = txt_book.underline_notes(frame.content)
+
+    def read_epub(self, save_path, file_name: str):
+        book_path = os.path.join(save_path, "temp_book")
+        if (os.path.exists(book_path)):
+            shutil.rmtree(book_path)
+        os.makedirs(book_path)
+        target_path = os.path.join(book_path, file_name.replace('.epub', '.zip'))
+        final_path = os.path.join(book_path, "content")
+        shutil.copy(self.file_path, target_path)
+        with zipfile.ZipFile(target_path) as zf:
+            zf.extractall(final_path)
+        book_parser = epub_book.EpubBookParser(final_path)
+        entries = book_parser.get_containers_paths()
+        print(entries)
+        content = book_parser.get_book_content(entries[0])
+        self.content = content[0]
+        self.notes = content[1]
 
     @property
     def length(self):

@@ -429,6 +429,11 @@ def description_text(text, lang, details=None):
             return 'Кто сканировал(для бумажного носителя): '
         elif lang == 'en':
             return 'Who scanned (for paper): '
+    if text == 'relation':
+        if lang == 'ru':
+            return 'Связь с издательством: '
+        elif lang == 'en':
+            return 'Relation to publisher: '
 
     if text == 'doc_authors':
         if lang == 'ru':
@@ -450,6 +455,16 @@ def description_text(text, lang, details=None):
             return 'Версия: '
         elif lang == 'en':
             return 'Version: '
+    if text == 'author_rights':
+        if lang == 'ru':
+            return "Авторские права: "
+        elif lang == 'en':
+            return "Copyright: "
+    if text == 'contributors':
+        if lang == 'ru':
+            return "Участники: "
+        elif lang == 'en':
+            return "Contributors: "
     if text == 'history':
         if lang == 'ru':
             return 'История: '

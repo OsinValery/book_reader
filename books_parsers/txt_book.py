@@ -1,6 +1,7 @@
 
 from typing import List, Dict
 import bookframe
+from .any_book_tag import AnyBookTag
 from localizator import Get_text
 
 def organise_notes(notes:List[str]) -> Dict[str, 'Txt_tag']:
@@ -72,19 +73,8 @@ def underline_notes(text: str) -> str:
             pos = end
 
     return text
-    frame.content = frame.content.replace("[", '[u][color=#0000ffff] (').replace("]", ") [/color][/u] ")
 
-class Txt_tag:
-
-    def __init__(self):
-        self.attr = {}
-        self.tag = ''
-        self.text = ''
-        self.content : List[Txt_tag] = []
-
-    def add_attribute(self, name, value):
-        self.attr[name] = value
-    
+class Txt_tag(AnyBookTag):
     def set_tag(self, tag):
         self.tag = tag
     
@@ -93,7 +83,6 @@ class Txt_tag:
     
     def add_content(self,cont):
         self.content.append(cont)
-    
     
     def work(self) -> List[bookframe.BookFrame]:
         if self.tag == 'note':
