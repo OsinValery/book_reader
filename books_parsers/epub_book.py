@@ -147,6 +147,7 @@ class EpubBookParser:
         manifest = opf_file_content.find_tag_in_tree("manifest")
         spine = opf_file_content.find_tag_in_tree('spine')
         guide = opf_file_content.find_tag_in_tree("guide")
+        root_folder = os.path.dirname(root_file_path)
         pages = []
         notes = {}
 
@@ -161,7 +162,7 @@ class EpubBookParser:
         styles = {}
         for style in css_files:
             descriptor = CssDescriptor()
-            descriptor.update_from_file(os.path.join(self.root_folder, style))
+            descriptor.update_from_file(os.path.join(root_folder, style))
             styles[style] = descriptor
 
         html_parser = Html_Parser()
@@ -169,7 +170,7 @@ class EpubBookParser:
             page_id = element.attr['idref']
             file_path = files[page_id]
             style_descriptor = CssDescriptor()
-            html_tag = html_parser.parce_xml_file(os.path.join(self.root_folder, file_path))
+            html_tag = html_parser.parce_xml_file(os.path.join(root_folder, file_path))
             style_tag = html_tag.find_tag_in_tree('style')
             if style_tag != None:
                 print(style_tag.tag)
@@ -179,7 +180,7 @@ class EpubBookParser:
             included_files = header.find_all_tags_in_tree("link")
             body_tag = html_tag.find_tag_in_tree('body')
             if body_tag != None:
-                page_content = body_tag.work(style_descriptor, self.root_folder)
+                page_content = body_tag.work(style_descriptor, root_folder)
                 pages.append(page_content)
                 
 
