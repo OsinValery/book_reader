@@ -42,7 +42,7 @@ class Html_Tag(Xml_Tag):
         self.apply_style(styles)
         if (self.tag == "p"):
             text = self.cunstruct_text(styles)
-            return [BookFrame(text, 'p', self.attr)]
+            return [BookFrame(text, 'html_p', self.attr)]
         if self.tag == 'h1':
             text = self.cunstruct_text(styles)
             return [BookFrame(text, 'title', self.attr)]

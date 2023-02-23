@@ -121,6 +121,21 @@ class BookFrame():
                 another_properties=another,
             )
 
+        elif self.type == 'html_p':
+            text: str = self.content.lstrip()
+            n = 8
+            # 2 different unicode simbols
+            if text[0] in ['-', '—']:
+                n = 3        
+            text = self.escape_text(text)
+            text, refs = self.referize_text(text)
+            text = ' ' * n + text
+            widget = page_widgets.HTML_Paragraph(
+                text= text, 
+                referization=refs, 
+                another_properties=another,
+            )
+
         elif self.type == 'txt_p':
             text: str = self.content.lstrip()
             n = 8
