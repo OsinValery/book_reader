@@ -6,6 +6,15 @@ from typing import Tuple
 class Html_Parser(XmlParser):
     ignore_tags = ["style", 'strong', 'script', 'a']
 
+    def is_self_closed(self, tag: str) -> bool:
+        if tag == '': return False
+        if 'meta' in tag[:5]: return True
+        pos = -1
+        while (tag[pos].isspace()) and (pos > -len(tag)):
+            pos -= 1
+        if pos == -len(tag): return False
+        return tag[-1] == '/'
+
     def parce_string(self, string:str, pos:int) -> Tuple[Html_Tag, int]:
         root = Html_Tag()
         if string[pos] != '<':
@@ -15,6 +24,7 @@ class Html_Parser(XmlParser):
         self_closed = self.is_self_closed(tag_txt)
         # divide tag and xml arguments here!!
         root.tag, root.attr = self.get_tag_arguments(tag_txt)
+
         if self_closed:
             return root, close + 1
         pos = close + 1
@@ -44,8 +54,8 @@ class Html_Parser(XmlParser):
                 closed = True
             if string[pos+1] == '/':
                 closed = True
-                close_pos = string.find('>', pos+1)
-                pos = close_pos + 1
+                close_pos = string.find('>', pos)
+                pos = max(close_pos + 1, pos + 1)
             #it is internal tag
             if not closed:
                 sub_tag, pos = self.parce_string(string, pos)

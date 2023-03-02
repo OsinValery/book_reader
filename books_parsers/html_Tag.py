@@ -59,9 +59,7 @@ class Html_Tag(Xml_Tag):
             elif child.tag == 'p':
                 text += child.cunstruct_text(styles)
             elif child.tag == 'i':
-                text += ' <emphasis> '
-                text += child.cunstruct_text(styles)
-                text += ' </emphasis> '
+                text += ' <emphasis> ' + child.cunstruct_text(styles) + ' </emphasis> '
             elif child.tag == 'a':
                 print(child.print())
                 print(child.attr)

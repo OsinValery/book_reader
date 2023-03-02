@@ -13,6 +13,7 @@ import books_parsers.fb2_book as fb2_book
 import books_parsers.fb2_book_description as fb2_book_description
 import books_parsers.txt_book as txt_book
 import books_parsers.epub_book as epub_book
+import books_parsers.Html_book as html_book
 
 class Book():
     def __init__(self) -> None:
@@ -40,6 +41,9 @@ class Book():
             file_name = self.format
             self.format = "epub"
             self.read_epub(file_folder, file_name)
+        elif self.format[-4:] == 'html':
+            self.format = "html"
+            self.read_html()
         else:
             raise Exception('unknown file format: '+ self.format)
 
@@ -204,6 +208,11 @@ class Book():
         content = book_parser.get_book_content(entries[0])
         self.content = content[0]
         self.notes = content[1]
+
+    def read_html(self):
+        print(self.file_path)
+        book = html_book.HtmlBook()
+        self.content, comments = book.get_book_content(self.file_path)
 
     @property
     def length(self):

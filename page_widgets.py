@@ -98,7 +98,7 @@ class SelectableLabel(Label, PageContent):
         self.selection = True
         self.first_pos = list(touch.pos)
         if self.parent:
-            if type(self.parent == SelectablePair):
+            if type(self.parent) == SelectablePair:
                 if self == self.parent.children[0] and len(self.parent.children) > 1:
                     self.first_pos[0] -= (self.parent.width * self.parent.pad + self.parent.spacing)
         return super().on_touch_down(touch)

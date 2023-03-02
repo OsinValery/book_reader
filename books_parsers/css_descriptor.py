@@ -8,6 +8,7 @@ class CssDescriptor:
         self.new_fonts = {}
     
     def update(self, class_:str, key: str, value: str):
+        class_ = class_.lower()
         if class_ not in self.content:
             self.content[class_] = {}
         self.content[class_][key] = value
@@ -34,8 +35,6 @@ class CssDescriptor:
                     LabelBase.register(font_family, fn_regular, fn_italic, fn_bold, fn_bolditalic=fn_both)
             except:
                 pass
-        
-        
 
     def resolve_new_font(self, css):
         print('add new font family')

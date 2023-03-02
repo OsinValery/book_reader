@@ -1,7 +1,7 @@
 
 from typing import Dict, Tuple
 from .xml_tag import Xml_Tag
-
+import time
 
 class XmlParser:
 
@@ -26,8 +26,13 @@ class XmlParser:
         attr = {}
         space_pos = tag.find(' ')
         if space_pos == -1:
+            if tag[-1] == '/':
+                return tag[:-1], attr
             return tag, attr
-        real_tag = tag[:space_pos]
+        if tag[space_pos-1] == '/':
+            real_tag = tag[:space_pos-1]
+        else:
+            real_tag = tag[:space_pos]
         pos = space_pos + 1
         while pos < len(tag):
             eq_pos = tag.find('=',pos)
@@ -35,9 +40,21 @@ class XmlParser:
                 pos = len(tag) + 10
             else:
                 name = tag[pos:eq_pos].strip()
-                val_start = tag.find('"',eq_pos)
-                val_end = tag.find('"', val_start+1)
-                value = tag[val_start+1:val_end]
+                val_start = eq_pos + 1
+
+                while val_start < len(tag) and tag[val_start] == ' ':
+                    val_start += 1
+                
+                if tag[val_start] in ['"', '\'']:
+                    val_end = tag.find(tag[val_start], val_start+1)
+                    if val_end == -1: val_end = len(tag)
+                    value = tag[val_start+1:val_end]
+                else:
+                    # without string definition
+                    val_end = tag.find(' ', val_start)
+                    if val_end == -1: val_end = len(tag)
+                    value = tag[val_start:val_end]
+
                 pos = val_end + 1
                 attr[name] = value
         return real_tag, attr
@@ -92,9 +109,13 @@ class XmlParser:
             encoding = self.determine_xml_encoding(full_path)
             with open(full_path, mode="r", encoding=encoding) as file:
                 content = file.read()
-                pos = content.find('>') + 1
+                if not '<?hml' in content[:20]:
+                    pos = 0
+                else:
+                    pos = content.find('>') + 1
                 return self.parce_string(content, pos)[0]
-        except Exception:
+        except Exception as e:
+            print(e)
             return Xml_Tag()
 
 
