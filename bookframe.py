@@ -77,6 +77,8 @@ class BookFrame():
         for word in text.split(' '):
             if word == '' or (word != '\n' and word.isspace()):
                 continue
+            if word in ['[i]', '[/i]']:
+                continue
             # this solution works faster then format strings
             result += '[ref=' + str(i) + ']' + word + '[/ref] '
             refers.append(word)
@@ -86,6 +88,7 @@ class BookFrame():
     def make_content(self):
         "returns widget view to present it to user"
         if self.cashed_widget is not None:
+            pass
             return self.cashed_widget
         is_cite = (('cite' in self.attributs) and self.attributs['cite'])
         is_poem = (('poem' in self.attributs) and self.attributs['poem'])
@@ -268,7 +271,7 @@ class BookFrame():
                     data = io.BytesIO(data)
                     img = Image(data, ext=extansion)
                     is_cover = 'cover' in self.attributs and self.attributs['cover']
-                    return page_widgets.ImageData(texture=img.texture, cover = is_cover)
+                    return page_widgets.ImageData(texture=img.texture, cover = is_cover, another_properties=another)
                 except Exception as e:
                     print(e)
                     return page_widgets.Mistake(text=f'picture wasn\'t loaded! ')

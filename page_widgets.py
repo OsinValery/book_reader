@@ -12,6 +12,7 @@ from kivy.core.window import Window
 from kivy.utils import rgba
 
 import app_values
+from books_parsers.css_measurement_systems import get_in_percents, get_size_for_performance
 
 #
 # study kvfiles/page_widgets.kv
@@ -39,6 +40,18 @@ class PageContent:
                 return widget
             widget = widget.parent
         return None
+    
+    @property
+    def get_page_size(self):
+        """returns size of book viewPort"""
+        if self.parent == None:
+            return Window.size
+        widget = self.parent
+        while widget.parent != None and type(widget.parent) != Factory.Page:
+            if type(widget.parent) == Factory.ScrollView:
+                return widget.parent.size
+            widget = widget.parent
+        return Window.size
 
 
 class Space(Widget, PageContent):
@@ -227,8 +240,10 @@ class PresentableLabel(SelectableLabel):
         return os.path.join(folder, 'assets', 'fonts', name)
 
     def resolve_css_properties(self):
+        view_port_size = self.get_page_size
         for property_ in self.another_properties:
-            value = clear_css_value(self.another_properties[property_])
+            value = clear_css_value(self.another_properties[property_])         
+            #print('work with property', property_,'with value', value)
             if value in ['inherit', 'initial', 'unset']:
                 continue
             if property_ == 'font-family':
@@ -236,12 +251,30 @@ class PresentableLabel(SelectableLabel):
                     self.font_family = value
                 except:
                     print('can\'t set font family')
+
+            if property_ == 'font-style':
+                if 'italic' == value:
+                    self.italic = True
             elif property_ == 'font-size':
-                self.font_size = value
+                real_value = get_size_for_performance(value, 16, Window.size, view_port_size, True)
+                self.font_size = real_value
+            elif property_ == 'font-family':
+                trile_families = self.another_properties[property_].split(',')
+                for font in trile_families:
+                    try:
+                        self.font_family = font
+                        pass
+                    except:
+                        print('no font:', font)
             elif property_ == 'text-align':
                 if value in ['center', 'right', 'left', 'justify']:
                     self.halign = value
-            elif property_ in ['margin-bottom', 'margin-top']:
+            elif property_ == 'font-weight':
+                if value == 'bold':
+                    self.bold = True
+                else:
+                    print('unknown font-weight:', value)
+            elif property_ in ['margin-bottom', 'margin-top', 'margin-left', 'margin-right']:
                 pass
             elif property_ in ['text-indent', 'margin', 'padding']:
                 pass
@@ -366,6 +399,37 @@ class ImageData(Widget, PageContent):
     another_properties=DictProperty({})
 
     def get_size(self, icon_size):
+        if self.another_properties != {}:
+            print(self.another_properties)
+            size = App.get_running_app().root.ids.page_presenter.ids.page.size
+            width, height = size[0] / 2, size[1] / 2
+            max_width = Window.width - icon_size * 2
+            if 'width' in self.another_properties:
+                value = self.another_properties['width']
+                if "%" in value:
+                    p = get_in_percents(value)
+                    if p != None: width = max_width * p
+                else:
+                    try:
+                        width = float(value)
+                    except:
+                        print("can't parce digit:", value, 'in ImageData.get_size()')
+            if 'height' in self.another_properties:
+                value = self.another_properties['height']
+                if "%" in value:
+                    p = get_in_percents(value)
+                    if p != None: height = size[1] * p
+                else:
+                    try:
+                        height = float(value)
+                    except:
+                        print("can't parce digit:", value, 'in ImageData.get_size()')
+            
+            if width > max_width:
+                height = height * max_width / width
+                width = max_width
+            return width, height
+
         if not self.cover:
             width = 0.8 * (Window.width - icon_size * 2)
             scale = width / self.texture.size[0]
@@ -511,12 +575,6 @@ def get_color_from_code(value: str):
                 colors.append(d)
         return colors
 
-def get_in_percents(value):
-    try:
-        value = value.replace('%', '')
-        return float(value) / 100
-    except:
-        return None
 
 colors_words = {
     "aliceblue": "#F0F8FF",

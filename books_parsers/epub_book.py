@@ -64,6 +64,7 @@ class EpubBookParser:
             "source": None,
             "relation": None,
             "date": None,
+            'subjects': [],
         }
         for child in metadata.content:
             if child.tag == "dc:title":
@@ -72,6 +73,8 @@ class EpubBookParser:
                 entities['authors'].append(get_any_text_content(child))
             elif child.tag == 'dc:language':
                 entities['language'] = get_any_text_content(child)
+            elif child.tag == 'dc:subject':
+                entities['subjects'].append(get_any_text_content(child))
             elif child.tag == 'dc:date':
                 entities['date'] = get_any_text_content(child)
             elif child.tag == 'dc:description':
@@ -113,6 +116,10 @@ class EpubBookParser:
         result.append(BookFrame(Get_text('des_date') + content, 'text', {}))
         content = resolve_space(entities['language'])
         result.append(BookFrame(Get_text('des_lang') + content, 'text', {}))
+        if len(entities['subjects']) != 0:
+            text = Get_text('des_ganres') + " "
+            text += ', '.join(entities['subjects'])
+            result.append(BookFrame(text,'text', {}))
 
         if entities['book_id']:
             content = resolve_space(entities['book_id'])
@@ -129,7 +136,12 @@ class EpubBookParser:
             result.append(BookFrame(Get_text('des_relation') + content, 'text', {}))
 
         content = resolve_space(entities['description'])
-        result.append(BookFrame(Get_text('des_annotation') + content, 'text', {}))
+        if len(content) > 15:
+            result.append(BookFrame(Get_text('des_annotation'), 'text',{}))
+            result.append(BookFrame(content, 'text', {}))
+        else:
+            text = Get_text('des_annotation') + '\n' + content
+            result.append(BookFrame(text, 'text', {}))
         
         if entities['rights']:
             content = resolve_space(entities['rights'])
@@ -181,10 +193,12 @@ class EpubBookParser:
                 if 'href' in included_file.attr:
                     if '.css' in included_file.attr['href']:
                         style_descriptor.update_from_descriptor(styles[included_file.attr['href']])
+            style_descriptor.register_new_font(root_folder)
             body_tag = html_tag.find_tag_in_tree('body')
             if body_tag != None:
                 page_content = body_tag.work(style_descriptor, root_folder)
                 pages.append(page_content)
+                
                 
 
         return pages, notes

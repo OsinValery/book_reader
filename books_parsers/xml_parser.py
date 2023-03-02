@@ -9,7 +9,10 @@ class XmlParser:
     def determine_xml_encoding(file_path:str) -> str:
         with open(file_path, 'rb') as file:
             line = str(file.readline())
-        enc_pos = line.find('encoding=') + 10
+        start_word = line.find('encoding=')
+        if start_word == -1:
+            return 'utf-8'
+        enc_pos = start_word + 10
         enc_end = line.find('"', enc_pos)
         encoding = line[enc_pos:enc_end]
         return encoding

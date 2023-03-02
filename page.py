@@ -127,7 +127,8 @@ class Page(Factory.Widget):
         finished = False
         while (time() < limit) and not finished:
             try:
-                content.add_widget(self.widgets_generator.__next__())
+                wid = self.widgets_generator.__next__()
+                content.add_widget(wid)
             except:
                 finished = True
         if not finished:

@@ -4,7 +4,7 @@ from .xml_parser import XmlParser
 from typing import Tuple
 
 class Html_Parser(XmlParser):
-    ignore_tags = ["style", 'strong']
+    ignore_tags = ["style", 'strong', 'script', 'a']
 
     def parce_string(self, string:str, pos:int) -> Tuple[Html_Tag, int]:
         root = Html_Tag()
