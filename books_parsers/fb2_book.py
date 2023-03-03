@@ -196,9 +196,6 @@ class FB2_tag(Xml_Tag):
 class FB2Book(XmlParser):
     ignore_tags = ['a', 'p', 'v', 'strong', 'description', 'binary', 'emphasis', 'text-author', 'subtitle', 'image']
 
-    def parce_string(self, string: str, pos: int) -> Tuple[FB2_tag, int]:
-        return super().parce_string(string, pos)
-
     def parce_string(self, string:str, pos:int) -> Tuple[FB2_tag, int]:
         root = FB2_tag()
         if string[pos] != '<':
@@ -213,7 +210,7 @@ class FB2Book(XmlParser):
             return root, close + 1
         pos = close + 1
         # ignore parsing content of tags with text content
-        # this code only takes text with styles markup
+        # this code only takes text inside tag
         if root.tag in self.ignore_tags:
             close_tag_text = self.get_close_tag(root.tag)
             close_tag_pos = string.find(close_tag_text, pos)
