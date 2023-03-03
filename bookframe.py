@@ -290,7 +290,9 @@ class BookFrame():
             widget = page_widgets.Unknown(text = text)
 
         if is_epigraph:
-            self.cashed_widget = page_widgets.SelectablePair(pad = 0.5,child = widget)
+            # do not cashe this widget, because it cause errors!
+            # don't know why
+            return page_widgets.SelectablePair(pad = 0.5,child = widget)
         else:
             self.cashed_widget = widget
         return self.cashed_widget

@@ -1,9 +1,9 @@
-from typing import List
-from .any_book_tag import AnyBookTag
+from typing import List, Tuple
+from .xml_tag import Xml_Tag
 from .xml_parser import XmlParser
 import bookframe
 
-class FB2_tag(AnyBookTag):
+class FB2_tag(Xml_Tag):
     def work(self, n=0) -> List[bookframe.BookFrame]:
         """returns list of bookframe.Bookframe of this element"""
         note = False
@@ -15,7 +15,7 @@ class FB2_tag(AnyBookTag):
         if self.tag == 'title':
             yield bookframe.BookFrame(None,'title_empty', {})
             for child in self.content:
-                if child.tag == 'empty-line/':
+                if child.tag == 'empty-line':
                     yield bookframe.BookFrame(None, 'empty', child.attr)
                 else:
                     # p
@@ -49,7 +49,7 @@ class FB2_tag(AnyBookTag):
 
         elif self.tag == 'epigraph':
             for child in self.content:
-                if child.tag == 'empty-line/':
+                if child.tag == 'empty-line':
                     for _el in child.work():
                         yield _el
                 elif child.tag == 'p':
@@ -89,7 +89,7 @@ class FB2_tag(AnyBookTag):
             return 
 
         element = None
-        if self.tag == 'empty-line/':
+        if self.tag == 'empty-line':
             element = bookframe.BookFrame(None, 'empty', {})
         elif self.tag == 'image':
             element = bookframe.BookFrame(None, 'image', self.attr)
@@ -109,7 +109,7 @@ class FB2_tag(AnyBookTag):
         if self.tag == 'title':
             result.append(bookframe.BookFrame(None,'title_empty', {}))
             for child in self.content:
-                if child.tag == 'empty-line/':
+                if child.tag == 'empty-line':
                     result.append(bookframe.BookFrame(None, 'empty', child.attr))
                 else:
                     # p
@@ -143,7 +143,7 @@ class FB2_tag(AnyBookTag):
 
         elif self.tag == 'epigraph':
             for child in self.content:
-                if child.tag == 'empty-line/':
+                if child.tag == 'empty-line':
                     result += child.work()
                 elif child.tag == 'p':
                     temp_tag = child.work()[0]
@@ -183,7 +183,7 @@ class FB2_tag(AnyBookTag):
             return result
 
         element = None
-        if self.tag == 'empty-line/':
+        if self.tag == 'empty-line':
             element = bookframe.BookFrame(None, 'empty', {})
         elif self.tag == 'image':
             element = bookframe.BookFrame(None, 'image', self.attr)
@@ -192,244 +192,57 @@ class FB2_tag(AnyBookTag):
         result.append(element)
         return result
 
-def get_tag_arguments(tag:str):
-    attr = {}
-    space_pos = tag.find(' ')
-    if space_pos == -1:
-        return tag, attr
-    real_tag = tag[:space_pos]
-    pos = space_pos + 1
-    while pos < len(tag):
-        eq_pos = tag.find('=',pos)
-        if eq_pos == -1:
-            pos = len(tag) + 10
-        else:
-            name = tag[pos:eq_pos].strip()
-            val_start = tag.find('"',eq_pos)
-            val_end = tag.find('"', val_start+1)
-            value = tag[val_start+1:val_end]
-            pos = val_end + 1
-            attr[name] = value
-    return real_tag, attr
 
-def fb2_parser(text:str, pos=0):
-    root = FB2_tag()
-    while pos < len(text) and text[pos] != '<':
-        pos += 1
-    close = text.find('>', pos)
-    tag = text[pos+1:close]
-    # divide tag and xml arguments here!!
-    root.tag, root.attr = get_tag_arguments(tag)
-    tag = root.tag
-    pos = close + 1
-    if tag == 'p':
-        close_tag = text.find('</p>', close)
-        tag_text = text[close+1:close_tag]
-        pos = close_tag + 3
-        root.text = tag_text
-    elif tag == 'v':
-        close_tag = text.find('</v>', close)
-        tag_text = text[close+1:close_tag]
-        pos = close_tag + 3
-        root.text = tag_text
-    elif tag == 'stanza':
+class FB2Book(XmlParser):
+    ignore_tags = ['a', 'p', 'v', 'strong', 'description', 'binary', 'emphasis', 'text-author', 'subtitle', 'image']
+
+    def parce_string(self, string: str, pos: int) -> Tuple[FB2_tag, int]:
+        return super().parce_string(string, pos)
+
+    def parce_string(self, string:str, pos:int) -> Tuple[FB2_tag, int]:
+        root = FB2_tag()
+        if string[pos] != '<':
+            pos = string.find("<", pos)
+        close = string.find(">", pos)
+        tag_txt = string[pos+1:close]
+        self_closed = self.is_self_closed(tag_txt)
+        # divide tag and xml arguments here!!
+        root.tag, root.attr = self.get_tag_arguments(tag_txt)
+
+        if self_closed:
+            return root, close + 1
         pos = close + 1
+        # ignore parsing content of tags with text content
+        # this code only takes text with styles markup
+        if root.tag in self.ignore_tags:
+            close_tag_text = self.get_close_tag(root.tag)
+            close_tag_pos = string.find(close_tag_text, pos)
+            if close_tag_pos == -1:
+                close_tag_pos = len(string)
+            root.text = string[pos:close_tag_pos]
+            return root, close_tag_pos + len(close_tag_text)
         closed = False
-        while not closed:
-            while text[pos] != '<':
-                pos += 1  
-            if text[pos:pos + 9] != '</stanza>':
-                sub_tag, new_pos = fb2_parser(text, pos)
-                root.append(sub_tag)
-                pos = new_pos
-                if pos >= len(text):
-                    closed = True
-            else:
-                closed = True
-                pos = pos + 8
-    elif tag == 'text-author':
-        close_tag = text.find('</text-author>',close)
-        tag_text = text[close+1:close_tag]
-        pos = close_tag + len('</text-author>') - 1
-        root.text = tag_text
-    elif tag == 'subtitle':
-        close_tag = text.find('</subtitle>', close)
-        tag_text = text[close+1:close_tag]
-        pos = close_tag + len('</subtitle>') - 1
-        root.text = tag_text
-    elif tag[:5] == 'image':
-        pos = close + 1
-        root.text = tag
-    elif tag == 'empty-line/':
-        pos = close + 1
-        root.text = tag
-    elif tag == 'title':
-        pos = close + 1
-        closed = False
-        while not closed:
-            while text[pos] != '<':
-                pos += 1  
-            if text[pos:pos + 8] != '</title>':
-                sub_tag, new_pos = fb2_parser(text, pos)
-                root.append(sub_tag)
-                pos = new_pos
-                if pos >= len(text):
-                    closed = True
-            else:
-                closed = True
-                pos = pos + 8 - 1
-    
-    elif tag == 'poem':
-        pos = close + 1
-        closed = False
-        while not closed:
-            while text[pos] != '<':
+        while (not closed) and (pos < len(string)):
+            content_start = pos
+            while (pos < len(string)) and string[pos] != "<":
                 pos += 1
-            if text[pos:pos+7] != '</poem>':
-                sub_tag, new_pos = fb2_parser(text, pos)
-                root.append(sub_tag)
-                pos = new_pos
-                if pos >= len(text):
-                    closed = True
-            else:
+            if (pos >= len(string)): return root, pos
+            plain_text = string[content_start:pos]
+            if plain_text != '' and not plain_text.isspace():
+                plain_tag = FB2_tag()
+                plain_tag.tag = "plain_text"
+                plain_tag.text = plain_text
+                root.append(plain_tag)
+            # work '<'
+            if pos + 1 == len(string):
                 closed = True
-                pos += 6
-
-    elif tag == 'epigraph':
-        pos = close + 1
-        closed = False
-        while not closed:
-            while text[pos] != '<':
-                pos += 1
-            if text[pos:pos+11] != '</epigraph>':
-                sub_tag, new_pos = fb2_parser(text, pos)
-                root.append(sub_tag)
-                pos = new_pos
-                if pos >= len(text):
-                    closed = True
-            else:
+            if string[pos+1] == '/':
                 closed = True
-                pos += 10
-
-    elif tag == 'cite':
-        pos = close + 1
-        closed = False
-        while not closed:
-            while text[pos] != '<':
-                pos += 1
-            if text[pos:pos+7] != '</cite>':
-                sub_tag, new_pos = fb2_parser(text, pos)
+                close_pos = string.find('>', pos)
+                pos = max(close_pos + 1, pos + 1)
+            #it is internal tag
+            if not closed:
+                sub_tag, pos = self.parce_string(string, pos)
                 root.append(sub_tag)
-                pos = new_pos
-                if pos >= len(text):
-                    closed = True
-            else:
-                closed = True
-                pos += 6
+        return root, pos
 
-    elif tag[:7] == 'section':
-        pos = close + 1
-        closed = False
-        while not closed:
-            if text[pos] == '>':
-                pos += 1
-            new_pos = text.find('<', pos)
-            if new_pos == -1:
-                free_text = text[pos:]
-            else:
-                free_text = text[pos:new_pos]
-            
-            free_text = work_free_text(free_text)
-            if free_text != '':
-                add_tag = FB2_tag()
-                add_tag.tag = 'text'
-                add_tag.text = free_text
-                root.append(add_tag)
-            
-            if new_pos == len(text) or new_pos == -1:
-                return root, len(text)
-            pos = new_pos
-            
-
-            if text[pos:pos+10] != '</section>':
-                sub_tag, new_pos = fb2_parser(text, pos)
-                root.append(sub_tag)
-                pos = new_pos
-                if pos >= len(text):
-                    closed = True
-            else:
-                closed = True
-                pos = pos + 9
-
-    elif tag[:4] == 'body':
-        pos = close + 1
-        closed = False
-        while not closed:
-            while text[pos] != '<':
-                pos += 1  
-            if text[pos:pos+7] != '</body>':
-                sub_tag, new_pos = fb2_parser(text, pos)
-                root.append(sub_tag)
-                pos = new_pos
-                if pos >= len(text):
-                    closed = True
-            else:
-                return root, pos + 7
-
-    elif tag[:10] == 'annotation':
-        pos = close + 1
-        closed = False
-        while not closed:
-            while text[pos] != '<':
-                pos += 1
-            if text[pos:pos+13] != '</annotation>':
-                sub_tag, new_pos = fb2_parser(text, pos)
-                root.append(sub_tag)
-                pos = new_pos
-                if pos >= len(text):
-                    closed = True
-            else:
-                closed = True
-                pos += 12
-    
-    elif 'coverpage' in tag:
-        pos = close + 1
-        closed = False
-        while not closed:
-            while text[pos] != '<':
-                pos += 1
-            if text[pos:pos+12] != '</coverpage>':
-                sub_tag, new_pos = fb2_parser(text, pos)
-                root.append(sub_tag)
-                pos = new_pos
-                if pos >= len(text):
-                    closed = True
-            else:
-                closed = True
-                pos += 11
-
-    elif 'history' in tag:
-        pos = close + 1
-        closed = False
-        while not closed:
-            while text[pos] != '<':
-                pos += 1
-            if text[pos:pos+10] != '</history>':
-                sub_tag, new_pos = fb2_parser(text, pos)
-                root.append(sub_tag)
-                pos = new_pos
-                if pos >= len(text):
-                    closed = True
-            else:
-                closed = True
-                pos += 9
-
-    else:
-        print('---uncnown---')
-        print(tag)
-        pos -= 1
-    return root, pos
-
-def work_free_text(text: str) -> str:
-    text = text.strip()
-    return text
