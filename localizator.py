@@ -470,6 +470,11 @@ def description_text(text, lang, details=None):
             return 'История: '
         elif lang == 'en':
             return 'History: '
+    if text == 'format':
+        if lang == 'ru':
+            return 'Формат: '
+        elif lang == 'en':
+            return 'Format: '
     if text == 'id_note':
         if lang == 'ru':
             return 'Если где-то указано id, имеется ввиду внутренний id библиотеки, откуда скачан документ.'

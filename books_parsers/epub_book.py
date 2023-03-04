@@ -65,6 +65,7 @@ class EpubBookParser:
             "relation": None,
             "date": None,
             'subjects': [],
+            "format": None,
         }
         for child in metadata.content:
             if child.tag == "dc:title":
@@ -96,6 +97,8 @@ class EpubBookParser:
                 entities['relation'] = get_any_text_content(child)
             elif child.tag == 'dc:':
                 entities[''] = get_any_text_content(child)
+            elif child.tag == 'dc:format':
+                entities['format'] = get_any_text_content(child)
             elif child.tag == 'meta':
                 print('found meta in book description!')
             else:
@@ -124,6 +127,9 @@ class EpubBookParser:
         if entities['book_id']:
             content = resolve_space(entities['book_id'])
             result.append(BookFrame("id:  " + content, 'text', {}))
+        if entities['format']:
+            content = resolve_space(entities['format'])
+            result.append(BookFrame(Get_text('des_format') + content, 'text', {}))
 
         content = resolve_space(entities['publisher'])
         result.append(BookFrame(Get_text('des_publisher') + content, 'text', {}))
