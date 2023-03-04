@@ -27,7 +27,6 @@ class BookFrame():
 
     def escape_text(self, text: str):
         # service symbols
-        text = text.replace('&amp;', '&')
         text = escape_markup(text)
         # work link
 

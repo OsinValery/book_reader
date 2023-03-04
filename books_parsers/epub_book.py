@@ -42,7 +42,7 @@ class EpubBookParser:
             pos = file_content.find("<rootfile", pos)
             if pos != -1:
                 pos_close = file_content.find(">", pos)
-                _, args = XmlParser.get_tag_arguments(file_content[pos:pos_close-1])
+                _, args = XmlParser().get_tag_arguments(file_content[pos:pos_close-1])
                 pos = pos_close
                 result.append(args['full-path'])
         return result

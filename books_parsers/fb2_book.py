@@ -216,7 +216,7 @@ class FB2Book(XmlParser):
             close_tag_pos = string.find(close_tag_text, pos)
             if close_tag_pos == -1:
                 close_tag_pos = len(string)
-            root.text = string[pos:close_tag_pos]
+            root.text = self.decode_unicode_simbols(string[pos:close_tag_pos])
             return root, close_tag_pos + len(close_tag_text)
         closed = False
         while (not closed) and (pos < len(string)):
@@ -228,7 +228,7 @@ class FB2Book(XmlParser):
             if plain_text != '' and not plain_text.isspace():
                 plain_tag = FB2_tag()
                 plain_tag.tag = "plain_text"
-                plain_tag.text = plain_text
+                plain_tag.text = self.decode_unicode_simbols(plain_text)
                 root.append(plain_tag)
             # work '<'
             if pos + 1 == len(string):

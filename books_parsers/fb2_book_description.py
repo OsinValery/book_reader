@@ -1,6 +1,6 @@
 
 from typing import List
-from books_parsers.fb2_book import get_tag_arguments, fb2_parser
+from books_parsers.fb2_book import FB2Book
 from .xml_parser import XmlParser
 from bookframe import BookFrame
 from localizator import Get_text,get_genre
@@ -85,7 +85,7 @@ class Date():
         self.text = ''
     
     def parse(self, text:str, tag:str):
-        real_tag, attr = get_tag_arguments(tag)
+        real_tag, attr = XmlParser().get_tag_arguments(tag)
         if 'value' in attr:
             self.value = attr['value']
         self.text = text.strip()
@@ -127,7 +127,7 @@ class Title_Info():
                 end_tag = text.find('>', start_tag)
                 tag_content = text[start_tag+1:end_tag]
                 if 'sequence' in tag_content:
-                    real_tag, attr = get_tag_arguments(tag_content)
+                    real_tag, attr = XmlParser().get_tag_arguments(tag_content)
                     self.sequence.append(attr)
                     pos = end_tag + 1
                 else:
@@ -154,9 +154,9 @@ class Title_Info():
                         self.name = content
                     elif tag_content == 'annotation':
                         ann_text = text[start_tag:pos]
-                        self.annotation = fb2_parser(ann_text)[0]
+                        self.annotation = FB2Book().parce_string(ann_text,0)[0]                        
                     elif tag_content == 'coverpage':
-                        self.image = fb2_parser(text[start_tag:pos])[0]
+                        self.image = FB2Book().parce_string(text[start_tag:pos],0)[0]
                     elif 'date' in tag_content:
                         self.date = Date()
                         self.date.parse(content, tag_content)
@@ -233,7 +233,7 @@ class Title_Info():
             result.append(BookFrame(Get_text('des_annotation') + Get_text('des_unknown'), 'text', {}))
         else:
             result.append(BookFrame(Get_text('des_annotation'), 'text', {}))
-            result += self.annotation.work()
+            result += self.annotation.work2()
         text = Get_text('des_keywords') + resolve_space(self.key_words)
         result.append(BookFrame(text, 'text', {}))
         if len(self.translators) == 0:
@@ -307,7 +307,7 @@ class Document_Info():
                 elif tag_content == 'version':
                     self.version = content
                 elif tag_content == 'history':
-                    self.history = fb2_parser(text[start_tag:pos])[0]
+                    self.history = FB2Book().parce_string(text[start_tag:pos],0)[0]
                 else:
                     print('unknown tag in document-info:', tag_content)
                     print(content)
@@ -374,7 +374,7 @@ class Publish_info():
                 end_tag = text.find('>', start_tag)
                 tag_content = text[start_tag+1:end_tag]
                 if 'sequence' in tag_content:
-                    _, attr = get_tag_arguments(tag_content)
+                    _, attr = XmlParser().get_tag_arguments(tag_content)
                     self.sequences.append(attr)
                     pos = end_tag + 1
                 else:
@@ -488,7 +488,7 @@ class FB2_Book_Deskription():
                     pos = close_tag + 10
                     print('found output tag in fb2 document. It must contain instruction for distributor. Likely, illegal access to document')
                 elif 'custom-info' in tag_text:
-                    real_tag, attr =  get_tag_arguments(tag_text)
+                    real_tag, attr =  XmlParser().get_tag_arguments(tag_text)
                     if 'into-type' in attr:
                         self.custom_info_type = attr['into-type']
                     close_tag = text.find('</custom-info>',tag_end)
@@ -499,7 +499,7 @@ class FB2_Book_Deskription():
                         pos = tag_end + 1
                         continue
                     print('unknown tag: ', tag_text)
-                    real, attr = get_tag_arguments(tag_text)
+                    real, attr = XmlParser().get_tag_arguments(tag_text)
                     close = '</' + real + '>'
                     if close_tag == -1:
                         pos = tag_end + 1

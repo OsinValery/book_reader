@@ -1,7 +1,6 @@
 
-from typing import Dict, Tuple
+from typing import Dict, Tuple, Union
 from .xml_tag import Xml_Tag
-import time
 
 class XmlParser:
 
@@ -20,9 +19,66 @@ class XmlParser:
     @staticmethod
     def get_close_tag(name: str) -> str:
         return "</" + name + ">"
+    
+    def taste_another_seqs(self, text, pos) -> Union[None, Tuple[str, str]]:
+        '''
+        pos = position of '&'
+        if can't determine code by sims seq, returns None
+        else returns sims seq and simbol, should be replaced
+        ex: text = 'abc &amp;' -> ('amp', '&')
+        ex2: text = 'abc &seq;' -> None
+        use that for non-xml sequences, like html codes
+        '''
+        return None
+    
+    def decode_unicode_simbols(self,text: str) -> str:
+        pos = 0
+        while pos != -1:
+            pos = text.find('&', pos)
+            if pos != -1:
+                if text[pos+1:pos+4] == 'amp':
+                    text = text.replace('&amp;', '&')
+                    pos += 1
+                elif text[pos+1:pos+3] == 'lt':
+                    text = text.replace('&lt;', '<')
+                    pos += 1
+                elif text[pos+1:pos+3] == 'gt':
+                    text = text.replace('&gt;', '>')
+                    pos += 1
+                elif text[pos+1:pos+5] == 'quot':
+                    text = text.replace('&quot;', '"')
+                    pos += 1
+                elif text[pos+1:pos+5] == 'apos':
+                    text = text.replace('&apos;', "'")
+                    pos += 1
+                elif text[pos+1] == '#':
+                    # decimal or hex code
+                    code_start = pos + 1
+                    while (text[code_start] != ';') and code_start < len(text):
+                        code_start += 1
+                    if code_start == len(text):
+                        pos += 1
+                    else:
+                        code = text[pos+2:code_start]
+                        base = 10
+                        if code[0] == 'x':
+                            base = 16
+                            code = code[1:]
+                        code = int(code, base=base)
+                        text = text.replace(text[pos:code_start+1], chr(code))
+                        pos += 1
+                else:
+                    substitution = self.taste_another_seqs(text, pos)
+                    if not substitution:
+                        print('unknown code cheme:', text[pos:pos+10])
+                        pos += 1
+                    else:
+                        repl_str = '&' + substitution[0] + ';'
+                        text = text.replace(repl_str, substitution[1])
+                        pos += 1
+        return text
 
-    @staticmethod
-    def get_tag_arguments(tag:str) -> Tuple[str, Dict[str, str]]:
+    def get_tag_arguments(self,tag:str) -> Tuple[str, Dict[str, str]]:
         attr = {}
         space_pos = tag.find(' ')
         if space_pos == -1:
@@ -56,7 +112,7 @@ class XmlParser:
                     value = tag[val_start:val_end]
 
                 pos = val_end + 1
-                attr[name] = value
+                attr[name] = self.decode_unicode_simbols(value)
         return real_tag, attr
 
     def is_self_closed(self, tag: str) -> bool:
@@ -89,7 +145,7 @@ class XmlParser:
             if plain_text != '' and not plain_text.isspace():
                 plain_tag = Xml_Tag()
                 plain_tag.tag = "plain_text"
-                plain_tag.text = plain_text
+                plain_tag.text = self.decode_unicode_simbols(plain_text)
                 root.append(plain_tag)
             # work '<'
             if pos + 1 == len(string):
@@ -120,7 +176,7 @@ class XmlParser:
 
 
             
-            
+
 
 
 
