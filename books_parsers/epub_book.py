@@ -188,16 +188,19 @@ class EpubBookParser:
 
         html_parser = Html_Parser()
         for element in spine.content:
+            style_descriptor = CssDescriptor()
+
             page_id = element.attr['idref']
             file_path = files[page_id]
-            style_descriptor = CssDescriptor()
-            html_tag = html_parser.parce_xml_file(os.path.join(root_folder, file_path))
+            html_document_path = os.path.join(root_folder, file_path)
+            html_document_folder = os.path.dirname(html_document_path)
+            
+            html_tag = html_parser.parce_xml_file(html_document_path)
             style_tag = html_tag.find_tag_in_tree('style')
             if style_tag != None:
                 style_descriptor.update_from_string(style_tag.text)
             header = html_tag.find_tag_in_tree('head')
             included_files = header.find_all_tags_in_tree("link")
-            print(included_files)
             for included_file in included_files:
                 if 'href' in included_file.attr:
                     if '.css' in included_file.attr['href']:
@@ -213,7 +216,7 @@ class EpubBookParser:
             style_descriptor.register_new_font(root_folder)
             body_tag = html_tag.find_tag_in_tree('body')
             if body_tag != None:
-                page_content = body_tag.work(style_descriptor, root_folder)
+                page_content = body_tag.work(style_descriptor, html_document_folder)
                 pages.append(page_content)
                 
                 
