@@ -45,6 +45,7 @@ class Book():
             self.read_html()
         else:
             raise Exception('unknown file format: '+ self.format)
+        print('book', self.file_path, 'was opened')
 
     def read_txt(self):
         elements = []
