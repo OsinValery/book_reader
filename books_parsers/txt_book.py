@@ -1,6 +1,6 @@
 
 from typing import List, Dict
-import bookframe
+import page_elements.bookframe as bookframe
 from .any_book_tag import AnyBookTag
 from localizator import Get_text
 

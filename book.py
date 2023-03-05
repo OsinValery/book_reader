@@ -5,7 +5,7 @@ import zipfile
 from kivy.app import App
 import chardet
 from typing import List, Dict
-from bookframe import BookFrame
+from page_elements.bookframe import BookFrame
 
 from books_parsers.any_book_tag import AnyBookTag
 import books_parsers.fb2_book as fb2_book

@@ -6,7 +6,7 @@ from kivy.app import App
 class AppInfo():
     def __init__(self) -> None:
         self.book = None
-        self.max_elements_per_page = 10
+        self.max_elements_per_page = 20
         self.library = []
         self.book_dir = ''
         self.supported_formats = ['.fb2', '.txt', '.epub', '.html']

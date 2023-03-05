@@ -1,7 +1,7 @@
 from typing import List, Tuple
 from .xml_tag import Xml_Tag
 from .xml_parser import XmlParser
-import bookframe
+import page_elements.bookframe as bookframe
 
 class FB2_tag(Xml_Tag):
     def work(self, n=0) -> List[bookframe.BookFrame]:

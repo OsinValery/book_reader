@@ -5,7 +5,7 @@ from .xml_parser import XmlParser
 from .html_parser import Html_Parser
 from .css_descriptor import CssDescriptor
 from localizator import Get_text
-from bookframe import BookFrame
+from page_elements.bookframe import BookFrame
 
 def resolve_space(text:str):
     if text == None or text == '' or text.isspace():

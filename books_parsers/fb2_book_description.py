@@ -2,7 +2,7 @@
 from typing import List
 from books_parsers.fb2_book import FB2Book
 from .xml_parser import XmlParser
-from bookframe import BookFrame
+from page_elements.bookframe import BookFrame
 from localizator import Get_text,get_genre
 
 def resolve_space(text:str):

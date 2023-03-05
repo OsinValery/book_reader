@@ -2,7 +2,7 @@ import io
 import base64
 from kivy.core.image import Image
 from kivy.utils import escape_markup
-import page_widgets
+import page_elements.page_widgets as page_widgets
 
 class BookFrame():
     def __init__(self, content, _type, args) -> None:

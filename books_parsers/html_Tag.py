@@ -1,7 +1,7 @@
 import os
 from .xml_tag import Xml_Tag
 from typing import List, Dict
-from bookframe import BookFrame
+from page_elements.html_bookframe import HtmlBookFrame
 from .css_descriptor import CssDescriptor
 from .css_measurement_systems import work_measurement_systems_for_inheritance
 
@@ -99,31 +99,31 @@ class Html_Tag(Xml_Tag):
             elif css_property == 'widows':
                 pass
 
-    def work(self, styles = CssDescriptor(), root_path = "") -> List[BookFrame]:
+    def work(self, styles = CssDescriptor(), root_path = "") -> List[HtmlBookFrame]:
         self.apply_style(styles)
         for child in self.content:
             self.share_css_properties_with_child(child)
         if (self.tag == "p"):
             text = self.cunstruct_text(styles)
-            return [BookFrame(text, 'html_p', self.attr)]
+            return [HtmlBookFrame(text, 'html_p', self.attr)]
         if self.tag == 'h1':
             text = self.cunstruct_text(styles)
-            return [BookFrame(text, 'title', self.attr)]
+            return [HtmlBookFrame(text, 'title', self.attr)]
         if self.tag in ['h2', "h3", 'h4', 'h5', 'h6']:
             text = self.cunstruct_text(styles)
             attr = self.attr
             attr['lavel'] = self.tag
-            return [BookFrame(text, 'subtitle', self.attr)]
+            return [HtmlBookFrame(text, 'subtitle', self.attr)]
 
         if self.tag == 'img':
             if 'src' in self.attr:
                 full_path = os.path.join(root_path, self.attr['src'])
                 self.attr['path'] = full_path
-                return [BookFrame(None, "file_image", self.attr)]
+                return [HtmlBookFrame(None, "file_image", self.attr)]
             elif 'alt' in self.attr:
-                return [BookFrame(self.attr['alt'],'subtitle', {})]
+                return [HtmlBookFrame(self.attr['alt'],'subtitle', {})]
             else:
-                return [BookFrame("broken image",'subtitle', {})]
+                return [HtmlBookFrame("broken image",'subtitle', {})]
 
         if self.tag == 'image':
             if 'xlink:href' in self.attr:
@@ -133,9 +133,9 @@ class Html_Tag(Xml_Tag):
                     self.attr['another']['height'] = self.attr['height']
                 if 'width' in self.attr:
                     self.attr['another']['width'] = self.attr['width']
-                return [BookFrame(None, "file_image", self.attr)]
+                return [HtmlBookFrame(None, "file_image", self.attr)]
             else:
-                return [BookFrame("broken image",'subtitle', {})]
+                return [HtmlBookFrame("broken image",'subtitle', {})]
         
         if self.tag == 'script' or self.tag == 'br':
             return []
@@ -160,7 +160,7 @@ class Html_Tag(Xml_Tag):
         print(self.attr)
         print(self.text)
         print(self.content)
-        return [BookFrame(self.text, self.tag, self.attr)]
+        return [HtmlBookFrame(self.text, self.tag, self.attr)]
 
 
 
