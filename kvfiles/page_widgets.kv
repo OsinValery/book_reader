@@ -7,14 +7,16 @@
     color: app.theme_cls.text_color if not root.note else (10/255, 183 / 255 , 122 / 255 , 1)
     font_size: 32
 
-    text_size: Window.width - 2 * icon_size , None
+    text_size: ((Window.width - 2 * icon_size) if not self.parent else self.parent.width) , None
     size: self.texture_size
     size_hint_y: None
+    size_hint_x: None
 
     selection_color: (66/255, 170/255, 1, 0.2)
 
     on_ref_press: 
         root.on_refference(*args)
+
 
 <PresentableLabel>:
     text: ""
@@ -106,7 +108,8 @@
 
 <NotesDelimeter>:
     size_hint_y: None
-    size: Window.width ,0.02 * Window.height 
+    size_hint_x: None
+    size: (Window.width - 2 * icon_size) if not self.parent else self.parent.width ,0.02 * Window.height 
 
     canvas:
         Color:
@@ -155,14 +158,11 @@
 <SelectablePair>:
     cols: 2
     height:root.child.texture_size[1]
-    width: Window.size[0] - 2 * icon_size
+    width: (Window.width - 2 * icon_size) if not self.parent else self.parent.width
     size_hint_y: None
+    size_hint_x: None
     spacing: 8
-    
-    on_parent:
-        if self.parent: second_child_container.add_widget(root.child)
-        root.child.text_size = ((1-root.pad) * Window.size[0], None)
-        root.child.texture_update()
+    padding: [0,0,10,0]
 
     Space:
         size_hint_x: root.pad
@@ -172,8 +172,9 @@
     OneElementContainer:
         anchor_x: 'left'
         anchor_y: "bottom"
-        size_hint: [1,1]
-        id: second_child_container
+        
+        on_parent:
+            if self.parent: self.add_widget(root.child)
 
 <Annotation_empty>:
     height: 0.04 * Window.height

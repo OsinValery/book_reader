@@ -27,7 +27,9 @@
 
         BoxLayout:
             size_hint_y: None
+            size_hint_x: None
             height: self.minimum_height
+            width: Window.width - 2 * icon_size
             orientation: 'vertical'
             spacing: 10
             id: page_content
