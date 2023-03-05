@@ -27,6 +27,16 @@
             size: self.size[0], self.height + 20
             pos: self.pos[0], self.pos[1] - 10
 
+<OneElementContainer>:
+    background_color: (0,0,0,0)
+
+    canvas.before:
+        Color:
+            rgba: self.background_color
+        Rectangle:
+            size: self.size[0], self.height + 20
+            pos: self.pos[0], self.pos[1] - 10
+
 
 <Paragraph>:
     text: ''
@@ -150,7 +160,7 @@
     spacing: 8
     
     on_parent:
-        if self.parent: self.add_widget(root.child)
+        if self.parent: second_child_container.add_widget(root.child)
         root.child.text_size = ((1-root.pad) * Window.size[0], None)
         root.child.texture_update()
 
@@ -159,8 +169,20 @@
         size_hint_y: None
         height: root.child.height
 
+    OneElementContainer:
+        anchor_x: 'left'
+        anchor_y: "bottom"
+        size_hint: [1,1]
+        id: second_child_container
+
 <Annotation_empty>:
     height: 0.04 * Window.height
 
 <Title_empty>:
     height: 0.02 * Window.height
+
+<BoxLayoutSelectableContainer>:
+    height: self.minimum_height
+
+
+
