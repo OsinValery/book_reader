@@ -64,9 +64,6 @@ class SelectablePageContent(PageContent):
                 child.deselect()
         return super().deselect()
 
-    def select(self):
-        pass
-
     def get_selected_text(self):
         text = ''
         if 'children' in dir(self):
@@ -235,11 +232,180 @@ class PresentableLabel(SelectableLabel):
     poem = BooleanProperty(False)
     note = BooleanProperty(False)
     epigraph = BooleanProperty(False)
-    another_properties = DictProperty({})
 
     def get_font(self, name):
         folder = App.get_running_app().directory
         return os.path.join(folder, 'assets', 'fonts', name)
+
+
+class Paragraph(PresentableLabel):
+    def resolve_state(self):
+            if self.cite: 
+                self.font_size = 30
+            self.halign = 'left'
+
+            if not self.epigraph:
+                if self.cite:
+                    self.font_name = self.get_font('NotoSans-ExtraLightItalic.ttf')
+            else:
+                self.halign = 'right'
+                self.size_hint_x = None
+                if self.cite:
+                    self.font_name = self.get_font('NotoSans-ThinItalic.ttf')
+                else:
+                    self.font_name = self.get_font('NotoSans-Thin.ttf')
+
+
+class Unknown(PresentableLabel):
+    pass
+
+class Mistake(PresentableLabel):
+    pass
+
+class ImageData(Widget, PageContent):
+    texture = ObjectProperty()
+    cover = BooleanProperty(False)
+    another_properties=DictProperty({})
+
+    def get_size(self, icon_size):
+        if self.another_properties != {}:
+            print(self.another_properties)
+            size = App.get_running_app().root.ids.page_presenter.ids.page.size
+            width, height = size[0] / 2, size[1] / 2
+            max_width = Window.width - icon_size * 2
+            if 'width' in self.another_properties:
+                value = self.another_properties['width']
+                if "%" in value:
+                    p = get_in_percents(value)
+                    if p != None: width = max_width * p
+                else:
+                    try:
+                        width = float(value)
+                    except:
+                        print("can't parce digit:", value, 'in ImageData.get_size()')
+            if 'height' in self.another_properties:
+                value = self.another_properties['height']
+                if "%" in value:
+                    p = get_in_percents(value)
+                    if p != None: height = size[1] * p
+                else:
+                    try:
+                        height = float(value)
+                    except:
+                        print("can't parce digit:", value, 'in ImageData.get_size()')
+            
+            if width > max_width:
+                height = height * max_width / width
+                width = max_width
+            return width, height
+
+        if not self.cover:
+            width = 0.8 * (Window.width - icon_size * 2)
+            scale = width / self.texture.size[0]
+            return [width, scale * self.texture.size[1]]
+        else:
+            size = App.get_running_app().root.ids.page_presenter.ids.page.size
+            return size[0] - 2 * icon_size, size[1]
+
+
+class Title(PresentableLabel):
+    def resolve_state(self):
+            if self.cite: 
+                self.font_size = 38
+
+            if self.cite and self.poem:
+                self.font_name = self.get_font('NotoSans-ExtraBoldItalic.ttf')
+            elif self.cite:
+                self.font_name = self.get_font('NotoSans-SemiBoldItalic.ttf')
+            elif self.poem:
+                self.font_name = self.get_font('NotoSans-ExtraBold.ttf')
+            else:
+                pass
+
+
+class NotesDelimeter(Widget,PageContent):
+    pass
+
+class Note(PresentableLabel):
+    pass
+
+class SubTitle(PresentableLabel):
+    def resolve_state(self):
+            if self.cite:
+                self.font_name = self.get_font('NotoSans-ThinItalic.ttf')
+            else:
+                self.font_name = self.get_font('NotoSans-Italic.ttf')
+    
+            if self.epigraph:
+                self.font_size = 28
+                self.size_hint_x = None
+            else:
+                if self.cite:
+                    self.font_size = 30
+
+class Stanza_empty(Space):
+    pass
+
+class Author(PresentableLabel):
+    def resolve_state(self):
+        if self.epigraph:
+            self.font_size = 28
+            self.size_hint_x = None
+            if self.cite:
+                self.font_name = self.get_font('NotoSans-ThinItalic.ttf')
+            else:
+                self.font_name = self.get_font('NotoSans-Light.ttf')
+        else:
+            self.font_name = self.get_font('NotoSans-Italic.ttf')
+            if self.cite:
+                self.font_size = 30
+
+
+# this class != Paragraph
+class Text(PresentableLabel):
+    def resolve_state(self):
+            if self.cite: 
+                self.font_size = 30
+
+            if not self.epigraph:
+                if self.cite:
+                    self.font_name = self.get_font('NotoSans-ExtraLightItalic.ttf')
+                else:
+                    self.font_name = self.get_font('NotoSans-Medium.ttf')
+            else:
+                self.size_hint_x = None
+                if self.cite:
+                    self.font_name = self.get_font('NotoSans-ThinItalic.ttf')
+                else:
+                    self.font_name = self.get_font('NotoSans-Thin.ttf')
+
+class Poem_line(PresentableLabel):
+    def resolve_state(self):
+            if self.epigraph:
+                self.size_hint_x = None
+                self.font_name = self.get_font('NotoSans-Thin.ttf')
+            else:
+                if self.cite:
+                    self.italic = True
+                    self.font_name = self.get_font('NotoSans-MediumItalic.ttf')
+                else:
+                    self.font_name = self.get_font('NotoSans-Medium.ttf')
+
+class Annotation_empty(Space):
+    pass
+
+class Title_Empty(Space):
+    pass
+
+class OneElementContainer(Factory.AnchorLayout, SelectablePageContent):
+    pass
+
+class BoxLayoutSelectableContainer(Factory.BoxLayout, SelectablePageContent):
+    pass
+
+
+class Html_Entity(PresentableLabel):
+    another_properties = DictProperty({})
 
     def resolve_css_properties(self):
         view_port_size = self.get_page_size
@@ -377,195 +543,29 @@ class PresentableLabel(SelectableLabel):
                 print('unknown css property:', property_, 'with value:', value)
 
 
-class Paragraph(PresentableLabel):
 
-    def resolve_state(self):
-        if self.another_properties != {}:
-            self.resolve_css_properties()
-        else:
-            if self.cite: 
-                self.font_size = 30
-            self.halign = 'left'
-
-            if not self.epigraph:
-                if self.cite:
-                    self.font_name = self.get_font('NotoSans-ExtraLightItalic.ttf')
-            else:
-                self.halign = 'right'
-                self.size_hint_x = None
-                if self.cite:
-                    self.font_name = self.get_font('NotoSans-ThinItalic.ttf')
-                else:
-                    self.font_name = self.get_font('NotoSans-Thin.ttf')
-
-class HTML_Paragraph(PresentableLabel):
-    def resolve_state(self):
-        if self.another_properties != {}:
-            self.resolve_css_properties()
-
-
-class Unknown(PresentableLabel):
+class Html_text(Html_Entity):
     pass
 
-class Mistake(PresentableLabel):
+class HTML_Paragraph(Html_Entity):
     pass
 
-class ImageData(Widget, PageContent):
-    texture = ObjectProperty()
-    cover = BooleanProperty(False)
-    another_properties=DictProperty({})
-
-    def get_size(self, icon_size):
-        if self.another_properties != {}:
-            print(self.another_properties)
-            size = App.get_running_app().root.ids.page_presenter.ids.page.size
-            width, height = size[0] / 2, size[1] / 2
-            max_width = Window.width - icon_size * 2
-            if 'width' in self.another_properties:
-                value = self.another_properties['width']
-                if "%" in value:
-                    p = get_in_percents(value)
-                    if p != None: width = max_width * p
-                else:
-                    try:
-                        width = float(value)
-                    except:
-                        print("can't parce digit:", value, 'in ImageData.get_size()')
-            if 'height' in self.another_properties:
-                value = self.another_properties['height']
-                if "%" in value:
-                    p = get_in_percents(value)
-                    if p != None: height = size[1] * p
-                else:
-                    try:
-                        height = float(value)
-                    except:
-                        print("can't parce digit:", value, 'in ImageData.get_size()')
-            
-            if width > max_width:
-                height = height * max_width / width
-                width = max_width
-            return width, height
-
-        if not self.cover:
-            width = 0.8 * (Window.width - icon_size * 2)
-            scale = width / self.texture.size[0]
-            return [width, scale * self.texture.size[1]]
-        else:
-            size = App.get_running_app().root.ids.page_presenter.ids.page.size
-            return size[0] - 2 * icon_size, size[1]
-
-
-class Title(PresentableLabel):
-    def resolve_state(self):
-        if self.another_properties != {}:
-            self.resolve_css_properties()
-        else:
-            if self.cite: 
-                self.font_size = 38
-            
-            if self.cite and self.poem:
-                self.font_name = self.get_font('NotoSans-ExtraBoldItalic.ttf')
-            elif self.cite:
-                self.font_name = self.get_font('NotoSans-SemiBoldItalic.ttf')
-            elif self.poem:
-                self.font_name = self.get_font('NotoSans-ExtraBold.ttf')
-            else:
-                pass
-
-
-class NotesDelimeter(Widget,PageContent):
+class H1(Html_Entity):
     pass
 
-class Note(PresentableLabel):
+class H2(Html_Entity):
     pass
 
-class SubTitle(PresentableLabel):
-    def resolve_state(self):
-        if self.another_properties != {}:
-            self.resolve_css_properties()
-        else:
-            if self.cite:
-                self.font_name = self.get_font('NotoSans-ThinItalic.ttf')
-            else:
-                self.font_name = self.get_font('NotoSans-Italic.ttf')
-    
-            if self.epigraph:
-                self.font_size = 28
-                self.size_hint_x = None
-            else:
-                if self.cite:
-                    self.font_size = 30
-
-class Stanza_empty(Space):
+class H3(Html_Entity):
     pass
 
-class Author(PresentableLabel):
-    def resolve_state(self):
-        if self.another_properties != {}:
-            self.resolve_css_properties()
-        elif self.epigraph:
-            self.font_size = 28
-            self.size_hint_x = None
-            if self.cite:
-                self.font_name = self.get_font('NotoSans-ThinItalic.ttf')
-            else:
-                self.font_name = self.get_font('NotoSans-Light.ttf')
-        else:
-            self.font_name = self.get_font('NotoSans-Italic.ttf')
-            if self.cite:
-                self.font_size = 30
-
-
-# this class != Paragraph
-class Text(PresentableLabel):
-    def resolve_state(self):
-        if self.another_properties != {}:
-            self.resolve_css_properties()
-        else:
-            if self.cite: 
-                self.font_size = 30
-
-            if not self.epigraph:
-                if self.cite:
-                    self.font_name = self.get_font('NotoSans-ExtraLightItalic.ttf')
-                else:
-                    self.font_name = self.get_font('NotoSans-Medium.ttf')
-            else:
-                self.size_hint_x = None
-                if self.cite:
-                    self.font_name = self.get_font('NotoSans-ThinItalic.ttf')
-                else:
-                    self.font_name = self.get_font('NotoSans-Thin.ttf')
-
-class Poem_line(PresentableLabel):
-    def resolve_state(self):
-        if self.another_properties != {}:
-            self.resolve_css_properties()
-        else:
-            if self.epigraph:
-                self.size_hint_x = None
-                self.font_name = self.get_font('NotoSans-Thin.ttf')
-            else:
-                if self.cite:
-                    self.italic = True
-                    self.font_name = self.get_font('NotoSans-MediumItalic.ttf')
-                else:
-                    self.font_name = self.get_font('NotoSans-Medium.ttf')
-
-class Annotation_empty(Space):
+class H4(Html_Entity):
     pass
 
-class Title_Empty(Space):
+class H5(Html_Entity):
     pass
 
-class OneElementContainer(Factory.AnchorLayout, SelectablePageContent):
+class H6(Html_Entity):
     pass
-
-class BoxLayoutSelectableContainer(Factory.BoxLayout, SelectablePageContent):
-    pass
-
-class Padding(BoxLayoutSelectableContainer):
-    child = ObjectProperty(Widget())
 
 

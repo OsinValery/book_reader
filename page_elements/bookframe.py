@@ -93,7 +93,6 @@ class BookFrame():
         is_poem = (('poem' in self.attributs) and self.attributs['poem'])
         is_note = (('note' in self.attributs) and self.attributs['note'])
         is_epigraph = (('epigraph' in self.attributs) and self.attributs['epigraph'])
-        another = self.attributs['another'] if 'another' in self.attributs else {}
 
         widget = page_widgets.Unknown(
             text='Initial widget. It means, that it wasn\'t choosen. Tag = ' + self.type , 
@@ -101,7 +100,6 @@ class BookFrame():
             epigraph=is_epigraph,
             poem=is_poem,
             note=is_note,
-            another_properties=another,
         )
 
         if self.type == 'p':
@@ -120,22 +118,6 @@ class BookFrame():
                 epigraph=is_epigraph,
                 poem=is_poem,
                 note=is_note,
-                another_properties=another,
-            )
-
-        elif self.type == 'html_p':
-            text: str = self.content.lstrip()
-            n = 8
-            # 2 different unicode simbols
-            if text[0] in ['-', '—']:
-                n = 3        
-            text = self.escape_text(text)
-            text, refs = self.referize_text(text)
-            text = ' ' * n + text
-            widget = page_widgets.HTML_Paragraph(
-                text= text, 
-                referization=refs, 
-                another_properties=another,
             )
 
         elif self.type == 'txt_p':
@@ -165,7 +147,6 @@ class BookFrame():
                 epigraph=is_epigraph,
                 poem=is_poem,
                 note=is_note,
-                another_properties=another,
             )
         elif self.type == 'empty':
             return page_widgets.Space()
@@ -180,7 +161,6 @@ class BookFrame():
                 epigraph=is_epigraph,
                 poem=is_poem,
                 note=is_note,
-                another_properties=another,
             )
         
         elif self.type == 'title_empty':
@@ -195,7 +175,6 @@ class BookFrame():
                 referization=refs,
                 cite=is_cite,
                 epigraph=is_epigraph,
-                another_properties=another,
                 poem=is_poem,
                 note=is_note,
             )
@@ -214,7 +193,6 @@ class BookFrame():
                 referization=refs,
                 cite=is_cite,
                 epigraph=is_epigraph,
-                another_properties=another,
                 poem=is_poem,
                 note=is_note,
             )
@@ -227,7 +205,6 @@ class BookFrame():
                 referization=refs,
                 cite=is_cite,
                 epigraph=is_epigraph,
-                another_properties=another,
                 poem=is_poem,
                 note=is_note,
             )
@@ -240,7 +217,6 @@ class BookFrame():
                 referization=refs,
                 cite=is_cite,
                 epigraph=is_epigraph,
-                another_properties=another,
                 poem=is_poem,
                 note=is_note,
             )
@@ -259,24 +235,6 @@ class BookFrame():
             except Exception as e:
                 print(e)
                 return page_widgets.Mistake(text=f'picture wasn\'t loaded! ')
-        
-        elif self.type == 'file_image':
-            extansion: str = self.attributs['path'][-4:]
-            extansion = extansion.replace('.', '')
-            if extansion in ['png', 'jpg', 'jpeg']:
-                try:
-                    with open(self.attributs['path'], mode='rb') as file:
-                        data = file.read()
-                    data = io.BytesIO(data)
-                    img = Image(data, ext=extansion)
-                    is_cover = 'cover' in self.attributs and self.attributs['cover']
-                    return page_widgets.ImageData(texture=img.texture, cover = is_cover, another_properties=another)
-                except Exception as e:
-                    print(e)
-                    return page_widgets.Mistake(text=f'picture wasn\'t loaded! ')
-            else:
-                print("\"", extansion, "\"", 'is not supported yet')
-                widget = page_widgets.Space()
 
         else:
             print("from bookframe!")

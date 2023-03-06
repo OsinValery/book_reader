@@ -5,6 +5,8 @@ from page_elements.html_bookframe import HtmlBookFrame
 from .css_descriptor import CssDescriptor
 from .css_measurement_systems import work_measurement_systems_for_inheritance
 
+style_tags = ['i', 'em', 'strong', 'b', 'sub', 'sup']
+
 class Html_Tag(Xml_Tag):
     def apply_style(self, styles: CssDescriptor):
         css = {}
@@ -46,27 +48,6 @@ class Html_Tag(Xml_Tag):
                 else:
                     self.attr['another'][property_] = properties[property_]
                 # TODO do transormations of measurements systems
-
-    def cunstruct_text(self, styles: CssDescriptor) -> str:
-        text = ""
-        for child in self.content:
-            if child.tag == "plain_text":
-                text += child.text
-            elif child.tag == "strong":
-                text += '<strong>' + child.construct_text(styles) + "</strong>"
-            elif child.tag == 'br':
-                text += '\n'
-            elif child.tag == 'p':
-                text += child.cunstruct_text(styles)
-            elif child.tag == 'i':
-                text += ' <emphasis> ' + child.cunstruct_text(styles) + ' </emphasis> '
-            elif child.tag == 'a':
-                print(child.print())
-                print(child.attr)
-            else:
-                print("unknown element:", child.tag)
-                print('in Html_Tag.cunstruct_text')
-        return text
     
     def share_css_property_with_child(self, child:'Html_Tag', css: str, is_numeric = False):
         if not 'another' in child.attr:
@@ -99,23 +80,141 @@ class Html_Tag(Xml_Tag):
             elif css_property == 'widows':
                 pass
 
+    def wrap_text_with_tag(self, text: str, tag: str, attr = None):
+        if tag == 'i' or tag == 'em':
+            return '[i]' + text + '[/i]'
+        elif tag == 'b':
+            return '[b]' + text + '[/b]'
+        elif tag == 'strong':
+            return '[b]' + text + '[/b]'
+        elif tag in ['sub','sup']:
+            return '[' + tag + ']' + text + '[/' + tag + ']'
+        else:
+            print('unknown tag to wrap!')
+            print(tag)
+            return text
+
     def work(self, styles = CssDescriptor(), root_path = "") -> List[HtmlBookFrame]:
+        result: List[HtmlBookFrame] = []
         self.apply_style(styles)
         for child in self.content:
             self.share_css_properties_with_child(child)
-        if (self.tag == "p"):
-            text = self.cunstruct_text(styles)
-            return [HtmlBookFrame(text, 'html_p', self.attr)]
-        if self.tag == 'h1':
-            text = self.cunstruct_text(styles)
-            return [HtmlBookFrame(text, 'title', self.attr)]
-        if self.tag in ['h2', "h3", 'h4', 'h5', 'h6']:
-            text = self.cunstruct_text(styles)
-            attr = self.attr
-            attr['lavel'] = self.tag
-            return [HtmlBookFrame(text, 'subtitle', self.attr)]
 
-        if self.tag == 'img':
+        if (self.tag == "p"):
+            unexpected_found = False
+            text = ''
+            for child in self.content:
+                if not unexpected_found:
+                    if child.tag == 'plain_text':
+                        text += child.text
+                    elif child.tag == 'br':
+                        text += '\n'
+                    elif child.tag in style_tags:
+                        new_children = child.work(styles, root_path)
+                        for new_child in new_children:
+                            if not unexpected_found:
+                                if new_child.type == 'html_text':
+                                    text += new_child.content
+                                else:
+                                    unexpected_found = True
+                                    if text != '':
+                                        result.append(HtmlBookFrame(text, 'html_p', self.attr))
+                                        text = ''
+                                    result.append(new_child)
+                            else:
+                                result.append(new_child)
+                    else:
+                        unexpected_found = True
+                        if text != '':
+                            result.append(HtmlBookFrame(text, 'html_p', self.attr))
+                            text = ''
+                        result += child.work(styles, root_path)
+                else:
+                    result += child.work(styles, root_path)
+            if not unexpected_found and text != '':
+                result.append(HtmlBookFrame(text, 'html_p', self.attr))
+            return result
+            #text = self.cunstruct_text(styles)
+            #return [HtmlBookFrame(text, 'html_p', self.attr)]
+
+        elif self.tag in style_tags:
+            unexpected_found = False
+            text = ''
+            for child in self.content:
+                if not unexpected_found:
+                    if child.tag == 'plain_text':
+                        text += child.text
+                    elif child.tag == 'br':
+                        text += '\n'
+                    elif child.tag in style_tags:
+                        new_children = child.work(styles, root_path)
+                        for new_child in new_children:
+                            if not unexpected_found:
+                                if new_child.type == 'html_text':
+                                    text += new_child.content
+                                else:
+                                    unexpected_found = True
+                                    if text != '':
+                                        text = self.wrap_text_with_tag(text, self.tag, self.attr)
+                                        result.append(HtmlBookFrame(text, 'html_text', self.attr))
+                                        text = ''
+                                    result.append(new_child)
+                            else:
+                                result.append(new_child)
+                    else:
+                        unexpected_found = True
+                        if text != '':
+                            text = self.wrap_text_with_tag(text, self.tag, self.attr)
+                            result.append(HtmlBookFrame(text, 'html_text', self.attr))
+                            text = ''
+                        result += child.work(styles, root_path)
+                else:
+                    result += child.work(styles, root_path)
+            if not unexpected_found and text != '':
+                text = self.wrap_text_with_tag(text, self.tag, self.attr)
+                result.append(HtmlBookFrame(text, 'html_text', self.attr))
+            return result
+        
+        elif self.tag == 'plain_text':
+            return [HtmlBookFrame(self.text, 'text', self.attr)]
+
+        elif self.tag in ['h1', 'h2', "h3", 'h4', 'h5', 'h6']:
+            text = ''
+            unexpected_found = False
+            for child in self.content:
+                if not unexpected_found:
+                    if child.tag == 'plain_text':
+                        text += child.text
+                    elif child.tag == 'br':
+                        text += '\n'
+                    elif child.tag in style_tags:
+                        new_children = child.work(styles, root_path)
+                        for new_child in new_children:
+                            if not unexpected_found:
+                                if new_child.type == 'html_text':
+                                    text += new_child.content
+                                else:
+                                    unexpected_found = True
+                                    if text != '':
+                                        result.append(HtmlBookFrame(text, self.tag, self.attr))
+                                        text = ''
+                                    result.append(new_child)
+                            else:
+                                result.append(new_child)
+                    else:
+                        unexpected_found = True
+                        if text != '':
+                            result.append(HtmlBookFrame(text, self.tag, self.attr))
+                            text = ''
+                        result += child.work(styles, root_path)
+                else:
+                    result += child.work(styles, root_path)
+            if not unexpected_found and text != '':
+                text = self.wrap_text_with_tag(text, self.tag, self.attr)
+                result.append(HtmlBookFrame(text, self.tag, self.attr))
+            return result
+
+        elif self.tag == 'img':
             if 'src' in self.attr:
                 full_path = os.path.join(root_path, self.attr['src'])
                 self.attr['path'] = full_path
@@ -125,7 +224,7 @@ class Html_Tag(Xml_Tag):
             else:
                 return [HtmlBookFrame("broken image",'subtitle', {})]
 
-        if self.tag == 'image':
+        elif self.tag == 'image':
             if 'xlink:href' in self.attr:
                 full_path = os.path.join(root_path, self.attr['xlink:href'])
                 self.attr['path'] = full_path
@@ -137,10 +236,11 @@ class Html_Tag(Xml_Tag):
             else:
                 return [HtmlBookFrame("broken image",'subtitle', {})]
         
-        if self.tag == 'script' or self.tag == 'br':
+        elif self.tag == 'script' or self.tag == 'br':
             return []
         
-        if self.tag == 'blockquote':
+        elif self.tag == 'blockquote':
+            print('remake blockquote')
             children = []
             for el in self.content:
                 new_children = el.work(styles, root_path)
@@ -149,7 +249,7 @@ class Html_Tag(Xml_Tag):
                     children.append(new_child)
             return children
 
-        if self.tag in ['body', 'div', "section", 'span', 'svg']:
+        elif self.tag in ['body', 'div', "section", 'span', 'svg']:
             result = []
             child: Html_Tag = None
             for child in self.content:
