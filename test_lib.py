@@ -17,7 +17,7 @@ class MyWidget(Screen):
 
     def __init__(self, **kw):
         super().__init__(**kw)
-        text = '[ref=2]Hello[ref=1]World[/ref][/ref]'
+        text = 'test' + chr(8203) + 'test1'
         lab = Label(text = text, markup = True, size_hint = [None, None])
         lab.size = lab.texture_size
         lab.pos = [400,200]

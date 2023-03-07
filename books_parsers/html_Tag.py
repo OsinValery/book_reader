@@ -6,6 +6,7 @@ from .css_descriptor import CssDescriptor
 from .css_measurement_systems import work_measurement_systems_for_inheritance
 
 style_tags = ['i', 'em', 'strong', 'b', 'sub', 'sup']
+char = chr(8203)
 
 class Html_Tag(Xml_Tag):
     def apply_style(self, styles: CssDescriptor):
@@ -82,13 +83,13 @@ class Html_Tag(Xml_Tag):
 
     def wrap_text_with_tag(self, text: str, tag: str, attr = None):
         if tag == 'i' or tag == 'em':
-            return '[i]' + text + '[/i]'
+            return '[i]' + char + text + char + '[/i]' + char
         elif tag == 'b':
-            return '[b]' + text + '[/b]'
+            return '[b]' + char + text + char + '[/b]' + char
         elif tag == 'strong':
-            return '[b]' + text + '[/b]'
+            return '[b]' + char + text + char + '[/b]' + char
         elif tag in ['sub','sup']:
-            return '[' + tag + ']' + text + '[/' + tag + ']'
+            return '[' + tag + ']' + char + text + char + '[/' + tag + ']' + char
         else:
             print('unknown tag to wrap!')
             print(tag)
@@ -134,8 +135,6 @@ class Html_Tag(Xml_Tag):
             if not unexpected_found and text != '':
                 result.append(HtmlBookFrame(text, 'html_p', self.attr))
             return result
-            #text = self.cunstruct_text(styles)
-            #return [HtmlBookFrame(text, 'html_p', self.attr)]
 
         elif self.tag in style_tags:
             unexpected_found = False

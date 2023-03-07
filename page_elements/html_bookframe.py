@@ -6,10 +6,20 @@ from .bookframe import BookFrame
 
 
 class HtmlBookFrame(BookFrame):
+    def is_markup(self, text: str) -> bool:
+        if text in ['[i]', '[/i]', '[b]', '[/b]', ['sub'], '[sup]', '[/sub]', '[/sup]']:
+            return True
+        if text in ['[u]', '[/u]', '[s]', '[/s]', '[/font]', '[/color]', '[/size]']:
+            return True
+        if text.startswith('[font') or text.startswith('[color') or text.startswith('[size'):
+            return True
+        return False
+
     def referize_text(self, text:str):
         refers = []
         i = 0
         result = ''
+        char = chr(8203)
         pos = 0
 
         while (pos < len(text)) and text[pos].isspace():
@@ -21,15 +31,18 @@ class HtmlBookFrame(BookFrame):
 
         while pos < len(text):
             if is_word:
-                if text[pos].isspace():
+                if text[pos].isspace() or (text[pos] == char):
                     is_word = False
                     word = text[word_start:pos]
-                    refers.append(word)
-                    result += '[ref=' + str(i) + ']' + word + '[/ref]'
-                    i += 1
+                    if self.is_markup(word):
+                        result += word
+                    else:
+                        refers.append(word)
+                        result += '[ref=' + str(i) + ']' + word + '[/ref]'
+                        i += 1
                     word_start = pos
             else:
-                if not text[pos].isspace():
+                if not (text[pos].isspace() or text[pos] == char):
                     is_word = True
                     result += text[word_start:pos]
                     word_start = pos
