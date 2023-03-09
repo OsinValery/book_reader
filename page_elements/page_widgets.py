@@ -269,7 +269,6 @@ class ImageData(Widget, PageContent):
 
     def get_size(self, icon_size):
         if self.another_properties != {}:
-            print(self.another_properties)
             size = App.get_running_app().root.ids.page_presenter.ids.page.size
             width, height = size[0] / 2, size[1] / 2
             max_width = Window.width - icon_size * 2
@@ -424,23 +423,11 @@ class Html_Entity(PresentableLabel):
                 if 'italic' == value:
                     self.italic = True
             elif property_ == 'font-size':
-                if value == 'medium':
-                    real_value = '16sp'
-                elif value == 'small':
-                    real_value = '14sp'
-                elif value == 'large':
-                    real_value = '24sp'
-                elif value == 'x-large':
-                    real_value = '28sp'
-                elif value == 'xx-large':
-                    real_value = '32sp'
-                elif value == 'x-small':
-                    real_value = '11sp'
-                elif value == 'xx-small':
-                    real_value = '8sp'
+                """if value in font_size_words:
+                    real_value = font_size_words[value]
                 else:
                     real_value = get_size_for_performance(value, 16, Window.size, view_port_size, True)
-                self.font_size = real_value
+                self.font_size = real_value"""
             elif property_ == 'font-family':
                 trile_families = self.another_properties[property_].split(',')
                 for font in trile_families:
@@ -455,6 +442,8 @@ class Html_Entity(PresentableLabel):
             elif property_ == 'font-weight':
                 if value == 'bold':
                     self.bold = True
+                elif value == 'normal':
+                    self.bold = False
                 else:
                     print('unknown font-weight:', value)
             elif property_ in ['margin-bottom', 'margin-top', 'margin-left', 'margin-right']:
@@ -549,23 +538,4 @@ class Html_text(Html_Entity):
 
 class HTML_Paragraph(Html_Entity):
     pass
-
-class H1(Html_Entity):
-    pass
-
-class H2(Html_Entity):
-    pass
-
-class H3(Html_Entity):
-    pass
-
-class H4(Html_Entity):
-    pass
-
-class H5(Html_Entity):
-    pass
-
-class H6(Html_Entity):
-    pass
-
 

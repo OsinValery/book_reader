@@ -1,7 +1,8 @@
-import kivy.metrics as metrics
+from copy import deepcopy
 from typing import List
 
-sims = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.']
+sims = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '-']
+default_font_size = '18sp'
 
 def clear_css_value(value: str):
     if value == "": return ""
@@ -20,26 +21,28 @@ def get_in_percents(value):
     except:
         return None
 
-def work_measurement_systems_for_inheritance(value: str, parent_value: str) -> str:
+def work_measurement_systems_for_inheritance(value: str, parent_value: str, default_value: str) -> str:
     if 'inherit' in value:
         return parent_value
     elif 'initial' in value:
-        print('found initial')
+        return default_value
     elif 'unset' in value:
-        print('found unset')
+        return default_value
     try:
         float(value)
         return value
     except:
         pass
     # here value have measurement points excectly
+    if value in font_size_words: value = font_size_words[value]
+    if parent_value in font_size_words: parent_value = font_size_words[parent_value]
     num_value, points = split_value_and_points(value)
     parent_num_value, parent_points = split_value_and_points(parent_value)
     if points == '%':
         proportion = get_in_percents(num_value)
         if proportion == None: return parent_value
         return str(proportion * float(parent_num_value)) + parent_points
-    elif points in ['mm', 'cm', 'in', 'pt', 'px', 'ex', 'ch', 'vw', 'vh', 'vmin', 'vmax']:
+    elif points in ['sp', 'mm', 'cm', 'in', 'pt', 'px', 'ex', 'ch', 'vw', 'vh', 'vmin', 'vmax']:
         return value
     elif points.upper() == 'Q':
         return str(1/40 * float(num_value)) + 'cm'
@@ -50,7 +53,7 @@ def work_measurement_systems_for_inheritance(value: str, parent_value: str) -> s
     elif points == 'em':
         return str(float(num_value) * float(parent_num_value)) + parent_points
     print('unknown measurement system!', value)
-    return '16px'
+    return default_font_size
 
 
 
@@ -76,7 +79,7 @@ def get_size_for_performance(value: str, default: int, window_size: List[float],
         proportion = get_in_percents(num_value)
         if proportion == None: return default
         return str(proportion * default) + 'px'
-    elif points in ['mm', 'cm', 'in', 'pt', 'px']:
+    elif points in ['sp', 'mm', 'cm', 'in', 'pt', 'px']:
         return value
     elif points.upper() == 'Q':
         return str(1/40 * float(num_value)) + 'cm'
@@ -117,13 +120,191 @@ def get_color_from_code(value: str):
                 colors.append(d)
         return colors
 
+def decrease_font_size_by_one(value: str):
+    return decrease_font_size_by_value(value, 1)
+
+def decrease_font_size_by_value(value: str, dec: float):
+    if 'inherit' in value:
+        return value
+    elif 'initial' in value:
+        print('found initial')
+    elif 'unset' in value:
+        print('found unset')
+
+    if value in font_size_words:
+        value = font_size_words[value]
+
+    return safe_decrease_font_size_by_value(value, dec)
+
+def safe_decrease_font_size_by_value(value:str, dec:float):
+    try:
+        float(value)
+        return str(max(float(value) - dec), 0)
+    except:
+        pass
+    
+    val, ms = split_value_and_points(value)
+    return str(max(float(val) - dec, 0)) + ms
 
 
+font_size_words = {
+    'medium': default_font_size,
+    'small': safe_decrease_font_size_by_value(default_font_size, 2),
+    'large': safe_decrease_font_size_by_value(default_font_size, -2),
+    'x-large': safe_decrease_font_size_by_value(default_font_size, -8),
+    'xx-large': safe_decrease_font_size_by_value(default_font_size, -12),
+    'x-small': safe_decrease_font_size_by_value(default_font_size, 8),
+    'xx-small': safe_decrease_font_size_by_value(default_font_size, 12),
+}
 
+text_color = 'black'
+default_css_properties = {
+    'body': {
+        'font-size': default_font_size,
+        'color': text_color,
+        'background-color': 'rgba(0,0,0,0)',
+        'text-align': 'left',
+        'font-weight': 'normal',
+        'font-family': 'arial',
+        'font-style': 'normal',
+    },
+    'p': {
+        'font-size': default_font_size,
+        'color': text_color,
+        'background-color': 'rgba(0,0,0,0)',
+        'text-align': 'left',
+        'font-weight': 'normal',
+        'font-family': 'arial',
+        'font-style': 'normal',
+    },
+    'text': {
+        'font-size': default_font_size,
+        'color': text_color,
+        'background-color': 'rgba(0,0,0,0)',
+        'text-align': 'left',
+        'font-weight': 'normal',
+        'font-family': 'arial',
+        'font-style': 'normal',
+    },
+    'b': {
+        'font-size': default_font_size,
+        'color': text_color,
+        'background-color': 'rgba(0,0,0,0)',
+        'text-align': 'left',
+        'font-weight': 'normal',
+        'font-family': 'arial',
+        'font-style': 'normal',
+    },
 
+    'plain_text': {
+        'font-size': default_font_size,
+        'color': text_color,
+        'background-color': 'rgba(0,0,0,0)',
+        'text-align': 'left',
+        'font-weight': 'normal',
+        'font-family': 'arial',
+        'font-style': 'normal',
+    },
+    'h1': {
+        'font-size': default_font_size,
+        'color': text_color,
+        'background-color': 'rgba(0,0,0,0)',
+        'text-align': 'left',
+        'font-weight': 'normal',
+        'font-family': 'arial',
+        'font-style': 'normal',
+    },
+    'h2': {
+        'font-size': default_font_size,
+        'color': text_color,
+        'background-color': 'rgba(0,0,0,0)',
+        'text-align': 'left',
+        'font-weight': 'normal',
+        'font-family': 'arial',
+        'font-style': 'normal',
+    },
+    'h3': {
+        'font-size': default_font_size,
+        'color': text_color,
+        'background-color': 'rgba(0,0,0,0)',
+        'text-align': 'left',
+        'font-weight': 'normal',
+        'font-family': 'arial',
+        'font-style': 'normal',
+    },
+    'h4': {
+        'font-size': default_font_size,
+        'color': text_color,
+        'background-color': 'rgba(0,0,0,0)',
+        'text-align': 'left',
+        'font-weight': 'normal',
+        'font-family': 'arial',
+        'font-style': 'normal',
+    },
+    'h5': {
+        'font-size': default_font_size,
+        'color': text_color,
+        'background-color': 'rgba(0,0,0,0)',
+        'text-align': 'left',
+        'font-weight': 'normal',
+        'font-family': 'arial',
+        'font-style': 'normal',
+    },
+    'h6': {
+        'font-size': default_font_size,
+        'color': text_color,
+        'background-color': 'rgba(0,0,0,0)',
+        'text-align': 'left',
+        'font-weight': 'normal',
+        'font-family': 'arial',
+        'font-style': 'normal',
+    },
+    'div': {
+        'font-size': default_font_size,
+        'color': text_color,
+        'background-color': 'rgba(0,0,0,0)',
+        'text-align': 'left',
+        'font-weight': 'normal',
+        'font-family': 'arial',
+        'font-style': 'normal',
+    },
+    'span': {
+        'font-size': default_font_size,
+        'color': text_color,
+        'background-color': 'rgba(0,0,0,0)',
+        'text-align': 'left',
+        'font-weight': 'normal',
+        'font-family': 'arial',
+        'font-style': 'normal',
+    },
+    'blockquote': {
+        'font-size': default_font_size,
+        'color': text_color,
+        'background-color': 'rgba(0,0,0,0)',
+        'text-align': 'left',
+        'font-weight': 'normal',
+        'font-family': 'arial',
+        'font-style': 'normal',
+    },
+    'section': {
+        'font-size': default_font_size,
+        'color': text_color,
+        'background-color': 'rgba(0,0,0,0)',
+        'text-align': 'left',
+        'font-weight': 'normal',
+        'font-family': 'arial',
+        'font-style': 'normal',
+    },
 
+}
 
-
+default_css_properties['b'] = deepcopy(default_css_properties['p'])
+default_css_properties['i'] = deepcopy(default_css_properties['p'])
+default_css_properties['strong'] = deepcopy(default_css_properties['p'])
+default_css_properties['em'] = deepcopy(default_css_properties['p'])
+default_css_properties['sub'] = deepcopy(default_css_properties['p'])
+default_css_properties['sup'] = deepcopy(default_css_properties['p'])
+default_css_properties['small'] = deepcopy(default_css_properties['p'])
 
 colors_words = {
     "aliceblue": "#F0F8FF",

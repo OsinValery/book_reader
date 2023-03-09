@@ -55,7 +55,6 @@ class HtmlBookFrame(BookFrame):
         else:
             result += text[word_start:]
 
-        print('clear markup in refers')
         return result, refers
 
     def escape_text(self, text: str):
@@ -88,8 +87,8 @@ class HtmlBookFrame(BookFrame):
                 referization=refs, 
                 another_properties=another,
             )
-        
-        elif self.type == 'text':
+
+        elif self.type in ('html_text', 'text'):
             text: str = self.content.lstrip()   
             text = self.escape_text(text)
             text, refs = self.referize_text(text)
@@ -117,12 +116,22 @@ class HtmlBookFrame(BookFrame):
                 print("\"", extansion, "\"", 'is not supported yet')
                 widget = page_widgets.Space()
         
+        elif self.type in ['h1', 'h2', "h3", 'h4', 'h5', 'h6']:
+            text: str = self.content.lstrip()   
+            text = self.escape_text(text)
+            text, refs = self.referize_text(text)
+            widget = page_widgets.Html_text(
+                text= text, 
+                referization=refs, 
+                another_properties=another,
+            )
+        
         else:
-            print("from htmlBookframe!")
+            '''print("from htmlBookframe!")
             print('unknown tag: ', self.type)
             print('content:')
             print(self.attributs)
-            print(self.content)
+            print(self.content)'''
             text = self.type + '\n' + self.content + '\n' + str(self.attributs)
             text = 'Uncnown element;\nThat\'s content:\n' + text
             widget = page_widgets.Unknown(text = text)
