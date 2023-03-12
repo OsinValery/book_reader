@@ -66,6 +66,7 @@ class HtmlBookFrame(BookFrame):
         if self.cashed_widget:
             return self.cashed_widget
 
+
         widget = page_widgets.Unknown(
             text='Initial widget. It means, that it wasn\'t choosen. Tag = ' + self.type , 
             cite=False,
@@ -115,7 +116,7 @@ class HtmlBookFrame(BookFrame):
             else:
                 print("\"", extansion, "\"", 'is not supported yet')
                 widget = page_widgets.Space()
-        
+
         elif self.type in ['h1', 'h2', "h3", 'h4', 'h5', 'h6']:
             text: str = self.content.lstrip()   
             text = self.escape_text(text)
@@ -125,6 +126,18 @@ class HtmlBookFrame(BookFrame):
                 referization=refs, 
                 another_properties=another,
             )
+        
+        elif self.type == 'link':
+            link = ''
+            if 'id' in self.attributs:
+                link = self.attributs['id']
+            elif 'name' in self.attributs:
+                link = self.attributs['name']
+            elif 'href' in self.attributs:
+                link = self.attributs['href']
+            else:
+                print(self.attributs)
+            widget = page_widgets.Link(link=link)
         
         else:
             '''print("from htmlBookframe!")

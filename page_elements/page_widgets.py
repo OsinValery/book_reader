@@ -446,6 +446,9 @@ class Html_Entity(PresentableLabel):
                     self.bold = False
                 else:
                     print('unknown font-weight:', value)
+            elif 'font-style' == property_:
+                if value != 'normal':
+                    self.italic = 1
             elif property_ in ['margin-bottom', 'margin-top', 'margin-left', 'margin-right']:
                 pass
             elif property_ in ['text-indent', 'margin', 'padding']:
@@ -532,10 +535,12 @@ class Html_Entity(PresentableLabel):
                 print('unknown css property:', property_, 'with value:', value)
 
 
-
 class Html_text(Html_Entity):
     pass
 
 class HTML_Paragraph(Html_Entity):
     pass
+
+class Link(Widget, PageContent):
+    link = StringProperty('')
 

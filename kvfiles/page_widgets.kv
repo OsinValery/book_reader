@@ -189,6 +189,14 @@
     text: ''
     markup: True
     valign: 'center'
-    
 
+<Link>:
+    size_hint_y: None
+    size: Window.width ,5
 
+    canvas:
+        Color:
+            rgba: (1,0,0,0.2)
+        Rectangle:
+            size: self.size[0], self.height + 20
+            pos: self.pos[0], self.pos[1] - 10

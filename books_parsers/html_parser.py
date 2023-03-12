@@ -4,7 +4,7 @@ from .xml_parser import XmlParser
 from typing import Tuple, Union
 
 class Html_Parser(XmlParser):
-    ignore_tags = ["style", 'strong', 'script', 'a']
+    ignore_tags = ["style", 'strong', 'script']
 
     def is_self_closed(self, tag: str) -> bool:
         if tag == '': return False

@@ -5,7 +5,7 @@ from page_elements.html_bookframe import HtmlBookFrame
 from .css_descriptor import CssDescriptor
 from .css_measurement_systems import *
 
-style_tags = ['i', 'em', 'strong', 'b', 'sub', 'sup']
+style_tags = ['i', 'em', 'strong', 'b', 'sub', 'sup', 'a']
 char = chr(8203)
 numeric_properties = [
     'font-size', 'border-spacing', 'letter-spacing', 'line-height',
@@ -168,16 +168,22 @@ class Html_Entity_with_preprocessor(Xml_Tag):
                 if 'width' in self.attr:
                     self.attr['another']['width'] = self.attr['width']
 
-        elif self.tag == 'plain_text':
+        if self.tag == 'plain_text':
             self.text = char + '[size=' + str(self.css['font-size']) + ']' + char + self.text + char + '[/size]' + char
+        
+        if (self.tag == 'a' and self.content == [] ):
+            link = Html_Tag()
+            link.attr = self.attr
+            link.tag = 'link'
+            return [link]
 
-        if self.tag in ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'a'] + style_tags:
+        if self.tag in ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'] + style_tags:
             def apply_tag(ch: 'Html_Entity_with_preprocessor'):
                 tag = self.tag
                 if tag == 'p':
                     return
                 elif tag == 'a':
-                    pass
+                    print('unpredictable content inside a!!!!')
                 elif tag in ['i', 'em']:
                     ch.make_cursive_subtree()
                 else:
@@ -192,6 +198,8 @@ class Html_Entity_with_preprocessor(Xml_Tag):
                     if not unexpected_found:
                         if entity.tag in (['br', 'plain_text'] + style_tags):
                             my_children.append(entity)
+                        elif entity.tag == 'link':
+                            output_list.append(entity)
                         else:
                             unexpected_found = True
                             output_list.append(entity)
@@ -209,12 +217,14 @@ class Html_Entity_with_preprocessor(Xml_Tag):
         return [self]
 
     def make_bold_subtree(self):
-        pass
+        self.css['font-weight'] = 'bold'
+        for child in self.content:
+            child.make_bold_subtree()
 
     def make_cursive_subtree(self):
-        pass
-
-
+        self.css['font-style'] = 'italic'
+        for child in self.content:
+            child.make_cursive_subtree()
 
 
 class Html_Tag(Html_Entity_with_preprocessor):
@@ -229,14 +239,26 @@ class Html_Tag(Html_Entity_with_preprocessor):
             return '[b]' + char + text + char + '[/b]' + char
         elif tag in ['sub','sup']:
             return '[' + tag + ']' + char + text + char + '[/' + tag + ']' + char
+        elif tag == 'a':
+            link = 'empty'
+            if 'id' in attr:
+                link = attr['id']
+            elif 'name' in attr:
+                link = attr['name']
+            elif 'href' in attr:
+                link = attr['href']
+            else:
+                print(attr)
+            return char + '[color=#FF0000]' + char + f'<a src={link}>' + text + '</a>' + char + '[/color]'
         else:
             print('unknown tag to wrap!')
             print(tag)
             return text
-    
+
     def processing(self) -> List[HtmlBookFrame]:
         # I garantee, that tree is correct here
         result = []
+
         if self.tag in ['p', 'h1', 'h2', "h3", 'h4', 'h5', 'h6'] + style_tags:
             text = ''
             for child in self.content:
@@ -252,7 +274,7 @@ class Html_Tag(Html_Entity_with_preprocessor):
                         else:
                             print(f'unexpexted tag in processing for "{self.tag}": child_tag: ', new_child.type, '(first)')
                 else:
-                    print(f'unexpexted tag in processing for "{self.tag}": child_tag: ', new_child.type)
+                    print(f'unexpexted tag in processing for "{self.tag}": child_tag: ', child.tag)
             if  text != '':
                 text = self.wrap_text_with_tag(text, self.tag, self.attr)
                 choose_tag = self.tag
@@ -286,6 +308,9 @@ class Html_Tag(Html_Entity_with_preprocessor):
         
         elif self.tag == 'plain_text':
             return [HtmlBookFrame(self.text, 'text', self.attr)]
+    
+        elif self.tag == 'link':
+            return [HtmlBookFrame(None, 'link', self.attr)]
 
         elif self.tag == 'blockquote':
             print('remake blockquote')
