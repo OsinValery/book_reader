@@ -405,6 +405,28 @@ class BoxLayoutSelectableContainer(Factory.BoxLayout, SelectablePageContent):
 
 class Html_Entity(PresentableLabel):
     another_properties = DictProperty({})
+    links = DictProperty({})
+
+    def on_touch_up(self, touch):
+        if self.choosenWord != '':
+            word_id = int(self.choosenWord)
+            if word_id in self.links:
+                reader = self.root_screen
+                if reader:
+                    wid = reader.ids['page_presenter']
+                    wid.goto_by_link(self.links[word_id])
+            elif  app_values.app_info.translate_text:
+                choosenWord = self.referization[word_id]
+                root = self.root_screen
+                if root:
+                    root.present(choosenWord)
+                else:
+                    print('can\'t present content in SelectableLabel.on_refference')
+            self.choosenWord = ''
+
+        # clear value
+        self.first_pos = list(self.center)
+        return super().on_touch_up(touch)
 
     def resolve_css_properties(self):
         view_port_size = self.get_page_size

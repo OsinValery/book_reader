@@ -92,7 +92,6 @@ class Book():
             zf.extractall(final_path)
         book_parser = epub_book.EpubBookParser(final_path)
         entries = book_parser.get_containers_paths()
-        print(entries)
         content = book_parser.get_book_content(entries[0])
         self.content = content[0]
         self.notes = content[1]
@@ -194,4 +193,9 @@ class Book():
     
     def get_page(self, number) -> List[BookFrame]:
         return self.content[number]
+
+    def get_page_by_link(self, link) -> int:
+        if link in self.notes:
+            return self.notes[link]
+        return -1
 

@@ -169,6 +169,7 @@ class EpubBookParser:
         root_folder = os.path.dirname(root_file_path)
         pages = []
         notes = {}
+        page_num = 2
 
         if metadata != None:
             pages.append(self.produce_description(metadata))
@@ -183,8 +184,6 @@ class EpubBookParser:
             descriptor = CssDescriptor()
             descriptor.update_from_file(os.path.join(root_folder, style))
             styles[style] = descriptor
-        
-        print(style)
 
         html_parser = Html_Parser()
         for element in spine.content:
@@ -194,6 +193,7 @@ class EpubBookParser:
             file_path = files[page_id]
             html_document_path = os.path.join(root_folder, file_path)
             html_document_folder = os.path.dirname(html_document_path)
+            html_document_name = os.path.basename(html_document_path)
             
             html_tag = html_parser.parce_xml_file(html_document_path)
             style_tag = html_tag.find_tag_in_tree('style')
@@ -218,8 +218,9 @@ class EpubBookParser:
             if body_tag != None:
                 page_content = body_tag.work(style_descriptor, html_document_folder)
                 pages.append(page_content)
-                
-                
+
+            notes[html_document_name] = page_num
+            page_num += 1
 
         return pages, notes
 

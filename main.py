@@ -127,7 +127,6 @@ class ReaderApp(MDApp):
             print('ReaderApp.set_theme:')
             print('unknown theme style: ', theme)
             print('Must be "Dark" or "Light" !!!!')
-        
 
 
 if __name__ == '__main__':

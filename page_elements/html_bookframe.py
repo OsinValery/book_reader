@@ -1,7 +1,6 @@
 import io
 import page_elements.page_widgets as page_widgets
 from kivy.core.image import Image
-from kivy.utils import escape_markup
 from .bookframe import BookFrame
 
 
@@ -17,6 +16,7 @@ class HtmlBookFrame(BookFrame):
 
     def referize_text(self, text:str):
         refers = []
+        links = {}
         i = 0
         result = ''
         char = chr(8203)
@@ -30,6 +30,22 @@ class HtmlBookFrame(BookFrame):
         is_word = True
 
         while pos < len(text):
+            if text[pos:pos+2] == '<a':
+                close = text.find('>', pos)
+                start = text.find('</a>', close)
+                src = text.find('src=', pos)
+                src = text[src+4:close]
+                pos = start + 4
+                color = '#0000ffff'
+                if src != 'empty':
+                    color = '#00a400'
+                    links[i] = src
+                txt = text[close + 1:start]
+                refers.append(txt)
+                result += f'[ref={i}][color={color}]' + txt + '[/color][/ref]'
+                i += 1
+                word_start = pos
+
             if is_word:
                 if text[pos].isspace() or (text[pos] == char):
                     is_word = False
@@ -41,11 +57,19 @@ class HtmlBookFrame(BookFrame):
                         result += '[ref=' + str(i) + ']' + word + '[/ref]'
                         i += 1
                     word_start = pos
+
+            elif text[pos].isspace():
+                pass
+            elif text[pos] == char:
+                is_word = True
+                result += text[word_start:pos]
+                word_start = pos
             else:
-                if not (text[pos].isspace() or text[pos] == char):
-                    is_word = True
-                    result += text[word_start:pos]
-                    word_start = pos
+                if text[pos-1] == char:
+                    pos -= 1
+                is_word = True
+                result += text[word_start:pos]
+                word_start = pos   
             pos += 1
         
         if is_word:
@@ -55,7 +79,7 @@ class HtmlBookFrame(BookFrame):
         else:
             result += text[word_start:]
 
-        return result, refers
+        return result, refers, links
 
     def escape_text(self, text: str):
         text = text.replace('&', '&amp;')
@@ -65,7 +89,7 @@ class HtmlBookFrame(BookFrame):
         another = self.attributs['another'] if 'another' in self.attributs else {}
         if self.cashed_widget:
             return self.cashed_widget
-
+        links = {}
 
         widget = page_widgets.Unknown(
             text='Initial widget. It means, that it wasn\'t choosen. Tag = ' + self.type , 
@@ -81,24 +105,26 @@ class HtmlBookFrame(BookFrame):
             if text[0] in ['-', '—']:
                 n = 3        
             text = self.escape_text(text)
-            text, refs = self.referize_text(text)
+            text, refs, links = self.referize_text(text)
             text = ' ' * n + text
             widget = page_widgets.HTML_Paragraph(
                 text= text, 
                 referization=refs, 
                 another_properties=another,
+                links = links
             )
 
         elif self.type in ('html_text', 'text'):
             text: str = self.content.lstrip()   
             text = self.escape_text(text)
-            text, refs = self.referize_text(text)
+            text, refs, links = self.referize_text(text)
             widget = page_widgets.Html_text(
                 text= text, 
                 referization=refs, 
                 another_properties=another,
+                links = links
             )
-        
+
         elif self.type == 'file_image':
             extansion: str = self.attributs['path'][-4:]
             extansion = extansion.replace('.', '')
@@ -120,11 +146,12 @@ class HtmlBookFrame(BookFrame):
         elif self.type in ['h1', 'h2', "h3", 'h4', 'h5', 'h6']:
             text: str = self.content.lstrip()   
             text = self.escape_text(text)
-            text, refs = self.referize_text(text)
+            text, refs, links = self.referize_text(text)
             widget = page_widgets.Html_text(
                 text= text, 
                 referization=refs, 
                 another_properties=another,
+                links=links
             )
         
         elif self.type == 'link':
@@ -138,7 +165,7 @@ class HtmlBookFrame(BookFrame):
             else:
                 print(self.attributs)
             widget = page_widgets.Link(link=link)
-        
+
         else:
             '''print("from htmlBookframe!")
             print('unknown tag: ', self.type)
@@ -148,6 +175,6 @@ class HtmlBookFrame(BookFrame):
             text = self.type + '\n' + self.content + '\n' + str(self.attributs)
             text = 'Uncnown element;\nThat\'s content:\n' + text
             widget = page_widgets.Unknown(text = text)
-        
+
         self.cashed_widget = widget
         return widget

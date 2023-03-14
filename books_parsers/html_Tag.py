@@ -241,15 +241,11 @@ class Html_Tag(Html_Entity_with_preprocessor):
             return '[' + tag + ']' + char + text + char + '[/' + tag + ']' + char
         elif tag == 'a':
             link = 'empty'
-            if 'id' in attr:
-                link = attr['id']
-            elif 'name' in attr:
-                link = attr['name']
-            elif 'href' in attr:
+            if 'href' in attr:
                 link = attr['href']
             else:
                 print(attr)
-            return char + '[color=#FF0000]' + char + f'<a src={link}>' + text + '</a>' + char + '[/color]'
+            return char + '[color=#FF0000]' + char + f'<a src={link}>' + text + '</a>' + char + '[/color]' + char
         else:
             print('unknown tag to wrap!')
             print(tag)
@@ -328,18 +324,33 @@ class Html_Tag(Html_Entity_with_preprocessor):
             for child in self.content:
                 result += child.processing()
             return result
-        print('unknown tag: ', self.tag)
+        """print('unknown tag: ', self.tag)
         print('content:')
         print(self.attr)
         print(self.text)
-        print(self.content)
+        print(self.content)"""
         return [HtmlBookFrame(self.text, self.tag, self.attr)]
 
 
     def work(self, styles = CssDescriptor(), root_path = "") -> List[HtmlBookFrame]:
         self.preprocessing(root_path, styles)
         self.attr['another'] = self.css
+        self.check_links(root_path)
         return self.processing()
+    
+    def check_links(self, rootpath):
+        self.attr['links_targets'] = []
+        if 'id' in self.attr:
+            self.attr['links_targets'].append(self.attr['id'])
+        if 'name' in self.attr:
+            self.attr['links_targets'].append(self.attr['name'])
+        if 'href' in self.attr:
+            if '://' in self.attr['href']:
+                # external src
+                self.attr['href'] = 'empty'
+        for child in self.content:
+            child.check_links(rootpath)
+            self.attr['links_targets'] += child.attr['links_targets']
 
 
 

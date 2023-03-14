@@ -87,7 +87,6 @@ class BookFrame():
     def make_content(self):
         "returns widget view to present it to user"
         if self.cashed_widget is not None:
-            pass
             return self.cashed_widget
         is_cite = (('cite' in self.attributs) and self.attributs['cite'])
         is_poem = (('poem' in self.attributs) and self.attributs['poem'])

@@ -5,6 +5,7 @@ import shutil
 from kivy.uix.widget import Widget
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.recycleview import RecycleView
+from kivy.uix.scrollview import ScrollView
 from kivy.uix.recycleview.views import RecycleDataViewBehavior
 from kivy.properties import NumericProperty, StringProperty, ObjectProperty
 from kivy.metrics import dp
@@ -180,6 +181,47 @@ class PagePresenter(Widget):
     def change_book(self):
         self.seek(1)
         self.ids.page_forward.disabled = self.book.length == 1
+    
+    def goto_by_link(self, link: str):
+        print(link)
+        book = app_values.app_info.book
+        page_, id_ = '', ''
+        parts = link.split('#')
+        if len(parts) == 1:
+            page_, id_ = parts[0], parts[0]
+        else:
+            page_, id_ = parts
+        
+        page_num:int = book.get_page_by_link(page_)
+        if page_num != -1: self.seek(page_num)
+
+        # find element by id
+        book_content = self.book.get_page(self.cur_page-1)
+        ind = 0
+        for i in range(len(book_content)):
+            el = book_content[i]
+            if 'links_targets' in el.attributs:
+                if id_ in el.attributs['links_targets']:
+                    ind = i
+                    break
+        
+        page = self.ids['page']
+        print(ind)
+
+        def go_to_label(dt):
+            try:
+                widget:Widget = page.ids['page_content'].children[ind]
+                k = 1 - (widget.pos[1]) / page.ids['page_content'].height
+                page.ids['page_scroll'].scroll_y = k
+                #page.ids['page_scroll'].scroll_to(widget)
+            except Exception as e:
+                print('error!!!')
+                print(e)
+                print(page.ids['page_content'].children)
+
+        Clock.schedule_once(go_to_label,1)
+        #ScrollView().scroll_y
+        
 
 
 class MyAppBar(MDTopAppBar):
