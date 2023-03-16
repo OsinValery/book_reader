@@ -8,7 +8,7 @@
 <Page>:
     canvas.before:
         Color:
-            rgba: (0,0,1,1)
+            rgba: (0,0,1,1) if app.theme_cls.theme_style == 'Light' else (66/255, 170/255, 1)
         Line:
             points: (0, page_number_height, self.width, page_number_height)
             width: 0.5

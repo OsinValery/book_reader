@@ -124,7 +124,6 @@
 
 
 <LibraryListItem>:
-    color: (0,1,0,1)
     width: self.parent.width if self.parent else 100
 
     on_press:
@@ -628,6 +627,7 @@
                 text_color: app.theme_cls.text_color
                 selected_color: app.theme_cls.text_color
                 selected: False
+                focus_behavior: False
                 icon_color: get_color_from_hex('#696e79')
                 icon: os.path.join(app.directory, 'assets', 'book.png')
 
@@ -635,7 +635,7 @@
                     app_menu.set_state('close')
                     library_list.update_library()
                     page_screen.current = 'library'
-        
+
             MDNavigationDrawerItem:
                 id: menu_settings
                 text: Get_text('info_settings')
@@ -643,6 +643,7 @@
                 icon_color: app.theme_cls.text_color
                 text_color: app.theme_cls.text_color
                 selected_color: app.theme_cls.text_color
+                focus_behavior: False
 
                 on_press:
                     app_menu.set_state('close')
