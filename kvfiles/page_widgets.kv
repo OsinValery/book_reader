@@ -139,6 +139,7 @@
     on_parent:
         root.resolve_state()
 
+
 <SelectablePair>:
     cols: 2
     height:root.child.texture_size[1]
@@ -200,3 +201,44 @@
         Rectangle:
             size: self.size[0], self.height + 20
             pos: self.pos[0], self.pos[1] - 10
+
+<HtmlDivider>:
+    height: 2
+    canvas: 
+        Color:
+            rgba: app.theme_cls.text_color
+        Rectangle:
+            size: self.size
+            pos: self.pos
+
+<ListItem>:
+    id: root_list_item
+    height: max(sign.width, content_container.height)
+    width: self.parent.width if self.parent else (Window.width - 2 * icon_size)
+    size_hint_y: None
+    size_hint_x: None
+    orientation: "horizontal"
+
+    OneElementContainer:
+        id: sign
+        width: Window.width / 20
+        size_hint_x: None
+        height: root.height
+        anchor_x: 'center'
+        anchor_y: 'center'
+        
+        Text:
+            text: "*"
+            halign: 'center'
+    
+    BoxLayoutSelectableContainer:
+        id: content_container
+        size_hint_y: None
+        size_hint_x: None
+        width: root_list_item.width - sign.width
+        children: []
+        orientation: "vertical"
+        spacing: 5
+        
+        on_parent:
+            root.work_children(self, root.list_items)

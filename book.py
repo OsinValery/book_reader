@@ -43,6 +43,11 @@ class Book():
         elif self.format[-4:] == 'html':
             self.format = "html"
             self.read_html()
+        elif self.format[-8:] == 'html.zip':
+            file_folder = App.get_running_app().user_data_dir
+            file_name = self.format
+            self.format = 'html.zip'
+            self.read_zipped_html(file_folder, file_name)
         else:
             raise Exception('unknown file format: '+ self.format)
         print('book', self.file_path, 'was opened')
@@ -99,7 +104,7 @@ class Book():
     def read_html(self):
         print(self.file_path)
         book = html_book.HtmlBook()
-        self.content, comments = book.get_book_content(self.file_path)
+        self.content, comments = book.get_book_content(self.file_path, self.max_elements_per_page)
 
     def read_fb2(self):
         parser = fb2_book.FB2Book()
@@ -186,6 +191,18 @@ class Book():
         if page != []:
             self.content.append(page)
 
+    def read_zipped_html(self, save_path, file_name):
+        book_path = os.path.join(save_path, "temp_book")
+        book = html_book.HtmlBook()
+        if (os.path.exists(book_path)):
+            shutil.rmtree(book_path)
+        os.makedirs(book_path)
+        target_path = os.path.join(book_path, file_name)
+        final_path = os.path.join(book_path, "content")
+        shutil.copy(self.file_path, target_path)
+        with zipfile.ZipFile(target_path) as zf:
+            zf.extractall(final_path)
+        self.content, _ = book.get_html_folder_book_content(final_path, self.max_elements_per_page)
 
     @property
     def length(self):
@@ -198,4 +215,35 @@ class Book():
         if link in self.notes:
             return self.notes[link]
         return -1
+    
+    def get_link_transition(self, link: str):
+        """returns number of page and number of element, interface should go to"""
+        page, ind = -1, -1
+        parts = link.split('#')
+        if len(parts) == 1:
+            page_, id_ = parts[0], parts[0]
+        else:
+            page_, id_ = parts
+        
+        if self.format == 'epub':
+            page = self.get_page_by_link(page_)
+            if page != -1:
+                book_content = self.get_page(page)
+                for i in range(len(book_content)):
+                    el = book_content[i]
+                    if 'links_targets' in el.attributs:
+                        if id_ in el.attributs['links_targets']:
+                            ind = i
+                            break
+            return page, ind
+    
+        for i in range(0, len(self.content)):
+            count = 0
+            for count in range(len(self.content[i])):
+                el = self.content[i][count]
+                if 'links_targets' in el.attributs:
+                    if id_ in el.attributs['links_targets']:
+                        return i + 1, count
+
+        return page, ind
 

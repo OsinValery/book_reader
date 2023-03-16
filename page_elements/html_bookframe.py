@@ -2,6 +2,7 @@ import io
 import page_elements.page_widgets as page_widgets
 from kivy.core.image import Image
 from .bookframe import BookFrame
+from kivy.uix.label import Label
 
 
 class HtmlBookFrame(BookFrame):
@@ -165,7 +166,25 @@ class HtmlBookFrame(BookFrame):
             else:
                 print(self.attributs)
             widget = page_widgets.Link(link=link)
+        
+        elif self.type == 'li':
+            content = self.content
+            items = []
+            for el in content:
+                container = page_widgets.OneElementContainer(
+                    size_hint_y = None,
+                    size_hint_x = None,
+                    anchor_y = 'center',
+                )
 
+                container.add_widget(el.make_content())
+                items.append(container)
+
+            widget = page_widgets.ListItem(list_items = items)
+        
+        elif self.type == 'divider':
+            widget = page_widgets.HtmlDivider()
+ 
         else:
             '''print("from htmlBookframe!")
             print('unknown tag: ', self.type)

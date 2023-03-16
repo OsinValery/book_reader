@@ -324,6 +324,21 @@ class Html_Tag(Html_Entity_with_preprocessor):
             for child in self.content:
                 result += child.processing()
             return result
+        
+        elif self.tag == 'li':
+            content = []
+            child: Html_Tag = None
+            for child in self.content:
+                content += child.processing()
+            return [HtmlBookFrame(content, 'li', self.attr)]
+    
+        elif self.tag == 'hr':
+            result = [HtmlBookFrame('None', 'divider', self.attr)]
+            child: Html_Tag = None
+            for child in self.content:
+                result += child.processing()
+            return result
+
         """print('unknown tag: ', self.tag)
         print('content:')
         print(self.attr)
@@ -336,6 +351,7 @@ class Html_Tag(Html_Entity_with_preprocessor):
         self.preprocessing(root_path, styles)
         self.attr['another'] = self.css
         self.check_links(root_path)
+        print(self.print())
         return self.processing()
     
     def check_links(self, rootpath):

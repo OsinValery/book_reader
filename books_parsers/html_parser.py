@@ -34,7 +34,7 @@ class Html_Parser(XmlParser):
         # divide tag and xml arguments here!!
         root.tag, root.attr = self.get_tag_arguments(tag_txt)
 
-        if self_closed:
+        if self_closed or root.tag == 'br':
             return root, close + 1
         pos = close + 1
         # ignore parsing content of tags with text content
@@ -56,7 +56,7 @@ class Html_Parser(XmlParser):
                 plain_tag = Html_Tag()
                 plain_tag.tag = "plain_text"
                 plain_text = self.remove_comments_from_string(plain_text)
-                plain_tag.text = self.decode_unicode_simbols(plain_text)
+                plain_tag.text = self.decode_unicode_simbols(plain_text).strip()
                 root.append(plain_tag)
             # work '<'
             if pos + 1 == len(string):
@@ -65,6 +65,11 @@ class Html_Parser(XmlParser):
                 closed = True
                 close_pos = self.find_simbols_outside_comments(['>'], string, pos+1)
                 pos = max(close_pos + 1, pos + 1)
+            
+            if root.tag == 'li':
+                if string[pos+1:pos+3] == 'li':
+                    closed = True
+            
             #it is internal tag
             if not closed:
                 if self.is_comment_start(string, pos):

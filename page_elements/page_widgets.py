@@ -566,3 +566,26 @@ class HTML_Paragraph(Html_Entity):
 class Link(Widget, PageContent):
     link = StringProperty('')
 
+class ListItem(BoxLayoutSelectableContainer):
+    list_items = ListProperty([])
+
+    def work_children(self,container: BoxLayoutSelectableContainer, children: List[Widget]):
+        for el in children:
+            container.add_widget(el)
+            el.width = container.width
+
+            for el_cont in el.children: 
+                el_cont.width = el.width
+                el_cont.size_hint_y = None
+                try: 
+                   el_cont.texture_update()
+                except:
+                    pass
+                el.height = el_cont.height
+            
+
+
+class HtmlDivider(Space):
+    pass
+
+

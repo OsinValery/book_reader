@@ -185,6 +185,29 @@ class PagePresenter(Widget):
     def goto_by_link(self, link: str):
         print(link)
         book = app_values.app_info.book
+
+        page, ind = book.get_link_transition(link)
+        if page != -1: self.seek(page)
+
+        def go_to_label(dt):
+            try:
+                widget:Widget = page.ids['page_content'].children[ind]
+                k = 1 - (widget.pos[1]) / page.ids['page_content'].height
+                page.ids['page_scroll'].scroll_y = k
+                #page.ids['page_scroll'].scroll_to(widget)
+            except Exception as e:
+                print('error!!!')
+                print(e)
+                print(page.ids['page_content'].children)
+
+        if ind != -1:
+            page = self.ids['page']
+            Clock.schedule_once(go_to_label,1)
+
+        return
+
+
+
         page_, id_ = '', ''
         parts = link.split('#')
         if len(parts) == 1:
@@ -220,7 +243,6 @@ class PagePresenter(Widget):
                 print(page.ids['page_content'].children)
 
         Clock.schedule_once(go_to_label,1)
-        #ScrollView().scroll_y
         
 
 
