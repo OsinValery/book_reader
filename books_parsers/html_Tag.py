@@ -36,6 +36,7 @@ class Html_Entity_with_preprocessor(Xml_Tag):
             child.decrease_font_size_for_subtree()
 
     def prepare_for_css_properties(self, parent:Xml_Tag = None):
+        self.attr['another'] = {}
         if self.tag in default_css_properties:
             self.css.update(default_css_properties[self.tag])
         elif parent:
@@ -163,9 +164,9 @@ class Html_Entity_with_preprocessor(Xml_Tag):
             if 'xlink:href' in self.attr:
                 full_path = os.path.join(rootpath, self.attr['xlink:href'])
                 self.attr['path'] = full_path
-                if 'height' in self.attr:
+                if 'height' in self.attr['another']:
                     self.attr['another']['height'] = self.attr['height']
-                if 'width' in self.attr:
+                if 'width' in self.attr['another']:
                     self.attr['another']['width'] = self.attr['width']
 
         if self.tag == 'plain_text':
@@ -252,6 +253,7 @@ class Html_Tag(Html_Entity_with_preprocessor):
             return text
 
     def processing(self) -> List[HtmlBookFrame]:
+        self.attr['another'] = self.css
         # I garantee, that tree is correct here
         result = []
 
@@ -318,7 +320,7 @@ class Html_Tag(Html_Entity_with_preprocessor):
                     children.append(new_child)
             return children
 
-        elif self.tag in ['body', 'div', "section", 'span', 'svg']:
+        elif self.tag in ['body', 'div', "section", 'span', 'svg', 'table', 'th', 'td', 'tr']:
             result = []
             child: Html_Tag = None
             for child in self.content:
@@ -338,6 +340,9 @@ class Html_Tag(Html_Entity_with_preprocessor):
             for child in self.content:
                 result += child.processing()
             return result
+    
+        elif self.tag == 'tr':
+            return [HtmlBookFrame(self.content, 'tr', self.attr)]
 
         """print('unknown tag: ', self.tag)
         print('content:')
@@ -346,12 +351,11 @@ class Html_Tag(Html_Entity_with_preprocessor):
         print(self.content)"""
         return [HtmlBookFrame(self.text, self.tag, self.attr)]
 
-
     def work(self, styles = CssDescriptor(), root_path = "") -> List[HtmlBookFrame]:
         self.preprocessing(root_path, styles)
         self.attr['another'] = self.css
         self.check_links(root_path)
-        print(self.print())
+        #print(self.print())
         return self.processing()
     
     def check_links(self, rootpath):

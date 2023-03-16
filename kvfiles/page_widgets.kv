@@ -242,3 +242,15 @@
         
         on_parent:
             root.work_children(self, root.list_items)
+
+<TableRow>:
+    orientation: "horizontal"
+
+    canvas:
+        Color:
+            rgba: (1,0,1, 0.3)
+        Rectangle:
+            size: self.size
+            pos: self.pos
+    
+

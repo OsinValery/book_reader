@@ -184,6 +184,19 @@ class HtmlBookFrame(BookFrame):
         
         elif self.type == 'divider':
             widget = page_widgets.HtmlDivider()
+        
+        elif self.type == 'tr':
+            widget = page_widgets.TableRow()
+            for child in self.content:
+                cell_children = child.processing()
+                ch_wid = page_widgets.BoxLayoutSelectableContainer()
+                for el in cell_children:
+                    ch_wid.add_widget(page_widgets.OneElementContainer(
+                        children = [el.make_content()],
+                        size_hint_x = 1,
+                        size_hint_y = 1,
+                    ))
+                widget.add_widget(ch_wid)
  
         else:
             '''print("from htmlBookframe!")
@@ -197,3 +210,10 @@ class HtmlBookFrame(BookFrame):
 
         self.cashed_widget = widget
         return widget
+
+
+
+
+
+
+

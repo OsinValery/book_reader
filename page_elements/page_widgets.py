@@ -588,4 +588,8 @@ class ListItem(BoxLayoutSelectableContainer):
 class HtmlDivider(Space):
     pass
 
+class TableRow(BoxLayoutSelectableContainer):
+    pass
+
+
 
